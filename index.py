@@ -10,20 +10,26 @@ set_appearance_mode("dark")
 # Functions
 def open_cert():
     filename = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg")])
-    certLabel.configure(text=filename)
+    global img_path
+    img_path = filename
+    certLabel.configure(text=os.path.basename(filename))
     return filename
 
 def open_format():
     filename = filedialog.askopenfilename(filetypes=[("XML files", "*.xml")])
-    formatLabel.configure(text=filename)
+    global format_path
+    format_path = filename
+    formatLabel.configure(text=os.path.basename(filename))
     return filename
 
 def export_dcc():
     dcc = "DCC.xml"
     dccLabel.configure(text=dcc + " successfully generated")
     with open(dcc, 'w') as file:
-        file.write("Certificate path: " + certLabel.cget("text") + "\n")
-        file.write("Format path: " + formatLabel.cget("text") + "\n")
+        # file.write("Certificate path: " + certLabel.cget("text") + "\n")
+        # file.write("Format path: " + formatLabel.cget("text") + "\n")
+        file.write("Certificate path: " + img_path + "\n")
+        file.write("Format path: " + format_path + "\n")
     return dcc
 
 # Title label
