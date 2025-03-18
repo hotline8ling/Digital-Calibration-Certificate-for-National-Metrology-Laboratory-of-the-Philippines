@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='utf-8'?>
+<DigitalCalibrationCertificate>
+  <AdministrativeData>
+    <CertificateNumber>05-2022-FORC-0132</CertificateNumber>
+    <CalibrationDate>Not found</CalibrationDate>
+  </AdministrativeData>
+  <Instrument>
+    <Name>Not found</Name>
+    <SerialNumber>Not found</SerialNumber>
+    <Manufacturer>Not found</Manufacturer>
+    <Model>Not found</Model>
+  </Instrument>
+  <CalibrationResults>
+    <Note>Results extracted from certificate</Note>
+  </CalibrationResults>
+  <RawExtractedText>Nationa Metrotocy Lasoratory
+L OF THE PHILIPPINES
+
+Providing International Traceability to Mewsirements in the Country
+
+CALIBRATION CERTIFICATE
+No. 05-2022-FORC-0132
+
+Date of Calibration : December 19, 2024
+Calibration Item Tensile Testing Machine
+Capacity &gt; 100 Ibt
+Measurement Range : 0 Ibf to 90 Ibf
+Resolution : 0.01 Ibt
+Make / Model &gt; Yuelian / STS-100kg
+Serial No. : 3974953; 14143 (Indicator)
+Customer : MANILA CORDAGE COMPANY
+No. 116 Progress Ave., Carmelray Industrial Park I
+Canlubang, Calamba City, Laguna
+
+MEASUREMENT RESULTS:
+
+Relative Relative Relative
+Expanded Measurement | Repeatability
+Uncertainty Error Error
+
+Applied Indicated
+Force Force
+
+Ibf Ibf
+
+0.0
+
+20.0
+
+40.0
+
+60.0
+
+80.0
+
+90.0 Sail
+
+UNCERTAINTY OF MEASUREMENT;
+
+The uncertainty stated is the expanded uncertainty obtained by multiplying the standard
+
+uncertainty by the coverage factor k = 2. It has been ¢
+100:2008 Evaluation of measurement data- Guide to the Expressi
+1in the assigned range of values with a
+
+termined in accordance with the
+
+measurement”, The value of the measurand lies wit
+probability of approximately 95%.
+
+NATIONAL METROLOGY LABORATORY OF THE PHILIPPINES F A Division of $3 Under 2
+
+Metrology Building, DOST Compound, Gen, Santos Avenue Tro DOsT
+
+Bicutan, Taguig City, Metro Manila 1631 Philippines
+
+Telefax: +63 2 8683 7750 to 69 local 2272
+Website: www.nml.gov.ph
+This report shall not be reproduced in any form, except in full, without written approval 0 ii 3 5 Bey
+of the National Metrology Laboratory, Industrial Technology Development Institute.
+
+</RawExtractedText>
+</DigitalCalibrationCertificate>
