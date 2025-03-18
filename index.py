@@ -40,10 +40,10 @@ image_label = CTkLabel(master=app, image=image, text="")
 image_label.place(relx=0.886, rely=0.085) 
 
 # Load and Resize the Image
-image1 = CTkImage(light_image=Image.open("nml-logo.png"), size=(26, 25))
+image1 = CTkImage(light_image=Image.open("nml-logo1.png"), size=(29, 28))
 # Create CTkLabel with Image
 image_label = CTkLabel(master=app, image=image1, text="") 
-image_label.place(relx=0.814, rely=0.0775) 
+image_label.place(relx=0.814, rely=0.0875) 
 
 stroke = CTkFrame(master=app, fg_color="#0855B1", corner_radius=0)
 stroke.place(relx=0.096, rely=0.0925, relwidth=0.006, relheight=0.0675)
