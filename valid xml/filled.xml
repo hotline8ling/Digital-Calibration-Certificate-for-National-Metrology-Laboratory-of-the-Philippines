@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='utf-8'?>
+<dcc:digitalCalibrationCertificate xmlns:dcc="https://ptb.de/dcc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://ptb.de/dcc https://ptb.de/dcc/v3.2.1/dcc.xsd" schemaVersion="3.2.1">
+  <dcc:administrativeData>
+    <dcc:dccSoftware>
+      <dcc:software>
+        <dcc:name>
+          <dcc:content>DigiCert</dcc:content> 
+        </dcc:name>
+        <dcc:release>1.0</dcc:release> 
+      </dcc:software>
+    </dcc:dccSoftware>
+    <dcc:coreData>
+      <dcc:countryCodeISO3166_1>PH</dcc:countryCodeISO3166_1> 
+      <dcc:usedLangCodeISO639_1>en</dcc:usedLangCodeISO639_1> 
+      <dcc:mandatoryLangCodeISO639_1>en</dcc:mandatoryLangCodeISO639_1> 
+      <dcc:uniqueIdentifier>02-2025-FORC-0043</dcc:uniqueIdentifier> 
+      <dcc:beginPerformanceDate>2025-02-24</dcc:beginPerformanceDate> 
+      <dcc:endPerformanceDate /> 
+      <dcc:performanceLocation>LABORATORY</dcc:performanceLocation> 
+    </dcc:coreData>
+    <dcc:items>
+      <dcc:name>
+        <dcc:content lang="en">Axle Weighing Scale</dcc:content> 
+      </dcc:name>
+      <dcc:equipmentClass refType=""> 
+        <dcc:reference /> 
+        <dcc:classID /> 
+      </dcc:equipmentClass>
+      <dcc:item>
+        <dcc:name>
+          <dcc:content lang="en" /> 
+        </dcc:name>
+        <dcc:model /> 
+        <dcc:identifications>
+          <dcc:identification>
+            <dcc:issuer />  
+            <dcc:value /> 
+            <dcc:name>
+              <dcc:content lang="en" /> 
+            </dcc:name>
+          </dcc:identification>
+        </dcc:identifications>
+      </dcc:item>
+    </dcc:items>
+    <dcc:calibrationLaboratory>
+      <dcc:calibrationLaboratoryCode>FORC</dcc:calibrationLaboratoryCode> 
+      <dcc:contact>
+        <dcc:name>
+          <dcc:content lang="en">National Metrology Laboratory - Industrial Technology Development Institute</dcc:content> 
+        </dcc:name>
+        <dcc:location>
+          <dcc:city>Taguig</dcc:city> 
+          <dcc:countryCode>PH</dcc:countryCode> 
+          <dcc:postCode>1633</dcc:postCode> 
+          <dcc:street>General Santos Ave</dcc:street> 
+        </dcc:location>
+      </dcc:contact>
+    </dcc:calibrationLaboratory>
+    <dcc:respPersons>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="en" /> 
+          </dcc:name>
+        </dcc:person>
+        <dcc:role /> 
+      </dcc:respPerson>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="en" /> 
+          </dcc:name>
+        </dcc:person>
+        <dcc:role /> 
+      </dcc:respPerson>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="en" /> 
+          </dcc:name>
+        </dcc:person>
+        <dcc:role /> 
+      </dcc:respPerson>
+    </dcc:respPersons>
+    <dcc:customer>
+      <dcc:name>
+        <dcc:content lang="en" /> 
+      </dcc:name>
+      <dcc:location>
+        <dcc:city /> 
+        <dcc:countryCode>PH</dcc:countryCode> 
+        <dcc:postCode /> 
+        <dcc:street /> 
+        <dcc:streetNo /> 
+      </dcc:location>
+    </dcc:customer>
+  </dcc:administrativeData>
+  <dcc:measurementResults>
+  </dcc:measurementResults>
+<dcc:comment /> 
+</dcc:digitalCalibrationCertificate>
