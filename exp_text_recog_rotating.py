@@ -10,27 +10,29 @@ import os
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Adjust if needed
 
 def preprocess_image(image_path):
-    """Enhance image contrast without damaging text integrity."""
+    """Enhance image contrast and rotate it so it's slightly to the left."""
     image = cv2.imread(image_path)
-
-    # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # Apply denoising
-    denoised = cv2.fastNlMeansDenoising(gray, None, h=5, templateWindowSize=7, searchWindowSize=21)
-
-    # Apply CLAHE for local contrast enhancement (non-destructive)
+    denoised = cv2.fastNlMeansDenoising(gray, None, 5, 7, 21)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     enhanced = clahe.apply(denoised)
-
-    # Gentle thresholding (just enough for OCR, not for full binarization)
     _, thresh = cv2.threshold(enhanced, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-    # Optional save for debugging
-    os.makedirs("output", exist_ok=True)
-    cv2.imwrite("output/new-prepro-img.jpg", thresh)
+    coords = np.column_stack(np.where(thresh > 0))
+    angle = cv2.minAreaRect(coords)[-1]
+    angle = -(90 + angle) if angle < -45 else -angle
 
-    return image, thresh
+    # angle += 1  # Rotate slightly to the left
+
+    (h, w) = image.shape[:2]
+    M = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0)
+    aligned_image = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    aligned_thresh = cv2.warpAffine(thresh, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+
+    os.makedirs("output", exist_ok=True)
+    cv2.imwrite("output/exp/new-prepro-img.jpg", aligned_thresh)
+
+    return image, aligned_thresh
 
 def image_to_searchable_pdf(image_path, pdf_path):
     original_img, preprocessed_img = preprocess_image(image_path)
@@ -75,5 +77,5 @@ def image_to_searchable_pdf(image_path, pdf_path):
     print(f"✅ Searchable PDF saved to: {pdf_path}")
 
 if __name__ == "__main__":
-    image_to_searchable_pdf("input/cert.jpg", "output/new-output.pdf")
+    image_to_searchable_pdf("input/cert.jpg", "output/exp/new-output.pdf")
     print("Searchable PDF created!")
