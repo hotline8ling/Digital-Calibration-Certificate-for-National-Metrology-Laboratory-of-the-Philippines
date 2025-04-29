@@ -86,13 +86,7 @@
       <dcc:name>
         <dcc:content lang="en"></dcc:content> <!-- This must be the customer name -->
       </dcc:name>
-      <dcc:location>
-        <dcc:city></dcc:city> <!-- This must be the City of the customer origin -->
-        <dcc:countryCode></dcc:countryCode> <!-- This must be the Country of the customer origin (ASSUME PH)-->
-        <dcc:postCode></dcc:postCode> <!-- This must be the Postal Code of the customer origin -->
-        <dcc:street></dcc:street> <!-- This must be the Street of the customer origin -->
-        <dcc:streetNo></dcc:streetNo> <!-- This must be the Street Number of the customer origin -->
-      </dcc:location>
+      <dcc:location></dcc:location>  <!-- This must be the Address of the customer origin -->
     </dcc:customer>
   </dcc:administrativeData>
   <dcc:measurementResults>
