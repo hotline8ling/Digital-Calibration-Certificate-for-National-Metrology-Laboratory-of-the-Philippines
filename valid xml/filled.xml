@@ -22,7 +22,7 @@
       <dcc:countryCodeISO3166_1>PH</dcc:countryCodeISO3166_1>      <!-- (STATIC) This must show the Country Code of the calibration certificate origin -->
       <dcc:usedLangCodeISO639_1>en</dcc:usedLangCodeISO639_1>      <!-- (STATIC) This must show the Language used in the calibration certificate -->
       <dcc:mandatoryLangCodeISO639_1>en</dcc:mandatoryLangCodeISO639_1>      <!-- (STATIC) This must show the Language used in the calibration certificate -->
-      <dcc:uniqueIdentifier>Calibration No. 02-2025-FORC-0043</dcc:uniqueIdentifier>      <!-- This must show the TSR Number used in the calibration certificate -->
+      <dcc:uniqueIdentifier>Calibration No. 02-2025-FORC-0042</dcc:uniqueIdentifier>      <!-- This must show the TSR Number used in the calibration certificate -->
       <dcc:beginPerformanceDate>2025-02-24</dcc:beginPerformanceDate>      <!-- This must show the Date of Calibration used in the calibration certificate -->
       <dcc:endPerformanceDate></dcc:endPerformanceDate>      <!-- This must show the Date of Calibration used in the calibration certificate -->
       <dcc:performanceLocation>LABORATORY</dcc:performanceLocation>      <!-- (ONSITE or LABORATORY) This must show the place where the calibration was done -->
@@ -42,7 +42,7 @@
             <dcc:issuer>customer</dcc:issuer>
             <dcc:value>Axle Weighing Scale</dcc:value>
             <dcc:name>
-              <dcc:content lang="en">1122YL23002</dcc:content>
+              <dcc:content lang="en">1122YL23001</dcc:content>
             </dcc:name>
           </dcc:identification>
         </dcc:identifications>
@@ -104,18 +104,18 @@
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>            <!-- This must be the First Science Research Specialist -->
+            <dcc:content lang="en">AHDRIAN CAMILO C. GERNALE</dcc:content>            <!-- This must be the First Science Research Specialist -->
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role>        <!-- This must be the First Science Research Specialist Role-->
+        <dcc:role>Science Research Specialist II</dcc:role>        <!-- This must be the First Science Research Specialist Role-->
       </dcc:respPerson>
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>            <!-- This must be the Second Science Research Specialist -->
+            <dcc:content lang="en">RADLEY F. MANALO</dcc:content>            <!-- This must be the Second Science Research Specialist -->
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role>        <!-- This must be the Second Science Research Specialist Role-->
+        <dcc:role>Senior Science Research Specialist</dcc:role>        <!-- This must be the Second Science Research Specialist Role-->
       </dcc:respPerson>
       <dcc:respPerson>
         <dcc:person>
@@ -146,10 +146,10 @@
     <dcc:usedMethods>
       <dcc:usedMethod refType="basic_uncertainty">
         <dcc:name>
-          <dcc:content lang="en"></dcc:content>
+          <dcc:content lang="en">Relative Expanded Uncertainty</dcc:content>
         </dcc:name>
         <dcc:description>
-          <dcc:content lang="en"></dcc:content>
+          <dcc:content lang="en">The uncertainty stated is the expanded uncertainty obtained by multiplying the standard uncertainty by the coverage factor k = 2. It has been determined in accordance with the “JCGM 100:2008 Evaluation of measurement data- Guide to the expression of uncertainty in measurement”. The value of the measurand lies within the assigned range of values with a probability of approximately 95%.</dcc:content>
         </dcc:description>
       </dcc:usedMethod>
       <dcc:usedMethods>
@@ -158,16 +158,16 @@
           <!-- TEMPERATURE -->
           <dcc:influenceCondition refType="basic_temperature">
             <dcc:name>
-              <dcc:content lang="en"/>
+              <dcc:content lang="en">Ambient Temperature</dcc:content>
             </dcc:name>
             <dcc:data>
               <dcc:quantity>
                 <dcc:name>
-                  <dcc:content lang="en"/>
+                  <dcc:content lang="en">Ambient Temperature</dcc:content>
                 </dcc:name>
                 <si:real>
-                  <si:value/>
-                  <si:unit/>
+                  <si:value>22 ± 2</si:value>
+                  <si:unit>\°C</si:unit>
                 </si:real>
               </dcc:quantity>
             </dcc:data>
@@ -177,16 +177,16 @@
           <!-- HUMIDITY -->
           <dcc:influenceCondition refType="basic_humidityRelative">
             <dcc:name>
-              <dcc:content lang="en"/>
+              <dcc:content lang="en">Relative Humidity</dcc:content>
             </dcc:name>
             <dcc:data>
               <dcc:quantity>
                 <dcc:name>
-                  <dcc:content lang="en"/>
+                  <dcc:content lang="en">Relative Humidity</dcc:content>
                 </dcc:name>
                 <si:real>
-                  <si:value/>
-                  <si:unit/>
+                  <si:value>39 ± 5</si:value>
+                  <si:unit>\%</si:unit>
                 </si:real>
               </dcc:quantity>
             </dcc:data>
@@ -198,13 +198,13 @@
 
           <dcc:result>
             <dcc:name>
-              <dcc:content lang="en"/>
+              <dcc:content lang="en">Applied Force</dcc:content>
             </dcc:name>
             <dcc:quantity refType="basic_measurementStandard">
               <si:hybrid>
                 <si:realListXMLList>
-                  <si:valueXMLList/>
-                  <si:unitXMLList/>
+                  <si:valueXMLList>0.00 3 000 6 000 9 000 12 000 15 000</si:valueXMLList>
+                  <si:unitXMLList>\kgf \kgf \kgf \kgf \kgf \kgf</si:unitXMLList>
                 </si:realListXMLList>
               </si:hybrid>
             </dcc:quantity>
@@ -212,13 +212,13 @@
 
           <dcc:result>
             <dcc:name>
-              <dcc:content lang="en"/>
+              <dcc:content lang="en">Indicated Force</dcc:content>
             </dcc:name>
             <dcc:quantity refType="basic_measuredValue">
               <si:hybrid>
                 <si:realListXMLList>
-                  <si:valueXMLList/>
-                  <si:unitXMLList/>
+                  <si:valueXMLList>0.00 2 850 5 700 8 550 11 433 14 300</si:valueXMLList>
+                  <si:unitXMLList>\kgf \kgf \kgf \kgf \kgf \kgf</si:unitXMLList>
                 </si:realListXMLList>
               </si:hybrid>
             </dcc:quantity>
@@ -226,13 +226,13 @@
 
           <dcc:result>
             <dcc:name>
-              <dcc:content lang="en"/>
+              <dcc:content lang="en">Relative Expanded Uncertainty</dcc:content>
             </dcc:name>
             <dcc:quantity refType="basic_measurementError">
               <si:hybrid>
                 <si:realListXMLList>
-                  <si:valueXMLList/>
-                  <si:unitXMLList/>
+                  <si:valueXMLList>0.00 1.04 0.56 0.41 0.45 0.31</si:valueXMLList>
+                  <si:unitXMLList>\% \% \% \% \% \%</si:unitXMLList>
                 </si:realListXMLList>
               </si:hybrid>
             </dcc:quantity>
@@ -242,8 +242,8 @@
 
 
       <dcc:comment>
-        <dcc:content lang="en"></dcc:content>
-        <dcc:content lang="en"></dcc:content>
+        <dcc:content lang="en">CALIBRATION PROCEDURE: The axle weighing scale was subjected to specified force values in comparison with force standard values. Three (3) series of increasing force values were applied to the axle weighing scale. The relevant references for this axle weighing scale calibration are the TP-S3-FORC-02: "Calibration of Axle Weighing Scales".</dcc:content>
+        <dcc:content lang="en">REMARKS: - The above results were those obtained at the time of calibration and refer only to the force measuring instrument (axle weighing scale) calibrated in static compression mode. - No adjustment was performed on the axle weighingscale. The user should determine suitabilityof the axle weighing scale for its intended use.</dcc:content>
       </dcc:comment>      <!-- This must include the CALIBRATION PROCEDURE and the Remarks in the document appended -->
     </dcc:usedMethods>
 

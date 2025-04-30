@@ -1,0 +1,53 @@
+import pdfplumber
+import pytest
+from pdf_to_xml import extract_table_columns
+
+# tests/test_extract_table_columns.py
+
+class DummyPage:
+    def __init__(self, tables):
+        self._tables = tables
+    def extract_tables(self, settings=None):
+        return self._tables
+
+class DummyPDF:
+    def __init__(self, pages):
+        self.pages = pages
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc, tb):
+        pass
+
+def dummy_open_factory(pages):
+    def _open(path):
+        return DummyPDF(pages)
+    return _open
+
+def test_no_tables(monkeypatch):
+    monkeypatch.setattr(pdfplumber, 'open', dummy_open_factory([]))
+    assert extract_table_columns('dummy.pdf') == []
+
+def test_skip_short_table(monkeypatch):
+    table = [['Only Header']]
+    monkeypatch.setattr(pdfplumber, 'open', dummy_open_factory([DummyPage([table])]))
+    assert extract_table_columns('dummy.pdf') == []
+
+def test_single_table(monkeypatch):
+    table = [
+        [' H1', ' H2', None],
+        [' v11', ' v12', ''],
+        ['',     ' v22', ' v23']
+    ]
+    monkeypatch.setattr(pdfplumber, 'open', dummy_open_factory([DummyPage([table])]))
+    result = extract_table_columns('dummy.pdf')
+    assert result == [{'H1': ['v11'], 'H2': ['v12', 'v22']}]
+
+def test_strip_whitespace(monkeypatch):
+    table = [
+        ['H1 ', ' H2'],
+        ['  a ', ' b '],
+        ['c',    '']
+    ]
+    monkeypatch.setattr(pdfplumber, 'open', dummy_open_factory([DummyPage([table])]))
+    result = extract_table_columns('dummy.pdf')
+    assert result == [{'H1': ['a', 'c'], 'H2': ['b']}]
