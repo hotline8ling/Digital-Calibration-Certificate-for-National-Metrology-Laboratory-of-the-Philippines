@@ -8,11 +8,48 @@ import layoutparser as lp
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Adjust if needed
 
+# def preprocess_image(image_path):
+#     image = cv2.imread(image_path)
+
+#     # # Upscale image (can help OCR read finer text better)
+#     # image = cv2.resize(image, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+
+#     # Gentle denoising
+#     denoised = cv2.fastNlMeansDenoisingColored(image, None, 5, 10, 7, 21)
+
+#     # Convert to LAB and enhance contrast
+#     lab = cv2.cvtColor(denoised, cv2.COLOR_BGR2LAB)
+#     l, a, b = cv2.split(lab)
+#     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+#     cl = clahe.apply(l)
+#     merged = cv2.merge((cl, a, b))
+#     enhanced = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
+
+#     # # Sharpening (can help bring back faint edges)
+#     # kernel = np.array([[0, -1, 0],
+#     #                    [-1, 5,-1],
+#     #                    [0, -1, 0]])
+#     # sharpened = cv2.filter2D(enhanced, -1, kernel)
+
+#     # Threshold to detect skew
+#     gray_for_thresh = cv2.cvtColor(enhanced, cv2.COLOR_BGR2GRAY)
+#     _, thresh = cv2.threshold(gray_for_thresh, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+#     coords = np.column_stack(np.where(thresh > 0))
+#     angle = cv2.minAreaRect(coords)[-1]
+#     angle = -(90 + angle) if angle < -45 else -angle
+
+#     (h, w) = image.shape[:2]
+#     M = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0)
+#     aligned_image = cv2.warpAffine(enhanced, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+
+#     os.makedirs("output", exist_ok=True)
+#     cv2.imwrite("output/exp/hyper/new-prepro-img.jpg", aligned_image)
+
+#     return image, aligned_image
+
 def preprocess_image(image_path):
     image = cv2.imread(image_path)
-
-    # # Upscale image (can help OCR read finer text better)
-    # image = cv2.resize(image, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
 
     # Gentle denoising
     denoised = cv2.fastNlMeansDenoisingColored(image, None, 5, 10, 7, 21)
@@ -25,28 +62,11 @@ def preprocess_image(image_path):
     merged = cv2.merge((cl, a, b))
     enhanced = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
 
-    # # Sharpening (can help bring back faint edges)
-    # kernel = np.array([[0, -1, 0],
-    #                    [-1, 5,-1],
-    #                    [0, -1, 0]])
-    # sharpened = cv2.filter2D(enhanced, -1, kernel)
+    # Save preprocessed image
+    os.makedirs("output/exp/hyper", exist_ok=True)
+    cv2.imwrite("output/exp/hyper/new-prepro-img.jpg", enhanced)
 
-    # Threshold to detect skew
-    gray_for_thresh = cv2.cvtColor(enhanced, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray_for_thresh, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    coords = np.column_stack(np.where(thresh > 0))
-    angle = cv2.minAreaRect(coords)[-1]
-    angle = -(90 + angle) if angle < -45 else -angle
-
-    (h, w) = image.shape[:2]
-    M = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0)
-    aligned_image = cv2.warpAffine(enhanced, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-
-    os.makedirs("output", exist_ok=True)
-    cv2.imwrite("output/exp/hyper/new-prepro-img.jpg", aligned_image)
-
-    return image, aligned_image
+    return image, enhanced
 
 
 def image_to_searchable_pdf(image_path, pdf_path):
@@ -68,8 +88,8 @@ def image_to_searchable_pdf(image_path, pdf_path):
     c.drawImage(temp_image_path, 0, 0, width=width, height=height)
 
     # Transparent text overlay
-    c.setFillColorRGB(1, 1, 1, alpha=0)
-    c.setFont("Helvetica", 10)
+    c.setFillColorRGB(255, 255, 255, alpha=1)
+    c.setFont("Helvetica", 22)
 
     # Group words by line
     lines = {}
@@ -84,14 +104,21 @@ def image_to_searchable_pdf(image_path, pdf_path):
         word_indices = lines[key]
         line_text = " ".join([data['text'][i] for i in word_indices])
         x = min([data['left'][i] for i in word_indices])
-        y = min([data['top'][i] for i in word_indices])
-        h = max([data['height'][i] for i in word_indices])
-        c.drawString(x, height - y - h + 2, line_text)
+
+        # Use average for better alignment
+        avg_top = int(np.mean([data['top'][i] for i in word_indices]))
+        avg_height = int(np.mean([data['height'][i] for i in word_indices]))
+
+        # Optional tweak: small offset to better center text
+        y_adjusted = height - avg_top - int(avg_height * 0.8)
+
+        c.drawString(x, y_adjusted, line_text)
+
 
     c.save()
     os.remove(temp_image_path)
     print(f"✅ Searchable PDF saved to: {pdf_path}")
 
 if __name__ == "__main__":
-    image_to_searchable_pdf("input/cert.jpg", "output/exp/hyper/new-output.pdf")
+    image_to_searchable_pdf("input/test2.jpg", "output/exp/hyper/new-output.pdf")
     print("Searchable PDF created!")
