@@ -12,6 +12,9 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 def preprocess_image(image_path):
     """Enhance image contrast and rotate it so it's slightly to the left."""
     image = cv2.imread(image_path)
+    # Upscale image (can help OCR read finer text better)
+    image = cv2.resize(image, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     denoised = cv2.fastNlMeansDenoising(gray, None, 5, 7, 21)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
