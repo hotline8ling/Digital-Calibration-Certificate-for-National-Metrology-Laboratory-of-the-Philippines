@@ -519,8 +519,8 @@ backButton = CTkButton(master=app, text="< ", corner_radius=7,
                     fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 15))
 backButton.place(relx=0.0225, rely=0.0486, relwidth=0.0200, relheight=0.0350)
 
-# IMG to XML label
-titleLabel = CTkLabel(master=app, text="IMG -> XML", font=("Inter", 13, "bold"), bg_color='white')
+# PDF to XML label
+titleLabel = CTkLabel(master=app, text="New XML", font=("Inter", 13, "bold"), bg_color='white')
 titleLabel.place(relx=0.1800, rely=0.0514)
 
 ##########################
