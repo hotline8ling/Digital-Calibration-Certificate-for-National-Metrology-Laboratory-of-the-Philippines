@@ -4,9 +4,16 @@ import os
 from PIL import Image
 
 app = CTk()
-app.title("DCC")
-app.geometry("500x400")
+app.title("DigiCert")
+app.geometry("500x500")
 set_appearance_mode("light")
+
+# Disable maximize button
+app.resizable(False, False)
+
+# Create a CTkFrame to act as the background (canvas)
+bg_frame = CTkFrame(master=app, fg_color="white")  # Set the color to white
+bg_frame.place(relx=0, rely=0, relwidth=1, relheight=1)  # Fill the entire window
 
 # Functions
 def open_cert():
@@ -23,76 +30,82 @@ def open_format():
     formatLabel.configure(text=os.path.basename(filename))
     return filename
 
-def export_dcc():
-    dcc = "DCC.xml"
-    dccLabel.configure(text=dcc + " successfully generated")
-    with open(dcc, 'w') as file:
-        # file.write("Certificate path: " + certLabel.cget("text") + "\n")
-        # file.write("Format path: " + formatLabel.cget("text") + "\n")
-        file.write("Certificate path: " + img_path + "\n")
-        file.write("Format path: " + format_path + "\n")
-    return dcc
-
 # Load and Resize the Image
 image = CTkImage(light_image=Image.open("itdi-logo.png"), size=(26, 25))
 # Create CTkLabel with Image
-image_label = CTkLabel(master=app, image=image, text="") 
-image_label.place(relx=0.886, rely=0.085) 
+image_label = CTkLabel(master=app, image=image, text="", bg_color='white') 
+image_label.place(relx=0.886, rely=0.064) 
 
 # Load and Resize the Image
 image1 = CTkImage(light_image=Image.open("nml-logo1.png"), size=(29, 28))
 # Create CTkLabel with Image
-image_label = CTkLabel(master=app, image=image1, text="") 
-image_label.place(relx=0.814, rely=0.0875) 
+image_label = CTkLabel(master=app, image=image1, text="", bg_color='white') 
+image_label.place(relx=0.814, rely=0.064) 
 
 stroke = CTkFrame(master=app, fg_color="#0855B1", corner_radius=0)
-stroke.place(relx=0.096, rely=0.0925, relwidth=0.006, relheight=0.0675)
+stroke.place(relx=0.106, rely=0.064, relwidth=0.006, relheight=0.0675)
 
-# Adding Background Rectangle (Using CTkFrame)
+# BG rectangle 1
 bg_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-bg_frame.place(relx=0, rely=0.2175, relwidth=1, relheight=0.2525)
+bg_frame.place(relx=0, rely=0.242, relwidth=1, relheight=0.202)
 
-# Adding Background Rectangle (Using CTkFrame)
+# BG rectangle 2
 bg_frame2 = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-bg_frame2.place(relx=0, rely=0.4875, relwidth=1, relheight=0.2525)
+bg_frame2.place(relx=0, rely=0.458, relwidth=1, relheight=0.202)
+
+# BG rectangle 3
+bg_frame3 = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
+bg_frame3.place(relx=0, rely=0.674, relwidth=1, relheight=0.202)
 
 # Title label
-titleLabel = CTkLabel(master=app, text="DCC Generator", font=("Montserrat", 32, "bold"))
-titleLabel.place(relx=0.112, rely=0.065)
+titleLabel = CTkLabel(master=app, text="DigiCert", font=("Montserrat", 32, "bold"), bg_color='white')
+titleLabel.place(relx=0.126, rely=0.054)
 
 # Textlabel for Import Calibration Certificate image
 importCertL = CTkLabel(master=app, text="Select a Calibration Certificate Image", font=("Inter", 13), bg_color="#E0E0E0")
-importCertL.place(relx=0.124, rely=0.23)
+importCertL.place(relx=0.124, rely=0.260)
 
 # import button for image
-importCert = CTkButton(master=app, text="Upload File", corner_radius=7, 
-                    fg_color="#0855B1", hover_color="#010E54", command=open_cert)
-importCert.place(relx=0.124, rely=0.30, relwidth=0.368, relheight=0.0825)
+importCert = CTkButton(master=app, text="Import Image", corner_radius=7, 
+                    fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_cert)
+importCert.place(relx=0.124, rely=0.308, relwidth=0.368, relheight=0.066)
 
 # Textlabel for Certificate Image
 certLabel = CTkLabel(master=app, text="exampleCertificate.jpg", font=("Inter", 12), bg_color="#E0E0E0")
-certLabel.place(relx=0.124, rely=0.38)
+certLabel.place(relx=0.124, rely=0.375)
+
+settings = CTkButton(
+    master=app,
+    text="Settings",
+    corner_radius=7,
+    fg_color="#010E54",
+    hover_color="#010E54",
+    font=("Inter", 8),  # Smaller font
+    command=open_cert
+)
+settings.place(relx=0.83, rely=0.158, relwidth=0.11, relheight=0.048)
 
 # Textlabel for Import Calibration Certificate image
-importFormatL = CTkLabel(master=app, text="Select Calibration Formal XML", font=("Inter", 13), bg_color="#E0E0E0")
-importFormatL.place(relx=0.124, rely=0.5025)
+importFormatL = CTkLabel(master=app, text="Select a Calibration Certificate PDF", font=("Inter", 13), bg_color="#E0E0E0")
+importFormatL.place(relx=0.124, rely=0.478)
 
-# import button for xml
-importFormat = CTkButton(master=app, text="Upload File", corner_radius=7,
-                    fg_color="#0855B1", hover_color="#010E54", command=open_format)
-importFormat.place(relx=0.124, rely=0.57, relwidth=0.368, relheight=0.0825)
+# import button for pdf
+importFormat = CTkButton(master=app, text="Import PDF", corner_radius=7,
+                    fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_format)
+importFormat.place(relx=0.124, rely=0.524, relwidth=0.368, relheight=0.066)
 
 # Textlabel for Calibration Format XML
 formatLabel = CTkLabel(master=app, text="exampleFormat.xml", font=("Inter", 12), bg_color="#E0E0E0")
-formatLabel.place(relx=0.124, rely=0.65)
+formatLabel.place(relx=0.124, rely=0.591)
 
-# export button for DCC
-exportDCC = CTkButton(master=app, text="Export DCC", corner_radius=7,
-                    fg_color="#0855B1", hover_color="#010E54", command=export_dcc)
-exportDCC.place(relx=0.124, rely=0.785, relwidth=0.222, relheight=0.0825)
+# Textlabel for DCC Scratch
+importFormatL = CTkLabel(master=app, text="Create a New Calibration Certificate", font=("Inter", 13), bg_color="#E0E0E0")
+importFormatL.place(relx=0.124, rely=0.700)
 
-# Textlabel for DCC
-dccLabel = CTkLabel(master=app, text="exampleDCC.xml", font=("Inter", 12))
-dccLabel.place(relx=0.37, rely=0.7925)
+# button for dcc-scratch
+importCert = CTkButton(master=app, text="Make a new DCC File", corner_radius=7, 
+                    fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_cert)
+importCert.place(relx=0.124, rely=0.754, relwidth=0.368, relheight=0.066)
+
 
 app.mainloop()
