@@ -1,0 +1,249 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dcc:digitalCalibrationCertificate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dcc="https://ptb.de/dcc" xmlns:si="https://ptb.de/si" xsi:schemaLocation="https://ptb.de/dcc https://ptb.de/dcc/v3.3.0/dcc.xsd" schemaVersion="3.3.0">
+  <!--        
+			DCC - Digital Calibration Certificate
+            Copyright (c) 2019 - 2025 Physikalisch-Technische Bundesanstalt
+
+      This specific file is a template for the DCC Generator for the National Metrology Laboratory of the Philippines 
+      =================================
+-->
+  <dcc:administrativeData>
+    <dcc:dccSoftware>
+      <dcc:software>
+        <dcc:name>
+          <dcc:content>DigiCert</dcc:content>
+        </dcc:name>
+        <dcc:release>v0.0</dcc:release>     
+      </dcc:software>
+    </dcc:dccSoftware>
+
+    <dcc:coreData>
+      <dcc:countryCodeISO3166_1>PH</dcc:countryCodeISO3166_1> 
+      <dcc:usedLangCodeISO639_1>en</dcc:usedLangCodeISO639_1>    
+      <dcc:mandatoryLangCodeISO639_1>en</dcc:mandatoryLangCodeISO639_1>      
+      <dcc:uniqueIdentifier>Calibration No. 02-2025-FORC-0042</dcc:uniqueIdentifier> 
+      <dcc:beginPerformanceDate>2025-02-24</dcc:beginPerformanceDate>
+      <dcc:endPerformanceDate></dcc:endPerformanceDate>     
+      <dcc:performanceLocation>LABORATORY</dcc:performanceLocation>
+    </dcc:coreData>
+
+    <!-- Calibration Item -->
+    <dcc:items>
+      <dcc:item>
+        <dcc:name>
+          <dcc:content lang="en">Axle Weighing Scale</dcc:content>
+        </dcc:name>
+
+        <dcc:model>Intercomp;</dcc:model>
+
+        <dcc:identifications>
+          <dcc:identification>
+            <dcc:issuer>customer</dcc:issuer>
+            <dcc:value>Axle Weighing Scale</dcc:value>
+            <dcc:name>
+              <dcc:content lang="en">1122YL23001</dcc:content>
+            </dcc:name>
+          </dcc:identification>
+        </dcc:identifications>
+
+        <dcc:description>
+          <dcc:content lang="en">Capacity: 15 000 kgf</dcc:content>
+          <dcc:content lang="en">Measurement Range: 0 kgf to 15 000 kgf</dcc:content>
+          <dcc:content lang="en">Resolution: 5 0 kgf</dcc:content>
+        </dcc:description>
+
+      </dcc:item>
+
+      <!-- STANDARD EQUIPMENT -->
+      <dcc:item>
+        <dcc:name>
+          <dcc:content lang="en">Force Measuring Instrument</dcc:content>
+        </dcc:name>
+
+
+        <dcc:model>Shimadzu/ UH- F1000kNX</dcc:model>
+
+        <dcc:identifications>
+          <dcc:identification>
+            <dcc:issuer>LABORATORY</dcc:issuer>
+            <dcc:value>SN 1251056K0094</dcc:value>
+            <dcc:name>
+              <dcc:content lang="en">Force Measuring Instrument</dcc:content>
+            </dcc:name>
+          </dcc:identification>
+        </dcc:identifications>
+
+        <dcc:description>
+          <dcc:content lang="en">Calibration Certificate No.: 11-2020-FORC-0116</dcc:content>
+          <dcc:content lang="en">Traceability: Traceable to the SI through NMD-ITDI</dcc:content>
+        </dcc:description>
+
+      </dcc:item>
+
+    </dcc:items>
+
+
+    <dcc:calibrationLaboratory>
+      <dcc:calibrationLaboratoryCode>FORC</dcc:calibrationLaboratoryCode>  
+      <dcc:contact>
+        <dcc:name>
+          <dcc:content lang="en">National Metrology Laboratory - Industrial Technology Development Institute</dcc:content> 
+        </dcc:name>
+        <dcc:location>
+          <dcc:city>Taguig</dcc:city>     
+          <dcc:countryCode>PH</dcc:countryCode>   
+          <dcc:postCode>1633</dcc:postCode> 
+          <dcc:street>General Santos Ave</dcc:street>
+        </dcc:location>
+      </dcc:contact>
+    </dcc:calibrationLaboratory>
+
+
+    <dcc:respPersons>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="en">AHDRIAN CAMILO C. GERNALE</dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role>Science Research Specialist II</dcc:role>
+      </dcc:respPerson>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="en">RADLEY F. MANALO</dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role>Senior Science Research Specialist</dcc:role>
+      </dcc:respPerson>
+      <dcc:respPerson>
+        <dcc:person>
+          <dcc:name>
+            <dcc:content lang="en"></dcc:content>
+          </dcc:name>
+        </dcc:person>
+        <dcc:role></dcc:role> 
+      </dcc:respPerson>
+    </dcc:respPersons>
+
+    <dcc:customer>
+      <dcc:name>
+        <dcc:content lang="en">SAVVICE CORPORATION</dcc:content>
+      </dcc:name>
+      <dcc:location>
+        <dcc:further>
+          <dcc:content lang="en">3rd Floor BMWC Bldg., Cagayan Valley Road</dcc:content>
+        </dcc:further>
+      </dcc:location>
+    </dcc:customer>
+  </dcc:administrativeData>
+
+  <dcc:measurementResults>
+    <dcc:name>
+      <dcc:content lang="en">Axle Weighing Scale</dcc:content>
+    </dcc:name>
+    <dcc:usedMethods>
+      <dcc:usedMethod refType="basic_uncertainty">
+        <dcc:name>
+          <dcc:content lang="en">Relative Expanded Uncertainty</dcc:content>
+        </dcc:name>
+        <dcc:description>
+          <dcc:content lang="en">The uncertainty stated is the expanded uncertainty obtained by multiplying the standard uncertainty by the coverage factor k = 2. It has been determined in accordance with the “JCGM 100:2008 Evaluation of measurement data- Guide to the expression of uncertainty in measurement”. The value of the measurand lies within the assigned range of values with a probability of approximately 95%.</dcc:content>
+        </dcc:description>
+      </dcc:usedMethod>
+      <dcc:usedMethods>
+
+        <dcc:influenceConditions>
+          <!-- TEMPERATURE -->
+          <dcc:influenceCondition refType="basic_temperature">
+            <dcc:name>
+              <dcc:content lang="en">Ambient Temperature</dcc:content>
+            </dcc:name>
+            <dcc:data>
+              <dcc:quantity>
+                <dcc:name>
+                  <dcc:content lang="en">Ambient Temperature</dcc:content>
+                </dcc:name>
+                <si:real>
+                  <si:value>22 ± 2</si:value>
+                  <si:unit>\°C</si:unit>
+                </si:real>
+              </dcc:quantity>
+            </dcc:data>
+          </dcc:influenceCondition>
+
+
+          <!-- HUMIDITY -->
+          <dcc:influenceCondition refType="basic_humidityRelative">
+            <dcc:name>
+              <dcc:content lang="en">Relative Humidity</dcc:content>
+            </dcc:name>
+            <dcc:data>
+              <dcc:quantity>
+                <dcc:name>
+                  <dcc:content lang="en">Relative Humidity</dcc:content>
+                </dcc:name>
+                <si:real>
+                  <si:value>39 ± 5</si:value>
+                  <si:unit>\%</si:unit>
+                </si:real>
+              </dcc:quantity>
+            </dcc:data>
+          </dcc:influenceCondition>
+        </dcc:influenceConditions>
+
+        <!-- RESULTS -->
+        <dcc:results>
+
+          <dcc:result>
+            <dcc:name>
+              <dcc:content lang="en">Applied Force</dcc:content>
+            </dcc:name>
+            <dcc:quantity refType="basic_measurementStandard">
+              <si:hybrid>
+                <si:realListXMLList>
+                  <si:valueXMLList>0.00 3 000 6 000 9 000 12 000 15 000</si:valueXMLList>
+                  <si:unitXMLList>\kgf \kgf \kgf \kgf \kgf \kgf</si:unitXMLList>
+                </si:realListXMLList>
+              </si:hybrid>
+            </dcc:quantity>
+          </dcc:result>
+
+          <dcc:result>
+            <dcc:name>
+              <dcc:content lang="en">Indicated Force</dcc:content>
+            </dcc:name>
+            <dcc:quantity refType="basic_measuredValue">
+              <si:hybrid>
+                <si:realListXMLList>
+                  <si:valueXMLList>0.00 2 850 5 650 8 500 11 317 14 150</si:valueXMLList>
+                  <si:unitXMLList>\kgf \kgf \kgf \kgf \kgf \kgf</si:unitXMLList>
+                </si:realListXMLList>
+              </si:hybrid>
+            </dcc:quantity>
+          </dcc:result>
+
+          <dcc:result>
+            <dcc:name>
+              <dcc:content lang="en">Relative Expanded Uncertainty</dcc:content>
+            </dcc:name>
+            <dcc:quantity refType="basic_measurementError">
+              <si:hybrid>
+                <si:realListXMLList>
+                  <si:valueXMLList>0.00 1.04 0.56 0.41 0.46 0.31</si:valueXMLList>
+                  <si:unitXMLList>\% \% \% \% \% \%</si:unitXMLList>
+                </si:realListXMLList>
+              </si:hybrid>
+            </dcc:quantity>
+          </dcc:result>
+        </dcc:results>
+      </dcc:usedMethods>
+
+
+      <dcc:comment>
+        <dcc:content lang="en">CALIBRATION PROCEDURE: The axle weighing scale was subjected to specified force values in comparison with force standard values. Three (3) series of increasing force values were applied to the axle weighing scale. The relevant references for this axle weighing scale calibration are the TP-S3-FORC-02: "Calibration of Axle Weighing Scales".</dcc:content>
+        <dcc:content lang="en">REMARKS: - The above results were those obtained at the time of calibration and refer only to the force measuring instrument (axle weighing scale) calibrated in static compression mode. - No adjustment was performed on the axle weighingscale. The user should determine suitabilityof the axle weighing scale for its intended use.</dcc:content>
+      </dcc:comment>
+    </dcc:usedMethods>
+
+</dcc:measurementResults></dcc:digitalCalibrationCertificate>

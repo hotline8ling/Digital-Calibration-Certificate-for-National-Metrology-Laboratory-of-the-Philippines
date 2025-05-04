@@ -1,13 +1,26 @@
 from customtkinter import *
 from PIL import Image
 import os
-from PIL import Image
-import xml.dom.minidom
+from tkinter import messagebox
+from xml.etree.ElementTree import ParseError
+from customtkinter import *
+import json
+import xml.etree.ElementTree as ET
+import lxml.etree as LET
+from io import BytesIO
+from tkinter import filedialog 
 import sys
+
+
+json_path = sys.argv[1]
+with open(json_path, encoding="utf-8") as f:
+    calibration_info = json.load(f)
+
+print(calibration_info)
 
 app = CTk()
 app.title("DigiCert")
-app.geometry("1200x700")
+app.geometry("600x700")
 set_appearance_mode("light")
 
 # Disable maximize button
@@ -17,16 +30,15 @@ app.resizable(False, False)
 bg_frame = CTkFrame(master=app, fg_color="white") 
 bg_frame.place(relx=0, rely=0, relwidth=1, relheight=1)  
 
-# Compute relx and rely based on 58x84 starting point in a 1200x700 canvas
-relx = 58 / 1200 
+# Compute relx and rely based on 58x84 starting point in a 600x700 canvas
+relx = 58 / 600
 rely = 84 / 700 
-relwidth = 475 / 1200  
+relwidth = 475 / 600  
 relheight = 525 / 700  
 
 # Create a scrollable frame
 scrollable_frame = CTkScrollableFrame(master=app, fg_color='white')
 scrollable_frame.place(relx=relx, rely=rely, relwidth=relwidth, relheight=relheight)
-
 
 ###############################
 # Title inside scrollable frame
@@ -40,8 +52,6 @@ tsr_label.grid(row=1, column=0, padx=10, pady=(5, 5), sticky="w")
 # TSR Number Textbox
 tsr_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 02-2019-FORC-0028")
 tsr_textbox.grid(row=2, column=0, padx=10, pady=(5, 10), sticky="w")
-tsr_textbox.bind("<KeyRelease>", lambda e: update_xml_field("dcc:uniqueIdentifier", tsr_textbox.get()))
-
 
 # Calibration Type Label
 calibration_label = CTkLabel(master=scrollable_frame, text="Calibration Type:", font=("Inter", 12, "bold"), bg_color='white')
@@ -68,21 +78,14 @@ start_date_label.grid(row=3, column=0, padx=10, pady=(5, 5), sticky="w")
 start_date_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 2025-02-24")
 start_date_textbox.grid(row=4, column=0, padx=10, pady=(5, 10), sticky="w")
 
-# Laboratory Code Label
-lab_code_label = CTkLabel(master=scrollable_frame, text="Laboratory Code:", font=("Inter", 12, "bold"), bg_color='white')
-lab_code_label.grid(row=3, column=1, padx=10, pady=(5, 5), sticky="w")
-
-# Laboratory Code Textbox
-lab_code_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. FORC")
-lab_code_textbox.grid(row=4, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # End Date of Calibration Label
 end_date_label = CTkLabel(master=scrollable_frame, text="End Date of Calibration:", font=("Inter", 12, "bold"), bg_color='white')
-end_date_label.grid(row=5, column=0, padx=10, pady=(5, 5), sticky="w")
+end_date_label.grid(row=3, column=1, padx=10, pady=(5, 5), sticky="w")
 
 # End Date of Calibration Textbox
 end_date_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 2025-02-24")
-end_date_textbox.grid(row=6, column=0, padx=10, pady=(5, 10), sticky="w")
+end_date_textbox.grid(row=4, column=1, padx=10, pady=(5, 10), sticky="w")
 
 #############################
 # Calibration Equipment Label
@@ -202,13 +205,13 @@ manufacturer_name_label.grid(row=19, column=0, padx=10, pady=(5, 5), sticky="w")
 manufacturer_name_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Not given")
 manufacturer_name_textbox.grid(row=20, column=0, padx=10, pady=(5, 10), sticky="w")
 
-# Capacity Label
-capacity_label = CTkLabel(master=scrollable_frame, text="Capacity:", font=("Inter", 12, "bold"), bg_color='white')
-capacity_label.grid(row=19, column=1, padx=10, pady=(5, 5), sticky="w")
+# Calibration Cert Label
+calibCert_label = CTkLabel(master=scrollable_frame, text="Calibration Certificate No.", font=("Inter", 12, "bold"), bg_color='white')
+calibCert_label.grid(row=19, column=1, padx=10, pady=(5, 5), sticky="w")
 
-# Capacity Textbox
-capacity_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 15 000 kgf")
-capacity_textbox.grid(row=20, column=1, padx=10, pady=(5, 10), sticky="w")
+# Calibration Cert Textbox
+calibCert_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 11-2020-FORC-0116")
+calibCert_textbox.grid(row=20, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # Model Label
 model_label = CTkLabel(master=scrollable_frame, text="Model:", font=("Inter", 12, "bold"), bg_color='white')
@@ -218,13 +221,13 @@ model_label.grid(row=21, column=0, padx=10, pady=(5, 5), sticky="w")
 model_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Shimadzu/ UH-F1000kNX")
 model_textbox.grid(row=22, column=0, padx=10, pady=(5, 10), sticky="w")
 
-# Range Label
-range_label = CTkLabel(master=scrollable_frame, text="Range:", font=("Inter", 12, "bold"), bg_color='white')
-range_label.grid(row=21, column=1, padx=10, pady=(5, 5), sticky="w")
+# Traceability Label
+traceability_label = CTkLabel(master=scrollable_frame, text="Traceability:", font=("Inter", 12, "bold"), bg_color='white')
+traceability_label.grid(row=21, column=1, padx=10, pady=(5, 5), sticky="w")
 
-# Range Textbox
-range_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0 kgf to 15 000 kgf")
-range_textbox.grid(row=22, column=1, padx=10, pady=(5, 10), sticky="w")
+# Traceability Textbox
+traceability_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Traceable to the SI through NMD-ITDI")
+traceability_textbox.grid(row=22, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # Identification Issuer Label
 identification_issuer_label = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
@@ -233,14 +236,6 @@ identification_issuer_label.grid(row=23, column=0, padx=10, pady=(5, 5), sticky=
 # Identification Issuer Textbox
 identification_issuer_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. laboratory")
 identification_issuer_textbox.grid(row=24, column=0, padx=10, pady=(5, 10), sticky="w")
-
-# Resolution Label
-resolution_label = CTkLabel(master=scrollable_frame, text="Resolution:", font=("Inter", 12, "bold"), bg_color='white')
-resolution_label.grid(row=23, column=1, padx=10, pady=(5, 5), sticky="w")
-
-# Resolution Textbox
-resolution_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 50 kgf")
-resolution_textbox.grid(row=24, column=1, padx=10, pady=(5, 10), sticky="w")
 
 #################
 # Personnel Label
@@ -326,7 +321,7 @@ temperature_label = CTkLabel(master=scrollable_frame, text="Temperature:", font=
 temperature_label.grid(row=36, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Temperature Textbox
-temperature_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. (22 ± 2)")
+temperature_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. (22 +- 2)")
 temperature_textbox.grid(row=37, column=0, padx=10, pady=(5, 10), sticky="w")
 
 # Unit Label (Temperature)
@@ -334,7 +329,7 @@ temperature_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("
 temperature_unit_label.grid(row=36, column=1, padx=10, pady=(5, 5), sticky="w")
 
 # Unit Textbox (Temperature)
-temperature_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \\celcius")
+temperature_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \celcius")
 temperature_unit_textbox.grid(row=37, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # Humidity Label
@@ -342,7 +337,7 @@ humidity_label = CTkLabel(master=scrollable_frame, text="Humidity:", font=("Inte
 humidity_label.grid(row=38, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Humidity Textbox
-humidity_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. (40 ± 5)")
+humidity_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. (40 +- 5)")
 humidity_textbox.grid(row=39, column=0, padx=10, pady=(5, 10), sticky="w")
 
 # Unit Label (Humidity)
@@ -350,7 +345,7 @@ humidity_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Int
 humidity_unit_label.grid(row=38, column=1, padx=10, pady=(5, 5), sticky="w")
 
 # Unit Textbox (Humidity)
-humidity_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \\%")
+humidity_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \%")
 humidity_unit_textbox.grid(row=39, column=1, padx=10, pady=(5, 10), sticky="w")
 
 ##########################
@@ -358,24 +353,24 @@ humidity_unit_textbox.grid(row=39, column=1, padx=10, pady=(5, 10), sticky="w")
 results_label = CTkLabel(master=scrollable_frame, text="Results:", font=("Inter", 14, "bold"), bg_color='white')
 results_label.grid(row=40, column=0, columnspan=2, padx=10, pady=(10, 5), sticky="w")
 
-# Applied Force Label
-applied_force_label = CTkLabel(master=scrollable_frame, text="Applied Force:", font=("Inter", 12, "bold"), bg_color='white')
-applied_force_label.grid(row=41, column=0, padx=10, pady=(5, 5), sticky="w")
+# Applied Measurement Label
+applied_measurement_label = CTkLabel(master=scrollable_frame, text="Applied Measurement:", font=("Inter", 12, "bold"), bg_color='white')
+applied_measurement_label.grid(row=41, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Applied Force Textbox
-applied_force_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 3 000 6 000")
-applied_force_textbox.grid(row=42, column=0, padx=10, pady=(5, 10), sticky="w")
+applied_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 3 000 6 000")
+applied_measurement_textbox.grid(row=42, column=0, padx=10, pady=(5, 10), sticky="w")
 
 # Unit Label (Applied Force)
 applied_force_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
 applied_force_unit_label.grid(row=41, column=1, padx=10, pady=(5, 5), sticky="w")
 
 # Unit Textbox (Applied Force)
-applied_force_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \\kgf \\kgf \\kgf")
+applied_force_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
 applied_force_unit_textbox.grid(row=42, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # Indicated Force Label
-indicated_force_label = CTkLabel(master=scrollable_frame, text="Indicated Force:", font=("Inter", 12, "bold"), bg_color='white')
+indicated_force_label = CTkLabel(master=scrollable_frame, text="Indicated Measurement:", font=("Inter", 12, "bold"), bg_color='white')
 indicated_force_label.grid(row=43, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Indicated Force Textbox
@@ -387,7 +382,7 @@ indicated_force_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", fon
 indicated_force_unit_label.grid(row=43, column=1, padx=10, pady=(5, 5), sticky="w")
 
 # Unit Textbox (Indicated Force)
-indicated_force_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \\kgf \\kgf \\kgf")
+indicated_force_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
 indicated_force_unit_textbox.grid(row=44, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # Relative Expanded Uncertainty Label
@@ -403,13 +398,50 @@ relative_expandedUn_unit_label = CTkLabel(master=scrollable_frame, text="Unit:",
 relative_expandedUn_unit_label.grid(row=45, column=1, padx=10, pady=(5, 5), sticky="w")
 
 # Unit Textbox (Relative Expanded Uncertainty)
-relative_expandedUn_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \\% \\% \\%")
+relative_expandedUn_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
 relative_expandedUn_unit_textbox.grid(row=46, column=1, padx=10, pady=(5, 10), sticky="w")
+
+
+#############################
+# Uncertainty of Measurement Label
+uncertainty_label = CTkLabel(master=scrollable_frame, text="Uncertainty of Measurement:", font=("Inter", 14, "bold"), bg_color='white')
+uncertainty_label.grid(row=47, column=0, padx=10, pady=(5, 5), sticky="w")
+
+# Define placeholder text and color
+uncertainty_placeholder = "e.g. The uncertainty stated is the expanded uncertainty obtained by multiplying the standard uncertainty..."
+
+def on_uncertainty_focus_in(event):
+    current_text = uncertainty_textbox.get("1.0", "end-1c")
+    if current_text == uncertainty_placeholder:
+        uncertainty_textbox.delete("1.0", "end")
+        uncertainty_textbox.configure(text_color="black")
+
+def on_uncertainty_focus_out(event):
+    current_text = uncertainty_textbox.get("1.0", "end-1c").strip()
+    if current_text == "":
+        uncertainty_textbox.insert("1.0", uncertainty_placeholder)
+        uncertainty_textbox.configure(text_color="gray")
+
+# Uncertainty of Measurement Textbox (Multiline with wrapping)
+uncertainty_textbox = CTkTextbox(
+    master=scrollable_frame,
+    font=("Inter", 12),
+    fg_color='white',
+    text_color="gray",
+    border_width=2,
+    height=90,
+    wrap='word'
+)
+uncertainty_textbox.insert("1.0", uncertainty_placeholder)
+uncertainty_textbox.bind("<FocusIn>", on_uncertainty_focus_in)
+uncertainty_textbox.bind("<FocusOut>", on_uncertainty_focus_out)
+uncertainty_textbox.grid(row=48, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+
 
 #############################
 # Calibration Procedure Label
 calibration_procedure_label = CTkLabel(master=scrollable_frame, text="Calibration Procedure:", font=("Inter", 14, "bold"), bg_color='white')
-calibration_procedure_label.grid(row=47, column=0, padx=10, pady=(5, 5), sticky="w")
+calibration_procedure_label.grid(row=49, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Define placeholder text and color
 placeholder_text = "e.g. CALIBRATION PROCEDURE: The axle weighing scale was subjected to specified..."
@@ -439,13 +471,13 @@ calibration_procedure_textbox = CTkTextbox(
 calibration_procedure_textbox.insert("1.0", placeholder_text)
 calibration_procedure_textbox.bind("<FocusIn>", on_focus_in)
 calibration_procedure_textbox.bind("<FocusOut>", on_focus_out)
-calibration_procedure_textbox.grid(row=48, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+calibration_procedure_textbox.grid(row=50, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
 
 
 ###############
 # Remarks Label
 remarks_label = CTkLabel(master=scrollable_frame, text="Remarks:", font=("Inter", 14, "bold"), bg_color='white')
-remarks_label.grid(row=49, column=0, padx=10, pady=(5, 5), sticky="w")
+remarks_label.grid(row=51, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Define placeholder text and color
 remarks_placeholder = "e.g. REMARKS: - The above results were those obtained at the time of calibration..."
@@ -475,197 +507,59 @@ remarks_textbox = CTkTextbox(
 remarks_textbox.insert("1.0", remarks_placeholder)
 remarks_textbox.bind("<FocusIn>", on_remarks_focus_in)
 remarks_textbox.bind("<FocusOut>", on_remarks_focus_out)
-remarks_textbox.grid(row=50, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+remarks_textbox.grid(row=52, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
 
 
 # ^ content of scrollable frame
 #########################################
 
-# Get the directory where the script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
-
 # Load and Resize the Image
 itdi_logo_path = os.path.join(script_dir, "itdi-logo.png")
 image = CTkImage(light_image=Image.open(itdi_logo_path), size=(26, 25))
+
 # Create CTkLabel with Image
 image_label = CTkLabel(master=app, image=image, text="", bg_color='white') 
-image_label.place(relx=0.4525, rely=0.0457)
+image_label.place(relx=1.0, rely=0.0457)
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
 # Load and Resize the Image
 nml_logo_path = os.path.join(script_dir, "nml-logo1.png")
 image1 = CTkImage(light_image=Image.open(nml_logo_path), size=(29, 28))
+
 # Create CTkLabel with Image
 image_label = CTkLabel(master=app, image=image1, text="", bg_color='white') 
-image_label.place(relx=0.4225, rely=0.0457)
+image_label.place(relx=1.0, rely=0.0457)
 
 stroke = CTkFrame(master=app, fg_color="#0855B1", corner_radius=0)
-stroke.place(relx=0.0483, rely=0.0438, relwidth=0.006, relheight=0.045)
+stroke.place(relx=0.0967, rely=0.0443, relwidth=0.012, relheight=0.045)
 
 # Title label
 titleLabel = CTkLabel(master=app, text="DigiCert", font=("Montserrat", 32, "bold"), bg_color='white')
-titleLabel.place(relx=0.0567, rely=0.0330)
-
-# BG rectangle 1
-bg_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-bg_frame.place(relx=0.5, rely=0.0, relwidth=0.5, relheight=1.0)
+titleLabel.place(relx=0.1133, rely=0.0330)
 
 # BG rectangle 
 footer_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-footer_frame.place(relx=0.0, rely=0.89, relwidth=0.5, relheight=0.1114)
+footer_frame.place(relx=0.0, rely=0.89, relwidth=1.0, relheight=0.1114)
 
 # Save Edit button
-saveEButton = CTkButton(master=app, text="Save Edit", corner_radius=7, 
+saveEButton = CTkButton(master=app, text="Preview", corner_radius=7, 
                        fg_color="#000000", hover_color="#1A4F8B", font=("Inter", 13))
-saveEButton.place(relx=0.1417, rely=0.9220, relwidth=0.1008, relheight=0.0471)
+saveEButton.place(relx=0.2834, rely=0.9220, relwidth=0.2016, relheight=0.0471)
 
 # Export button
 exportButton = CTkButton(master=app, text="Export", corner_radius=7, 
                          fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13))
-exportButton.place(relx=0.2575, rely=0.9220, relwidth=0.1008, relheight=0.0471)
+exportButton.place(relx=0.5150, rely=0.9220, relwidth=0.2016, relheight=0.0471)
 
 # Back button
 backButton = CTkButton(master=app, text="< ", corner_radius=7, 
                     fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 15))
-backButton.place(relx=0.0225, rely=0.0486, relwidth=0.0200, relheight=0.0350)
+backButton.place(relx=0.0450, rely=0.0486, relwidth=0.0400, relheight=0.0350)
 
-# PDF to XML label
+# IMG to XML label
 titleLabel = CTkLabel(master=app, text="PDF -> XML", font=("Inter", 13, "bold"), bg_color='white')
-titleLabel.place(relx=0.1800, rely=0.0514)
-
-##########################
-# insert code for the preview of XML file here
-
-xml_preview = CTkTextbox(master=app, font=("Courier", 12), wrap="none")
-xml_preview.place(relx=0.6, rely=0.24, relwidth=0.35, relheight=0.65)
-
-import xml.dom.minidom
-
-parsed_xml = None  # holds DOM for live editing
-def preload_xml(path):
-    global parsed_xml
-
-    # Configure XML preview for dark mode
-    xml_preview.configure(
-        fg_color="#1E1E1E",  # Dark background
-        text_color="#D4D4D4",  # Light text color
-        scrollbar_button_color="#333333",
-        scrollbar_button_hover_color="#555555"
-    )
-
-    if os.path.exists(path):
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                raw_xml = f.read()
-                try:
-                    parsed_xml = xml.dom.minidom.parseString(raw_xml)
-                    pretty_xml = parsed_xml.toprettyxml(indent="  ")
-                    
-                    # Clear the preview
-                    xml_preview.configure(state="normal")
-                    xml_preview.delete("0.0", "end")
-                    
-                    # Add syntax highlighting
-                    lines = pretty_xml.split('\n')
-                    for line in lines:
-                        # Process the line for highlighting
-                        if line.strip().startswith('<?xml') or line.strip().startswith('<!DOCTYPE'):
-                            # XML declaration or DOCTYPE - cyan
-                            xml_preview.insert("end", line + "\n", ("declaration",))
-                        elif '</' in line and '>' in line:
-                            # Closing tag
-                            parts = line.split('</')
-                            xml_preview.insert("end", parts[0], ("normal",))
-                            
-                            tag_parts = parts[1].split('>')
-                            xml_preview.insert("end", '</'+tag_parts[0]+'>', ("tag",))
-                            
-                            if len(tag_parts) > 1:
-                                xml_preview.insert("end", tag_parts[1], ("normal",))
-                            xml_preview.insert("end", "\n")
-                        elif '<' in line and '>' in line and not line.strip().startswith('<!--'):
-                            # Opening tag or self-closing tag
-                            start_tag_pos = line.find('<')
-                            end_tag_pos = line.find('>', start_tag_pos)
-                            
-                            # Before tag
-                            if start_tag_pos > 0:
-                                xml_preview.insert("end", line[:start_tag_pos], ("normal",))
-                            
-                            # The tag itself
-                            xml_preview.insert("end", line[start_tag_pos:end_tag_pos+1], ("tag",))
-                            
-                            # After tag - this is content
-                            if end_tag_pos < len(line)-1:
-                                xml_preview.insert("end", line[end_tag_pos+1:], ("content",))
-                            
-                            xml_preview.insert("end", "\n")
-                        elif line.strip().startswith('<!--'):
-                            # Comment
-                            xml_preview.insert("end", line + "\n", ("comment",))
-                        else:
-                            # Text content or whitespace
-                            if line.strip():
-                                xml_preview.insert("end", line + "\n", ("content",))
-                            else:
-                                xml_preview.insert("end", line + "\n")
-                    
-                    # Configure tags with colors
-                    xml_preview.tag_configure("declaration", foreground="#569CD6")  # Light blue for declarations
-                    xml_preview.tag_configure("tag", foreground="#F92672")  # Pink/red for tags
-                    xml_preview.tag_configure("content", foreground="#A6E22E")  # Green for content
-                    xml_preview.tag_configure("comment", foreground="#75715E")  # Grey for comments
-                    xml_preview.tag_configure("normal", foreground="#D4D4D4")  # Light grey for normal text
-                    
-                except Exception as e:
-                    parsed_xml = None
-                    xml_preview.insert("0.0", f"Error parsing XML:\n{e}")
-            
-        except UnicodeDecodeError:
-            try:
-                with open(path, "r", encoding="latin-1") as f:
-                    raw_xml = f.read()
-                    try:
-                        parsed_xml = xml.dom.minidom.parseString(raw_xml)
-                        pretty_xml = parsed_xml.toprettyxml(indent="  ")
-                        # Display with the same syntax highlighting (would duplicate code here)
-                        xml_preview.insert("0.0", pretty_xml)
-                    except Exception as e:
-                        parsed_xml = None
-                        xml_preview.insert("0.0", f"Error parsing XML:\n{e}")
-            except Exception as e:
-                xml_preview.insert("0.0", f"Error reading file:\n{e}")
-        except Exception as e:
-            xml_preview.insert("0.0", f"Error opening file:\n{e}")
-    
-    xml_preview.configure(state="disabled")
-
-def update_xml_field(tag_name, new_value):
-    global parsed_xml
-    if parsed_xml:
-        try:
-            element = parsed_xml.getElementsByTagName(tag_name)[0]
-            if element.firstChild is not None:
-                element.firstChild.nodeValue = new_value
-            else:
-                element.appendChild(parsed_xml.createTextNode(new_value))
-            pretty_xml = parsed_xml.toprettyxml(indent="  ")
-            xml_preview.configure(state="normal")
-            xml_preview.delete("0.0", "end")
-            xml_preview.insert("0.0", pretty_xml)
-            xml_preview.configure(state="disabled")
-        except Exception as e:
-            xml_preview.configure(state="normal")
-            xml_preview.delete("0.0", "end")
-            xml_preview.insert("0.0", f"Error updating XML:\n{e}")
-            xml_preview.configure(state="disabled")
-
-
-
-# Use the absolute path for the XML template too
-print("HERE BITCHHHH" + sys.argv[1])
-template_path = sys.argv[1] if len(sys.argv) > 1 else "template.xml"
-preload_xml(template_path)  # Use absolute path for template
-
+titleLabel.place(relx=0.3600, rely=0.0514)
 
 
 

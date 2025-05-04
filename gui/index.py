@@ -6,7 +6,24 @@ from PIL import Image
 import subprocess
 from datetime import datetime
 from lxml import etree as LET
+import json
+import re
 
+import pdfplumber
+
+#import static_info.json
+# Load the JSON data from the file using absolute path
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, 'static_info.json')
+try:
+    with open(config_path, 'r') as file:
+        cfg = json.load(file)
+except FileNotFoundError:
+    print(f"Error: Could not find the configuration file at: {config_path}")
+    print("Current working directory:", os.getcwd())
+    print("Looking for file in directory:", script_dir)
+    raise
 
 
 app = CTk()
@@ -29,30 +46,30 @@ def open_cert():
     certLabel.configure(text=os.path.basename(filename))
     return filename
 
+
 def open_pdf():
-    # only look for PDF now
-    filename = filedialog.askopenfilename(
-        filetypes=[("PDF files", "*.pdf")]
-    )
-    if not filename:
+    pdf_path = filedialog.askopenfilename(filetypes=[("PDF files","*.pdf")])
+    if not pdf_path:
         return
-    
-    global pdf_path
-    global output
-    pdf_path = filename
-    formatLabel.configure(text=os.path.basename(filename))
-    
-    try: 
-        # Call the pdf_to_xml function with the selected PDF 
-        output = pdf_to_xml(pdf_path)
-        if output:
-            # Close the current app window and open pdfToxml.py with the output file path
-            app.destroy()
-            print("THIS IS THE DAGGER" + output)
-            subprocess.Popen(["python", os.path.join(os.path.dirname(__file__), "pdfToxml.py"), os.path.join(os.path.dirname(__file__), output)])  # Pass the output file path as an argument
-    except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {str(e)}")
-       
+
+    cal_info = extract_pdf(pdf_path)
+    if not cal_info:
+        messagebox.showerror("Error","No data extracted")
+        return
+
+    # write to a well-known temp JSON
+    tmp = os.path.join(script_dir, "calibration_info.json")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(cal_info, f, ensure_ascii=False, indent=2)
+
+    app.destroy()
+    # pass the JSON file, not the PDF!
+    subprocess.Popen([sys.executable,
+                      os.path.join(script_dir, "pdfToxml.py"),
+                      tmp])
+        
+
+
 
 def open_newxml_gui():
     app.destroy()  # Close the current app window
@@ -62,30 +79,23 @@ def open_settings():
     app.destroy()  # Close the current app window
     subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"settings.py")])  # Open the settings.py file
 
-def pdf_to_xml(pdf_path):
-    # This function is a placeholder for the actual PDF to XML conversion logic.
-    # You can implement the conversion logic here.
-     # Process the PDF to XML
-        import re
-        import pdfplumber
-        import xml.etree.ElementTree as ET
-        from datetime import datetime
+def extract_pdf(pdf_path):
+    # Initialize an empty dictionary to store the extracted information
+    
+    
+    
+
+    def extract_text(path):
+        with pdfplumber.open(path) as pdf:
+            return "\n".join(page.extract_text() or "" for page in pdf.pages)
         
-        # Set output path
-        template = os.path.join(os.path.dirname(__file__), "template.xml")
+    raw_text = extract_text(pdf_path)
         
-        
-        # Extract text from PDF
-        def extract_text(path):
-            with pdfplumber.open(path) as pdf:
-                return "\n".join(page.extract_text() or "" for page in pdf.pages)
-        
-        # Extract table data from PDF
-        def extract_table_columns(path):
+    def extract_table_columns(path):
             tables_columns = []
-            # tune these strategies if your PDF's ruling lines or text‐based layout differs
+            # tune these strategies if your PDF’s ruling lines or text‐based layout differs
             table_settings = {
-                "vertical_strategy": "lines",
+                "vertical_strategy":   "lines",
                 "horizontal_strategy": "lines",
                 "intersection_tolerance": 5
             }
@@ -101,7 +111,7 @@ def pdf_to_xml(pdf_path):
                         # find the first row with >50% non‐empty cells → assume header
                         header_idx = next(
                             (i for i, row in enumerate(table)
-                             if sum(bool(cell and cell.strip()) for cell in row) >= len(row) // 2),
+                            if sum(bool(cell and cell.strip()) for cell in row) >= len(row) // 2),
                             0
                         )
                         headers = [cell.strip() for cell in table[header_idx]]
@@ -117,523 +127,416 @@ def pdf_to_xml(pdf_path):
 
                         if any(columns_data.values()):
                             tables_columns.append(columns_data)
+
             return tables_columns
+
+        # usage remains the same
+    table_columns = extract_table_columns(pdf_path)
+
+    config_path = os.path.join(r"C:\Users\ADMIN\Documents\GitHub\Digital-Calibration-Certificate-for-National-Metrology-Laboratory-of-the-Philippines\gui\static_info.json")
+    try:
+        with open(config_path, 'r') as file:
+            cfg = json.load(file)
+    except FileNotFoundError:
+        print(f"Error: Could not find the configuration file at: {config_path}")
+        print("Current working directory:", os.getcwd())
+        print("Looking for file in directory:", script_dir)
+        raise
+
+
+    def extract_calibration_info(raw_text):
+           # Initialize variables to store extracted information
+        info = {
+                        "software_name": cfg["software_name"],
+                        "software_release": cfg["software_release"],
+                        "country_code_iso": cfg["country_code_iso"],
+                        "used_lang_code": cfg["used_lang_code"],
+                        "mandatory_lang_code": cfg["mandatory_lang_code"],
+                        "calibration_labcode": cfg["calibration_lab"]["code"],
+                        "calibration_contactname": cfg["calibration_lab"]["contact"],
+                        "calibration_labcity": cfg["calibration_lab"]["city"],
+                        "calibration_labcountrycode": cfg["calibration_lab"]["countrycode"],
+                        "calibration_lab_postcode": cfg["calibration_lab"]["postcode"],
+                        "calibration_labstreet": cfg["calibration_lab"]["street"],
+
+                        'certificate_number': '',
+                        'calibration_date': '',
+                        'calibration_enddate': '',
+                        'calibration_location': 'Laboratory',
+
+                        # Items
+                        'calibration_item': '',
+                        "make_model": '',
+                        "serial_number": '',
+                        "capacity": '',
+                        "measurement_range": '',
+                        "resolution": '',
+                        "identification_issuer": 'Not given',
+
+                        # Standard equipment
+                        "standard_item": '',            
+                        "standard_model": '',           
+                        "standard_serial_number": '',           
+                        "standard_cert_number": '',              
+                        "standard_traceability": '',
+                        "standard_item_issuer": 'Not given',  
+
+                        # Persons
+                        "resp_person1_name": '',
+                        "resp_person1_role": '',
+                        "resp_person2_name": '',
+                        "resp_person2_role": '',
+                        "resp_person3_name": '',
+                        "resp_person3_role": '',
+
+                        # Customer
+                        "customer_name": '',
+                        "customer_address": '',
+                        # Environment & results
+                        "temperature": '',
+                        "temperature_unit": '',
+
+                        "humidity": '',
+                        "humidity_unit": '',
+                        # measurement arrays – split on spaces or commas
+                        "standard_measurement_values": '',
+                        "standard_measurement_unit": '',
+                        "measured_item_values": '',
+                        "measured_item_unit": '',
+                        "relative_uncertainty":"Relative Expanded Uncertainty",
+                        "measured_item": "Indicated Measurement",
+                        "measurement_standard": "Standard Measurement",
+                        "relative_uncertainty_values": '',
+                        "relative_uncertainty_unit": '',
+                        # big text‐areas
+                        "calibration_procedure": '',
+                        "remarks": '',
+                        "uncertainty_of_measurement": '',
+         }     
+        # Split text into lines for easier processing
+        lines = raw_text.split('\n')
         
-        # Extract calibration information
-        def extract_calibration_info(raw_text):
-            # Initialize variables to store extracted information
-            info = {
-                'certificate_number': '',
-                'calibration_date': '',
-                'calibration_item': '',
-                'capacity': '',
-                'measurement_range': '',
-                'resolution': '',
-                'make_model': '',
-                'serial_number': '',
-                'customer_name': '',
-                'customer_address': ''
-            }
+        # Extract certificate number using regex
+        cert_match = re.search(r'No\.\s+([\w\-]+)', raw_text)
+        if cert_match:
+            info['certificate_number'] = cert_match.group(1)
+        
+        # Extract calibration date using regex
+        date_match = re.search(r'Date of Calibration\s*:\s*([^\n]+)', raw_text)
+        if date_match:
+            info['calibration_date'] = date_match.group(1).strip()
+        
+        # Extract calibration item
+        item_match = re.search(r'Calibration Item\s*:\s*([^\n]+)', raw_text)
+        if item_match:
+            info['calibration_item'] = item_match.group(1).strip()
+        
+        # Extract capacity
+        capacity_match = re.search(r'Capacity\s*:\s*([^\n]+)', raw_text)
+        if capacity_match:
+            info['capacity'] = capacity_match.group(1).strip()
+        
+        # Extract measurement range
+        range_match = re.search(r'Measurement Range\s*:\s*([^\n]+)', raw_text)
+        if range_match:
+            info['measurement_range'] = range_match.group(1).strip()
+        
+        # Extract resolution
+        resolution_match = re.search(r'Resolution\s*:\s*([^\n]+)', raw_text)
+        if resolution_match:
+            info['resolution'] = resolution_match.group(1).strip()
+        
+        # Extract make/model
+        make_match = re.search(r'Make / Model\s*:\s*([^\n]+)', raw_text)
+        if make_match:
+            info['make_model'] = make_match.group(1).strip()
+        
+        # Extract serial number
+        serial_match = re.search(r'Serial No\.\s*:\s*([^\n]+)', raw_text)
+        if serial_match:
+            info['serial_number'] = serial_match.group(1).strip()
+        
+        # Extract customer and address
+        # First find the customer line
+        customer_match = re.search(r'Customer\s*:\s*([^\n]+)', raw_text)
+        if customer_match:
+            info['customer_name'] = customer_match.group(1).strip()
             
-            # Split text into lines for easier processing
-            lines = raw_text.split('\n')
-            
-            # Extract certificate number using regex
-            cert_match = re.search(r'No\.\s+([\w\-]+)', raw_text)
-            if cert_match:
-                info['certificate_number'] = cert_match.group(1)
-            
-            # Extract calibration date using regex
-            date_match = re.search(r'Date of Calibration\s*:\s*([^\n]+)', raw_text)
-            if date_match:
-                info['calibration_date'] = date_match.group(1).strip()
-            
-            # Extract calibration item
-            item_match = re.search(r'Calibration Item\s*:\s*([^\n]+)', raw_text)
-            if item_match:
-                info['calibration_item'] = item_match.group(1).strip()
-            
-            # Extract capacity
-            capacity_match = re.search(r'Capacity\s*:\s*([^\n]+)', raw_text)
-            if capacity_match:
-                info['capacity'] = capacity_match.group(1).strip()
-            
-            # Extract measurement range
-            range_match = re.search(r'Measurement Range\s*:\s*([^\n]+)', raw_text)
-            if range_match:
-                info['measurement_range'] = range_match.group(1).strip()
-            
-            # Extract resolution
-            resolution_match = re.search(r'Resolution\s*:\s*([^\n]+)', raw_text)
-            if resolution_match:
-                info['resolution'] = resolution_match.group(1).strip()
-            
-            # Extract make/model
-            make_match = re.search(r'Make / Model\s*:\s*([^\n]+)', raw_text)
-            if make_match:
-                info['make_model'] = make_match.group(1).strip()
-            
-            # Extract serial number
-            serial_match = re.search(r'Serial No\.\s*:\s*([^\n]+)', raw_text)
-            if serial_match:
-                info['serial_number'] = serial_match.group(1).strip()
-            
-            # Extract customer and address
-            # First find the customer line
-            customer_match = re.search(r'Customer\s*:\s*([^\n]+)', raw_text)
-            if customer_match:
-                info['customer_name'] = customer_match.group(1).strip()
-                
-                # Find the address (typically the line after customer)
-                customer_line_index = -1
-                for i, line in enumerate(lines):
-                    if 'Customer :' in line or 'Customer:' in line:
-                        customer_line_index = i
-                        break
-                
-                # If we found the customer line and there's at least one more line after it
-                if customer_line_index != -1 and customer_line_index + 1 < len(lines):
-                    # The next line is likely the address
-                    address_line = lines[customer_line_index + 1].strip()
-                    
-                    # Check if the next line appears to be an address (not a section header)
-                    if address_line and not address_line.isupper() and 'MEASUREMENT' not in address_line:
-                        info['customer_address'] = address_line
-            
-            # Extract environmental conditions
-            temp_match = re.search(r'Ambient Temperature\s*:\s*\(?([^\)\n]+)\)?', raw_text)
-            if temp_match:
-                info['temperature'] = temp_match.group(1).strip()
-            
-            hum_match = re.search(r'Relative Humidity\s*:\s*\(?([^\)\n]+)\)?', raw_text)
-            if hum_match:
-                info['humidity'] = hum_match.group(1).strip()
-            
-            # Extract responsible persons
-            exclude_prefixes = (
-                'CALIBRATION', 'UNCERTAINTY', 'STANDARD', 'ENVIRONMENTAL',
-                'PAGE', 'MEASUREMENT', 'REMARKS', 'DATE', '-END'
-            )
-            person_indices = []
+            # Find the address (typically the line after customer)
+            customer_line_index = -1
             for i, line in enumerate(lines):
-                txt = line.strip()
-                if (re.match(r'^[A-Z][A-Z\s,\.\-]+$', txt)
-                    and len(txt.split()) > 1
-                    and not any(txt.startswith(pref) for pref in exclude_prefixes)):
-                    person_indices.append(i)
-
-            # take up to three name/role pairs
-            for idx, li in enumerate(person_indices[:3]):
-                info[f'resp_person{idx+1}_name'] = lines[li].strip()
-                # the role should be the next non-empty line after the name
-                for j in range(li+1, min(li+5, len(lines))):
-                    role_txt = lines[j].strip()
-                    if role_txt and role_txt != lines[li].strip():
-                        info[f'resp_person{idx+1}_role'] = role_txt
-                        break
-
-            # Extract calibration procedure
-            proc_match = re.search(
-                r'CALIBRATION PROCEDURE:\s*(.*?)\nENVIRONMENTAL CONDITIONS:',
-                raw_text,
-                re.DOTALL
-            )
-            if proc_match:
-                info['calibration_procedure'] = proc_match.group(1).strip()
-            else:
-                info['calibration_procedure'] = ''
+                if 'Customer :' in line or 'Customer:' in line:
+                    customer_line_index = i
+                    break
             
-            # Extract REMARKS
-            remarks = []
-            in_remarks = False
-            current_remark = ""
-            for line in lines:
-                stripped = line.strip()
-                # enter remarks section
-                if not in_remarks:
-                    if stripped.startswith("REMARKS"):
-                        in_remarks = True
-                    continue
+            # If we found the customer line and there's at least one more line after it
+            if customer_line_index != -1 and customer_line_index + 1 < len(lines):
+                # The next line is likely the address
+                address_line = lines[customer_line_index + 1].strip()
+                
+                # Check if the next line appears to be an address (not a section header)
+                if address_line and not address_line.isupper() and 'MEASUREMENT' not in address_line:
+                    info['customer_address'] = address_line
+                
+                # If we might need to look for more address lines
+                next_section_idx = -1
+                for i in range(customer_line_index + 1, len(lines)):
+                    if 'MEASUREMENT' in lines[i] or 'RESULTS' in lines[i]:
+                        next_section_idx = i
+                        break
+                
+                # If we found a section header and there might be more address lines
+                if next_section_idx != -1 and customer_line_index + 1 < next_section_idx - 1:
+                    # Collect all lines between customer and next section
+                    address_lines = []
+                    for i in range(customer_line_index + 1, next_section_idx):
+                        if lines[i].strip():  # If not empty
+                            address_lines.append(lines[i].strip())
+                    
+                    if address_lines:
+                        info['customer_address'] = ' '.join(address_lines)
+                        
+                # Extract environmental conditions
+        temp_match = re.search(r'Ambient Temperature\s*:\s*\(?([^\)\n]+)\)?', raw_text)
+        if temp_match:
+            info['temperature'] = temp_match.group(1).strip()
+        
+        hum_match = re.search(r'Relative Humidity\s*:\s*\(?([^\)\n]+)\)?', raw_text)
+        if hum_match:
+            info['humidity'] = hum_match.group(1).strip()
+        
+        # --- Replace old respPerson logic with this new block ---
+        # Extract responsible persons by finding uppercase name lines and their following role lines
+        exclude_prefixes = (
+            'CALIBRATION', 'UNCERTAINTY', 'STANDARD', 'ENVIRONMENTAL',
+            'PAGE', 'MEASUREMENT', 'REMARKS', 'DATE', '-END'
+        )
+        person_indices = []
+        for i, line in enumerate(lines):
+            txt = line.strip()
+            # line is all-caps (with spaces, commas, dots or hyphens), at least two words,
+            # and does not start with any known header
+            if (re.match(r'^[A-Z][A-Z\s,\.\-]+$', txt)
+                and len(txt.split()) > 1
+                and not any(txt.startswith(pref) for pref in exclude_prefixes)):
+                person_indices.append(i)
 
-                # stop if we hit a new all‑caps section or a line that's fully uppercase (and not a bullet)
-                if (stripped.isupper() and not stripped.startswith("-")) or re.match(r'^[A-Z\s]+:$', stripped):
+        # take up to three name/role pairs
+        for idx, li in enumerate(person_indices[:3]):
+            info[f'resp_person{idx+1}_name'] = lines[li].strip()
+            # the role should be the next non-empty line after the name
+            for j in range(li+1, min(li+5, len(lines))):
+                role_txt = lines[j].strip()
+                if role_txt and role_txt != lines[li].strip():
+                    info[f'resp_person{idx+1}_role'] = role_txt
                     break
 
-                # new bullet
-                if stripped.startswith("-"):
-                    if current_remark:
-                        remarks.append(current_remark.strip())
-                    current_remark = stripped.lstrip("- ").strip()
-                # continuation of the previous bullet
-                elif current_remark:
-                    current_remark += " " + stripped
 
-            # append last collected remark
-            if current_remark:
-                remarks.append(current_remark.strip())
-
-            # prefix each bullet with "- " and join
-            info['remarks'] = " ".join(f"- {r}" for r in remarks)
-
-            # Extract uncertainty of measurement narrative
-            uom_match = re.search(
-                r'UNCERTAINTY OF MEASUREMENT:\s*(.*?)(?=\n[A-Z ]+?:|\nPage\s*\d+\s*of\s*\d+)',
-                raw_text,
-                re.DOTALL
-            )
-            if uom_match:
-                info['uncertainty_of_measurement'] = uom_match.group(1).strip()
-            else:
-                info['uncertainty_of_measurement'] = ''
-            
-            # Clean up data
-            for key in info:
-                if isinstance(info[key], str):
-                    info[key] = re.sub(r'\s+', ' ', info[key]).strip()
-                    # Fix specific formatting issues
-                    info[key] = info[key].replace(' ,', ',').replace(' .', '.')
-                    info[key] = info[key].replace(' ;', ';').replace(' :', ':')
-            
-            return info
+        # Extract calibration procedure 
+        # Extract calibration procedure (multi-line until the next section header)
+        proc_match = re.search(
+            r'CALIBRATION PROCEDURE:\s*(.*?)\nENVIRONMENTAL CONDITIONS:',
+            raw_text,
+            re.DOTALL
+        )
+        if proc_match:
+            info['calibration_procedure'] = proc_match.group(1).strip()
+        else:
+            info['calibration_procedure'] = ''
         
-        # Process the PDF
-        raw_text = extract_text(pdf_path)
-        table_columns = extract_table_columns(pdf_path)
-        calibration_info = extract_calibration_info(raw_text)
+        # Extract REMARKS
+        remarks = []
+        in_remarks = False
+        current_remark = ""
+        for line in lines:
+            stripped = line.strip()
+            # enter remarks section
+            if not in_remarks:
+                if stripped.startswith("REMARKS"):
+                    in_remarks = True
+                continue
+
+            # stop if we hit a new all‑caps section or a line that’s fully uppercase (and not a bullet)
+            if (stripped.isupper() and not stripped.startswith("-")) or re.match(r'^[A-Z\s]+:$', stripped):
+                break
+
+            # new bullet
+            if stripped.startswith("-"):
+                if current_remark:
+                    remarks.append(current_remark.strip())
+                current_remark = stripped.lstrip("- ").strip()
+            # continuation of the previous bullet
+            elif current_remark:
+                current_remark += " " + stripped
+
+        # append last collected remark
+        if current_remark:
+            remarks.append(current_remark.strip())
+
+        # prefix each bullet with “- ” and join
+        info['remarks'] = " ".join(f"- {r}" for r in remarks)
+
+        # Extract uncertainty of measurement narrative, stopping at next section header or page break
+        uom_match = re.search(
+            r'UNCERTAINTY OF MEASUREMENT:\s*(.*?)(?=\n[A-Z ]+?:|\nPage\s*\d+\s*of\s*\d+)',
+            raw_text,
+            re.DOTALL
+        )
+        if uom_match:
+            info['uncertainty_of_measurement'] = uom_match.group(1).strip()
+        else:
+            info['uncertainty_of_measurement'] = ''
+
+
         
-        # Extract additional info from tables
-        if len(table_columns) >= 2:
-            # Extract from standard table (table 2)
-            std_entry = table_columns[1]['Name of Standard'][0]
-            lines = std_entry.split('\n')
-            instrument_name = ' '.join(lines[:-1]).strip()
-            instrument_serial = lines[-1].strip()
-            make_model = " ".join(table_columns[1]['Make/Model'][0].split())
-            cert_number = table_columns[1]['Calibration Certificate No.'][0]
-            traceability = " ".join(table_columns[1]['Traceability'][0].split())
+
+        # Clean up data …
+        for key, val in info.items():
+            if isinstance(val, str):
+                info[key] = re.sub(r'\s+', ' ', val).strip()
+        
+        # Clean up data - remove any unwanted characters or fix formatting issues
+        for key in info:
+            # Clean up extra spaces
+            if isinstance(info[key], str):
+                info[key] = re.sub(r'\s+', ' ', info[key]).strip()
+                # Fix specific formatting issues
+                info[key] = info[key].replace(' ,', ',').replace(' .', '.')
+                info[key] = info[key].replace(' ;', ';').replace(' :', ':')
+        
+        return info
+
+    calibration_info = extract_calibration_info(raw_text)
+    calibration_info
+
+
+
+    def extract_table_columns(path):
+            tables_columns = []
             
-            # Extract from measurements table (table 1)
-            standard_measurement = list(table_columns[0].keys())[0]
-            raw_standard = table_columns[0][standard_measurement]
-            standard_unit = raw_standard[0]
-            raw_standard_str = raw_standard[1]
-            standard_val = raw_standard_str.replace('\n', ' ')
+            with pdfplumber.open(path) as pdf:
+                for page in pdf.pages:
+                    tables = page.extract_tables()
+                    
+                    for table in tables:
+                        if not table or len(table) < 2:  # Skip empty tables or tables with only headers
+                            continue
+                        
+                        # Assume first row contains headers
+                        headers = table[0]
+                        
+                        # Create dictionary to store columns data
+                        columns_data = {}
+                        
+                        # Initialize dictionary with header names as keys and empty lists as values
+                        for header in headers:
+                            if header:  # Skip empty headers
+                                columns_data[header] = []
+                        
+                        # Fill in column data from remaining rows
+                        for row in table[1:]:
+                            for i, cell in enumerate(row):
+                                if i < len(headers) and headers[i] and cell:
+                                    columns_data[headers[i]].append(cell)
+                        
+                        tables_columns.append(columns_data)
             
-            # Extract equipment measurements
-            measured_col = next((col for col in table_columns[0]
-                              if 'indicated' in col.lower()), None)
-            if measured_col:
-                raw_measured = table_columns[0][measured_col]
-                measured_unit = raw_measured[0]
-                measured_val = raw_measured[1].replace('\n', ' ')
-            else:
-                measured_unit = ''
-                measured_val = ''
-                
-            # Extract uncertainty
+            return tables_columns
+
+        # Usage
+    table_columns = extract_table_columns(pdf_path)
+    
+    # extract instrument name and serial number from Table 2
+    std_entry = table_columns[1]['Name of Standard'][0]
+    lines = std_entry.split('\n')
+    instrument_name = ' '.join(lines[:-1]).strip()
+    instrument_serial = lines[-1].strip()
+
+    # Extract Make/Model from table 2 without newlines
+    make_model = " ".join(table_columns[1]['Make/Model'][0].split())
+
+    #Extract calibration certificate number from table 2
+    cert_number = table_columns[1]['Calibration Certificate No.'][0]
+
+    # Extract traceability from table 2
+    traceability = " ".join(table_columns[1]['Traceability'][0].split())
+
+
+
+        #------------------------------------------------ MEASUREMENT RESULTS TABLE --------------------------------------------------
+        #Extract the first key of table 1 as standard measurement
+    standard_measurement = list(table_columns[0].keys())[0]
+
+        # split the uncertainty column into unit and values
+    raw_standard = table_columns[0][standard_measurement]
+    standard_unit = raw_standard[0]
+
+    raw_standard_str = raw_standard[1]
+    standard_val = raw_standard_str.replace('\n', ' ')
+
+
+        # Extract the equipment measured values from table 1
+    measured_col = next((col for col in table_columns[0]
+                            if 'indicated' in col.lower()), None)
+    if measured_col:
+            raw_measured = table_columns[0][measured_col]
+            measured_unit = raw_measured[0]
+            measured_val = raw_measured[1].replace('\n', ' ')
+    else:
+            measured_unit = ''
+            measured_val = ''
+
+    uncertainty_col = ""
+        # find the column in the first table whose header contains "uncertainty"
+    for col_name, col_values in table_columns[0].items():
             uncertainty_col = ""
-            for col_name, col_values in table_columns[0].items():
+            # find the column in the first table whose header contains "uncertainty"
+            for col_name in table_columns[0].keys():
                 if 'uncertainty' in col_name.lower():
                     uncertainty_col = col_name
                     break
-                    
+            # split the uncertainty column into unit and values
             raw_uncertainty = table_columns[0][uncertainty_col]
             uncertainty_unit = raw_uncertainty[0]
+            # count and replace newlines in the uncertainty values
             uncertainty_str = raw_uncertainty[1]
             value_count = uncertainty_str.count('\n') + 1
             uncertainty_val = uncertainty_str.replace('\n', ' ')
-            
-            # Store additional info in calibration_info
-            calibration_info['standard_item'] = instrument_name
-            calibration_info['standard_serial_number'] = instrument_serial
-            calibration_info['standard_model'] = make_model
-            calibration_info['standard_cert_number'] = cert_number
-            calibration_info['standard_traceability'] = traceability
-            calibration_info['relative_uncertainty'] = uncertainty_col.replace('\n', ' ')
-            calibration_info['relative_uncertainty_unit'] = uncertainty_unit
-            calibration_info['relative_uncertainty_values'] = uncertainty_val
-            calibration_info['value_count'] = value_count
-            calibration_info['standard_measurement'] = standard_measurement.replace('\n', ' ')
-            calibration_info['standard_measurement_unit'] = standard_unit
-            calibration_info['standard_measurement_values'] = standard_val
-            calibration_info['measured_item'] = measured_col.replace('\n', ' ') if measured_col else ''
-            calibration_info['measured_item_unit'] = measured_unit
-            calibration_info['measured_item_values'] = measured_val
+
+
+
+        # store into calibration_info
+    calibration_info['standard_item'] = instrument_name
+    calibration_info['standard_serial_number'] = instrument_serial
+    calibration_info["standard_model"] = make_model
+    calibration_info['standard_cert_number'] = cert_number
+    calibration_info['standard_traceability'] = traceability
+
+    calibration_info['relative_uncertainty'] = uncertainty_col.replace('\n', ' ')
+    calibration_info['relative_uncertainty_unit'] = ' '.join([f'\\{uncertainty_unit}'] * value_count)
+    calibration_info['relative_uncertainty_values'] = uncertainty_val
+
+    calibration_info['measurement_standard'] = standard_measurement.replace('\n', ' ')
+    calibration_info['standard_measurement_unit'] = ' '.join([f'\\{standard_unit}'] * value_count)
+    calibration_info['standard_measurement_values'] = standard_val
+
+
+    # store into calibration_info
+    calibration_info['measured_item'] = measured_col.replace('\n', ' ') if measured_col else ''
+    calibration_info['measured_item_unit'] = ' '.join([f'\\{measured_unit}'] * value_count)
+    calibration_info['measured_item_values'] = measured_val
+
+    # return the calibration_info dictionary
+    print(calibration_info)
+    # Save the calibration_info to a JSON file
+    # with open("calibration_info.json", "w") as f:
+    #     json.dump(calibration_info, f, indent=4)
+    return calibration_info
+
         
-        # Prepare data for XML
-        # Core data
-        software_name = "DigiCert"
-        software_release = "v0.0"
-        country_code_iso = "PH"
-        used_lang_code = "en"
-        mandatory_lang_code = "en"
-        unique_identifier = "Calibration No. " + calibration_info["certificate_number"]
-        raw_date = calibration_info.get("calibration_date", "")
-        step1 = re.sub(r"([A-Za-z]+)(\d)", r"\1 \2", raw_date)
-        step2 = step1.replace(",", ", ")
-        norm = re.sub(r"\s+", " ", step2).strip()
-        try:
-            dt = datetime.strptime(norm, "%B %d, %Y")
-            begin_performance_date = dt.strftime("%Y-%m-%d")
-        except ValueError:
-            begin_performance_date = ""
-        end_performance_date = ""
-        performance_location = "LABORATORY"
-        
-        # Items
-        item_name = calibration_info.get("calibration_item", "")
-        item_model = calibration_info["make_model"]
-        id_issuer = "customer"
-        id_name = calibration_info["calibration_item"]
-        id_serialnum = calibration_info["serial_number"]
-        capacity = "Capacity: " + calibration_info["capacity"]
-        measurement_range = "Measurement Range: " + calibration_info["measurement_range"]
-        resolution = "Resolution: " + calibration_info["resolution"]
-        standard_name = calibration_info["standard_item"]
-        standard_model = calibration_info["standard_model"]
-        standard_id_issuer = "LABORATORY"
-        standard_id_name = calibration_info["standard_item"]
-        standard_id_serialnum = calibration_info["standard_serial_number"]
-        standard_certificate_number = "Calibration Certificate No.: " + calibration_info["standard_cert_number"]
-        standard_traceability = "Traceability: " + calibration_info["standard_traceability"]
-        
-        # Calibration lab
-        calibration_labcode = "FORC"
-        calibration_contactname = "National Metrology Laboratory - Industrial Technology Development Institute"
-        calibration_labcity = "Taguig"
-        calibration_labcountrycode = "PH"
-        calibration_lab_postcode = "1633"
-        calibration_labstreet = "General Santos Ave"
-        
-        # Responsible persons
-        if "resp_person1_name" in calibration_info and "resp_person1_role" in calibration_info:
-            resp1_name = calibration_info["resp_person1_name"]
-            resp1_role = calibration_info["resp_person1_role"]
-        else:
-            resp1_name = ""
-            resp1_role = ""
 
-        if "resp_person2_name" in calibration_info and "resp_person2_role" in calibration_info:
-            resp2_name = calibration_info["resp_person2_name"]
-            resp2_role = calibration_info["resp_person2_role"]
-        else:
-            resp2_name = ""
-            resp2_role = ""
 
-        if "resp_person3_name" in calibration_info and "resp_person3_role" in calibration_info:
-            resp3_name = calibration_info["resp_person3_name"]
-            resp3_role = calibration_info["resp_person3_role"]
-        else:
-            resp3_name = ""
-            resp3_role = ""
-        
-        # Customer
-        customer_name = calibration_info["customer_name"]
-        customer_address = calibration_info.get("customer_address", "")
-        
-        # Measurement results
-        measurement_item = calibration_info["calibration_item"]
-        measurement_method = calibration_info["relative_uncertainty"]
-        measurement_desc = calibration_info["uncertainty_of_measurement"]
-        influencecondition1 = "Ambient Temperature"
-        temperature = calibration_info["temperature"]
-        unit1 = "°C"
-        influencecondition2 = "Relative Humidity"
-        humidity = calibration_info["humidity"]
-        unit2 = "%"
-        measurement_standard = calibration_info["standard_measurement"]
-        measurement_standard_values = calibration_info["standard_measurement_values"]
-        measurement_standard_unit = ' '.join([f'\\{calibration_info["standard_measurement_unit"]}'] * value_count)
-        measured_item = calibration_info["measured_item"]
-        measured_item_values = calibration_info["measured_item_values"]
-        measured_item_unit = ' '.join([f'\\{calibration_info["measured_item_unit"]}'] * value_count)
-        measurement_error = calibration_info["relative_uncertainty"]
-        measurement_error_values = calibration_info["relative_uncertainty_values"]
-        measurement_error_unit = ' '.join([f'\\{calibration_info["relative_uncertainty_unit"]}'] * value_count)
-        calibrationprocedure = "CALIBRATION PROCEDURE: " + calibration_info["calibration_procedure"]
-        remarks = "REMARKS: " + calibration_info["remarks"]
-        
-        # Parse template, register namespaces
-        ns = {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}
-        for p,u in ns.items(): ET.register_namespace(p,u)
-        
-        from xml.etree.ElementTree import ParseError
-        try:
-            tree = ET.parse(template)
-        except ParseError as e:
-            # fallback to lxml recovery if available
-            try:
-                from lxml import etree as LET
-                parser = LET.XMLParser(recover=True)
-                tree = LET.parse(template, parser)
-            except ImportError:
-                raise e
-                
-        root = tree.getroot()
-        
-        def set_text(elem, txt, lang=None):
-            if elem is None or txt is None: return
-            elem.text = txt
-            if lang: elem.set("lang", lang)
-            
-        # 1) software
-        sw = root.find(".//dcc:software", ns)
-        set_text(sw.find("dcc:name/dcc:content", ns), software_name)
-        set_text(sw.find("dcc:release", ns), software_release)
 
-        # 2) coreData
-        cd = root.find(".//dcc:coreData", ns)
-        set_text(cd.find("dcc:countryCodeISO3166_1", ns), country_code_iso)
-        set_text(cd.find("dcc:usedLangCodeISO639_1", ns), used_lang_code)
-        set_text(cd.find("dcc:mandatoryLangCodeISO639_1", ns), mandatory_lang_code)
-        set_text(cd.find("dcc:uniqueIdentifier", ns), unique_identifier)
-        set_text(cd.find("dcc:beginPerformanceDate", ns), begin_performance_date)
-        set_text(cd.find("dcc:endPerformanceDate", ns), end_performance_date)
-        set_text(cd.find("dcc:performanceLocation", ns), performance_location)
-
-        # 3) items: first is calibration, second is standard
-        items = root.findall(".//dcc:items/dcc:item", ns)
-
-        # calibration item
-        if items:
-            ci = items[0]
-            set_text(ci.find("dcc:name/dcc:content", ns), item_name, lang=used_lang_code)
-            set_text(ci.find("dcc:manufacturer/dcc:name/dcc:content", ns), "", lang=used_lang_code)
-            set_text(ci.find("dcc:model", ns), item_model)
-            ident = ci.find("dcc:identifications/dcc:identification", ns)
-            if ident is not None:
-                set_text(ident.find("dcc:issuer", ns), id_issuer)
-                set_text(ident.find("dcc:value", ns), id_name)
-                set_text(ident.find("dcc:name/dcc:content", ns), id_serialnum, lang=used_lang_code)
-            desc = ci.find("dcc:description", ns)
-            if desc is not None:
-                cont = desc.findall("dcc:content", ns)
-                if len(cont)>0: set_text(cont[0], capacity, lang=used_lang_code)
-                if len(cont)>1: set_text(cont[1], measurement_range, lang=used_lang_code)
-                if len(cont)>2: set_text(cont[2], resolution, lang=used_lang_code)
-
-        # standard item
-        if len(items)>1:
-            si_el = items[1]
-            set_text(si_el.find("dcc:name/dcc:content", ns), standard_name, lang=used_lang_code)
-            set_text(si_el.find("dcc:manufacturer/dcc:name/dcc:content", ns), "", lang=used_lang_code)
-            set_text(si_el.find("dcc:model", ns), standard_model)
-            ident2 = si_el.find("dcc:identifications/dcc:identification", ns)
-            if ident2 is not None:
-                set_text(ident2.find("dcc:issuer", ns), standard_id_issuer)
-                set_text(ident2.find("dcc:value", ns), standard_id_serialnum)
-                set_text(ident2.find("dcc:name/dcc:content", ns), standard_id_name, lang=used_lang_code)
-            desc2 = si_el.find("dcc:description", ns)
-            if desc2 is not None:
-                cont2 = desc2.findall("dcc:content", ns)
-                if len(cont2)>0: set_text(cont2[0], standard_certificate_number, lang=used_lang_code)
-                if len(cont2)>1: set_text(cont2[1], standard_traceability, lang=used_lang_code)
-
-        # 4) calibrationLaboratory
-        lab = root.find(".//dcc:calibrationLaboratory", ns)
-        set_text(lab.find("dcc:calibrationLaboratoryCode", ns), calibration_labcode)
-        set_text(lab.find("dcc:contact/dcc:name/dcc:content", ns), calibration_contactname, lang=used_lang_code)
-        loc = lab.find("dcc:contact/dcc:location", ns)
-        set_text(loc.find("dcc:city", ns), calibration_labcity)
-        set_text(loc.find("dcc:countryCode", ns), calibration_labcountrycode)
-        set_text(loc.find("dcc:postCode", ns), calibration_lab_postcode)
-        set_text(loc.find("dcc:street", ns), calibration_labstreet)
-
-        # 5) respPersons
-        resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)
-        for idx,(name,role) in enumerate([(resp1_name,resp1_role),(resp2_name,resp2_role),(resp3_name,resp3_role)]):
-            if idx<len(resp_nodes):
-                rp = resp_nodes[idx]
-                set_text(rp.find("dcc:person/dcc:name/dcc:content", ns), name, lang=used_lang_code)
-                set_text(rp.find("dcc:role", ns), role)
-
-        # 6) customer
-        cust = root.find(".//dcc:customer", ns)
-        set_text(cust.find("dcc:name/dcc:content", ns), customer_name)
-        f = cust.find("dcc:location/dcc:further/dcc:content", ns)
-        set_text(f, customer_address, lang=used_lang_code)
-
-        # 7) measurementResults
-        mr = root.find(".//dcc:measurementResults", ns)
-        set_text(mr.find("dcc:name/dcc:content", ns), measurement_item, lang=used_lang_code)
-        um = mr.find("dcc:usedMethods/dcc:usedMethod", ns)
-        set_text(um.find("dcc:name/dcc:content", ns), measurement_method, lang=used_lang_code)
-        set_text(um.find("dcc:description/dcc:content", ns), measurement_desc, lang=used_lang_code)
-
-        # 7) influenceConditions
-        ic = mr.find(".//dcc:influenceConditions", ns)
-        if ic is None:
-            print("⚠️ influenceConditions not found")
-        else:
-            conds = ic.findall("dcc:influenceCondition", ns)
-            # first condition
-            if len(conds) > 0:
-                infl = conds[0]
-                set_text(infl.find("dcc:name/dcc:content", ns), influencecondition1, lang=used_lang_code)
-                dq = infl.find(".//dcc:quantity", ns)
-                set_text(dq.find("dcc:name/dcc:content", ns), influencecondition1, lang=used_lang_code)
-                real = dq.find("si:real", ns)
-                set_text(real.find("si:value", ns), temperature)
-                set_text(real.find("si:unit", ns), "\\" + unit1)
-            # second condition
-            if len(conds) > 1:
-                infl = conds[1]
-                set_text(infl.find("dcc:name/dcc:content", ns), influencecondition2, lang=used_lang_code)
-                dq = infl.find(".//dcc:quantity", ns)
-                set_text(dq.find("dcc:name/dcc:content", ns), influencecondition2, lang=used_lang_code)
-                real = dq.find("si:real", ns)
-                set_text(real.find("si:value", ns), humidity)
-                set_text(real.find("si:unit", ns), "\\" + unit2)
-
-        # 8) results
-        res = mr.find(".//dcc:results", ns)
-        if res is None:
-            print("⚠️ results not found")
-        else:
-            # define your three rows in lists
-            names = [measurement_standard, measured_item, measurement_error]
-            values = [measurement_standard_values, measured_item_values, measurement_error_values]
-            units = [measurement_standard_unit, measured_item_unit, measurement_error_unit]
-            for idx, row in enumerate(res.findall("dcc:result", ns)):
-                # name
-                set_text(row.find("dcc:name/dcc:content", ns), names[idx], lang=used_lang_code)
-                # realListXMLList
-                real_list = row.find(".//si:realListXMLList", ns)
-                if real_list is not None:
-                    set_text(real_list.find("si:valueXMLList", ns), values[idx])
-                    set_text(real_list.find("si:unitXMLList", ns), units[idx])
-
-        # 8) comment
-        comm = root.find(".//dcc:comment", ns)
-        cc = comm.findall("dcc:content", ns)
-        if cc: 
-            set_text(cc[0], calibrationprocedure, lang=used_lang_code)
-        if len(cc)>1: 
-
-            set_text(cc[1], remarks, lang=used_lang_code)
-
-            # Let the user choose where to save the file
-            suggested_filename = unique_identifier + "_DCC.xml"
-            output_path = filedialog.asksaveasfilename(
-                defaultextension=".xml",
-                initialfile=suggested_filename,
-                filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
-            )
-
-            # Check if user canceled the save dialog
-            if not output_path:
-                messagebox.showinfo("Operation Canceled", "File save operation canceled.")
-                return None
-
-            # Ensure the directory exists
-            output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-                
-            # Write the file
-            tree.write(output_path, encoding="utf-8", xml_declaration=True)
-
-        return output_path
         
       
     
@@ -716,6 +619,9 @@ importFormatL.place(relx=0.124, rely=0.700)
 importCert = CTkButton(master=app, text="Make a new DCC File", corner_radius=7, 
                     fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_newxml_gui)
 importCert.place(relx=0.124, rely=0.754, relwidth=0.368, relheight=0.066)
+
+
+
 
 
 app.mainloop()

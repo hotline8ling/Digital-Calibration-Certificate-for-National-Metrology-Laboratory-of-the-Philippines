@@ -814,8 +814,6 @@ def export_to_xml():
         "measurement_range": "Measurement Range: " + range_textbox.get(),
         "resolution": "Resolution: " + resolution_textbox.get(),
         "identification_issuer": identification_issuer_textbox.get(),
-        
-        "identification_issuer": identification_issuer_textbox.get(),
 
         # Standard equipment
         "standard_item": standard_item_textbox1.get(),             # rename your widget if needed
