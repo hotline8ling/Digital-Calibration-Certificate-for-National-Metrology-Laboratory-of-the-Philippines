@@ -1,3 +1,4 @@
+import re
 import subprocess
 from tkinter import messagebox
 from xml.etree.ElementTree import ParseError
@@ -8,6 +9,9 @@ from PIL import Image
 import json
 import xml.etree.ElementTree as ET
 import lxml.etree as LET
+from io import BytesIO
+from tkinter import filedialog   # you’ll need this up top if you also do file‐saves later
+
 
 #import static_info.json
 # Load the JSON data from the file using absolute path
@@ -23,6 +27,10 @@ except FileNotFoundError:
     print("Looking for file in directory:", script_dir)
     raise
 
+
+def back_to_menu():
+    app.destroy()  # Close the current app window
+    subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"index.py")])
 
 
 
@@ -136,13 +144,6 @@ serial_number_label.grid(row=8, column=1, padx=10, pady=(5, 5), sticky="w")
 serial_number_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 1122YL23002")
 serial_number_textbox.grid(row=9, column=1, padx=10, pady=(5, 10), sticky="w")
 
-# Manufacturer Name Label
-manufacturer_name_label = CTkLabel(master=scrollable_frame, text="Manufacturer Name:", font=("Inter", 12, "bold"), bg_color='white')
-manufacturer_name_label.grid(row=10, column=0, padx=10, pady=(5, 5), sticky="w")
-
-# Manufacturer Name Textbox
-manufacturer_name_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Not given")
-manufacturer_name_textbox.grid(row=11, column=0, padx=10, pady=(5, 10), sticky="w")
 
 # Capacity Label
 capacity_label = CTkLabel(master=scrollable_frame, text="Capacity:", font=("Inter", 12, "bold"), bg_color='white')
@@ -205,13 +206,6 @@ serial_number_label1.grid(row=17, column=1, padx=10, pady=(5, 5), sticky="w")
 serial_number_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. SN 1251056K0094")
 serial_number_textbox1.grid(row=18, column=1, padx=10, pady=(5, 10), sticky="w")
 
-# Manufacturer Name Label
-manufacturer_name_label1 = CTkLabel(master=scrollable_frame, text="Manufacturer Name:", font=("Inter", 12, "bold"), bg_color='white')
-manufacturer_name_label1.grid(row=19, column=0, padx=10, pady=(5, 5), sticky="w")
-
-# Manufacturer Name Textbox
-manufacturer_name_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Not given")
-manufacturer_name_textbox1.grid(row=20, column=0, padx=10, pady=(5, 10), sticky="w")
 
 # Calibration Cert Label
 calibCert_label = CTkLabel(master=scrollable_frame, text="Calibration Certificate No.", font=("Inter", 12, "bold"), bg_color='white')
@@ -564,12 +558,231 @@ exportButton.place(relx=0.2575, rely=0.9220, relwidth=0.1008, relheight=0.0471)
 
 # Back button
 backButton = CTkButton(master=app, text="< ", corner_radius=7, 
-                    fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 15))
+                    fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 15),
+                    command=back_to_menu)
 backButton.place(relx=0.0225, rely=0.0486, relwidth=0.0200, relheight=0.0350)
-
 # PDF to XML label
 titleLabel = CTkLabel(master=app, text="New XML", font=("Inter", 13, "bold"), bg_color='white')
 titleLabel.place(relx=0.1800, rely=0.0514)
+
+
+
+# 1) Collect every field in collect_calibration_info()
+def collect_calibration_info():
+    calibration_info = {
+        # static JSON:
+        "software_name": cfg["software_name"],
+        "software_release": cfg["software_release"],
+        "country_code_iso": cfg["country_code_iso"],
+        "used_lang_code": cfg["used_lang_code"],
+        "mandatory_lang_code": cfg["mandatory_lang_code"],
+        "calibration_labcode": cfg["calibration_lab"]["code"],
+        "calibration_contactname": cfg["calibration_lab"]["contact"],
+        "calibration_labcity": cfg["calibration_lab"]["city"],
+        "calibration_labcountrycode": cfg["calibration_lab"]["countrycode"],
+        "calibration_lab_postcode": cfg["calibration_lab"]["postcode"],
+        "calibration_labstreet": cfg["calibration_lab"]["street"],
+        # core data
+        "certificate_number": "Calibration No. " + tsr_textbox.get(),
+        "calibration_date": start_date_textbox.get(),
+        "calibration_enddate": end_date_textbox.get(),
+        "calibration_location": calibration_dropdown.get(),
+        # items
+        "calibration_item": calibration_item_dropdown.get(),
+        "make_model": model_textbox.get(),
+        "serial_number": serial_number_textbox.get(),
+        "capacity": "Capacity: " + capacity_textbox.get(),
+        "measurement_range": "Measurement Range: " + range_textbox.get(),
+        "resolution": "Resolution: " + resolution_textbox.get(),
+        "identification_issuer": identification_issuer_textbox.get(),
+        
+        # standard
+        "standard_item": standard_item_textbox1.get(),
+        "standard_model": model_textbox1.get(),
+        "standard_serial_number": serial_number_textbox1.get(),
+        "standard_cert_number": calibCert_textbox.get(),
+        "standard_traceability": traceability_textbox.get(),
+        
+        "standard_item_issuer": identification_issuer_textbox1.get(),
+        # persons
+        "resp_person1_name": analyst1_textbox.get(),
+        "resp_person1_role": role1_textbox.get(),
+        "resp_person2_name": analyst2_textbox.get(),
+        "resp_person2_role": role2_textbox.get(),
+        "resp_person3_name": authorized_textbox.get(),
+        "resp_person3_role": authorized_role_textbox.get(),
+        # customer
+        "customer_name": customer_textbox.get(),
+        "customer_address": address_textbox.get(),
+        # conditions/results
+        "temperature": temperature_textbox.get(),
+        "temperature_unit": temperature_unit_textbox.get(),
+        "humidity": humidity_textbox.get(),
+        "humidity_unit": humidity_unit_textbox.get(),
+        "standard_measurement_values": applied_measurement_textbox.get(),
+        "standard_measurement_unit": applied_measurement_unit_textbox.get(),
+        "measured_item_values": indicated_measurement_textbox.get(),
+        "measured_item_unit": indicated_measurement_unit_textbox.get(),
+        "relative_uncertainty_values": relative_expandedUn_textbox.get(),
+        "relative_uncertainty_unit": relative_expandedUn_unit_textbox.get(),
+        "relative_uncertainty":"Relative Expanded Uncertainty",
+        "measured_item": "Indicated Measurement",
+        "measurement_standard": "Standard Measurement",
+        # big text areas
+        "calibration_procedure": calibration_procedure_textbox.get("1.0", "end-1c").replace(placeholder_text, ""),
+        "remarks": remarks_textbox.get("1.0", "end-1c").replace(remarks_placeholder, ""),
+        "uncertainty_of_measurement": uncertainty_textbox.get("1.0", "end-1c").replace(uncertainty_placeholder, "")
+
+    }
+    return calibration_info
+
+
+def generate_xml_tree(info):
+    template = os.path.join(script_dir, "template.xml")
+    for p,u in {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}.items():
+        ET.register_namespace(p,u)
+
+    try:
+        tree = ET.parse(template)
+    except ParseError:
+        parser = LET.XMLParser(recover=True)
+        tree = LET.parse(template, parser)
+    root = tree.getroot()
+
+    def set_text(elem, txt, lang=None):
+        if elem is None or txt is None: return
+        elem.text = txt
+        if lang: elem.set("lang", lang)
+
+    ns = {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}
+
+    # 1) software
+    sw = root.find(".//dcc:software", ns)
+    set_text(sw.find("dcc:name/dcc:content", ns), info["software_name"])
+    set_text(sw.find("dcc:release", ns), info["software_release"])
+
+    # 2) coreData
+    cd = root.find(".//dcc:coreData", ns)
+    set_text(cd.find("dcc:uniqueIdentifier", ns), info["certificate_number"])
+    set_text(cd.find("dcc:beginPerformanceDate", ns), info["calibration_date"])
+    set_text(cd.find("dcc:endPerformanceDate", ns), info["calibration_enddate"])
+    set_text(cd.find("dcc:performanceLocation", ns), info["calibration_location"])
+
+    # 3) first item (your device)
+    items = root.findall(".//dcc:items/dcc:item", ns)
+    if items:
+        ci = items[0]
+        set_text(ci.find("dcc:name/dcc:content", ns), info["calibration_item"], lang=info["used_lang_code"])
+        set_text(ci.find("dcc:model", ns), info["make_model"])
+        ident = ci.find("dcc:identifications/dcc:identification", ns)
+        if ident is not None:
+            set_text(ident.find("dcc:issuer", ns), info["identification_issuer"])
+            set_text(ident.find("dcc:value", ns), info["serial_number"])
+        desc = ci.find("dcc:description", ns)
+        if desc is not None:
+            cont = desc.findall("dcc:content", ns)
+            set_text(cont[0], info["capacity"])
+            set_text(cont[1], info["measurement_range"])
+            set_text(cont[2], info["resolution"])
+
+    # 4) second item (standard)
+    if len(items) > 1:
+        si_el = items[1]
+        set_text(si_el.find("dcc:name/dcc:content", ns), info["standard_item"], lang=info["used_lang_code"])
+        set_text(si_el.find("dcc:model", ns), info["standard_model"])
+        ident2 = si_el.find("dcc:identifications/dcc:identification", ns)
+        if ident2 is not None:
+            set_text(ident2.find("dcc:issuer", ns), info["standard_item_issuer"])
+            set_text(ident2.find("dcc:value", ns), info["standard_serial_number"])
+        desc2 = si_el.find("dcc:description", ns)
+        if desc2 is not None:
+            cont2 = desc2.findall("dcc:content", ns)
+            set_text(cont2[0], info["standard_cert_number"])
+            set_text(cont2[1], info["standard_traceability"])
+
+    # 5) respPersons
+    resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)
+    for idx,(name,role) in enumerate([(info["resp_person1_name"],info["resp_person1_role"]),(info["resp_person2_name"],info["resp_person2_role"]),(info["resp_person3_name"],info["resp_person3_role"])]):
+        if idx<len(resp_nodes):
+            rp = resp_nodes[idx]
+            set_text(rp.find("dcc:person/dcc:name/dcc:content", ns), name, lang=info["used_lang_code"])
+            set_text(rp.find("dcc:role", ns), role)
+
+    # 6) customer
+    cust = root.find(".//dcc:customer", ns)
+    set_text(cust.find("dcc:name/dcc:content", ns), info["customer_name"])
+    f = cust.find("dcc:location/dcc:further/dcc:content", ns)
+    set_text(f, info["customer_address"], lang=info["used_lang_code"])
+
+    # 7) measurementResults
+    mr = root.find(".//dcc:measurementResults", ns)
+    set_text(mr.find("dcc:name/dcc:content", ns), info["calibration_item"], lang=info["used_lang_code"])
+    um = mr.find("dcc:usedMethods/dcc:usedMethod", ns)
+    set_text(um.find("dcc:name/dcc:content", ns), info["relative_uncertainty"], lang=info["used_lang_code"])
+    set_text(um.find("dcc:description/dcc:content", ns), info["uncertainty_of_measurement"], lang=info["used_lang_code"])
+
+    # 7) influenceConditions
+    ic = mr.find(".//dcc:influenceConditions", ns)
+    if ic is None:
+        print("⚠️ influenceConditions not found")
+    else:
+        conds = ic.findall("dcc:influenceCondition", ns)
+        # first condition
+        if len(conds) > 0:
+            infl = conds[0]
+            set_text(infl.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=info["used_lang_code"])
+            dq = infl.find(".//dcc:quantity", ns)
+            set_text(dq.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=info["used_lang_code"])
+            real = dq.find("si:real", ns)
+            set_text(real.find("si:value", ns), info["temperature"])
+            set_text(real.find("si:unit", ns), info["temperature_unit"])
+        # second condition
+        if len(conds) > 1:
+            infl = conds[1]
+            set_text(infl.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=info["used_lang_code"])
+            dq = infl.find(".//dcc:quantity", ns)
+            set_text(dq.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=info["used_lang_code"])
+            real = dq.find("si:real", ns)
+            set_text(real.find("si:value", ns), info["humidity"])
+            set_text(real.find("si:unit", ns), info["humidity_unit"])
+
+    # 8) results
+    res = mr.find(".//dcc:results", ns)
+    if res is None:
+        print("⚠️ results not found")
+    else:
+        # define your three rows in lists
+        names = [info["measurement_standard"], info["measured_item"], info["relative_uncertainty"]]
+        values = [info["standard_measurement_values"], info["measured_item_values"], info["relative_uncertainty_values"]]
+        units = [info["standard_measurement_unit"],info["measured_item_unit"], info["relative_uncertainty_unit"]]
+        for idx, row in enumerate(res.findall("dcc:result", ns)):
+            # name
+            set_text(row.find("dcc:name/dcc:content", ns), names[idx], lang=info["used_lang_code"])
+            # realListXMLList
+            real_list = row.find(".//si:realListXMLList", ns)
+            if real_list is not None:
+                set_text(real_list.find("si:valueXMLList", ns), values[idx])
+                set_text(real_list.find("si:unitXMLList", ns), units[idx])
+
+    # 8) comment
+    comm = root.find(".//dcc:comment", ns)
+    cc = comm.findall("dcc:content", ns)
+    if cc: 
+        set_text(cc[0], "CALIBRATION PROCEDURE: " + info["calibration_procedure"], lang=info["used_lang_code"])
+    if len(cc)>1: 
+        set_text(cc[1], "REMARKS: " +info["remarks"], lang=info["used_lang_code"]) 
+    # 5) laboratory, 6) persons, 7) conditions, 8) results, 9) comments…
+    #    (copy each block from export_to_xml here, replacing `calibration_info` with `info`)
+
+    return tree
+
+def build_xml_string():
+    info = collect_calibration_info()
+    tree = generate_xml_tree(info)
+    buf = BytesIO()
+    tree.write(buf, encoding="utf-8", xml_declaration=True)
+    return buf.getvalue().decode("utf-8")
+
 
 
 def export_to_xml():
@@ -601,7 +814,7 @@ def export_to_xml():
         "measurement_range": "Measurement Range: " + range_textbox.get(),
         "resolution": "Resolution: " + resolution_textbox.get(),
         "identification_issuer": identification_issuer_textbox.get(),
-        "manufacturer_name": manufacturer_name_textbox.get(),
+        
         "identification_issuer": identification_issuer_textbox.get(),
 
         # Standard equipment
@@ -610,7 +823,6 @@ def export_to_xml():
         "standard_serial_number": serial_number_textbox1.get(),             # rename your widget if needed
         "standard_cert_number": "Calibration Certificate No.: " + calibCert_textbox.get(),             # rename your widget if needed    # example
         "standard_traceability": "Traceability: " +traceability_textbox.get(),
-        "standard_manufacturer": manufacturer_name_textbox1.get(),  # example
         "standard_item_issuer": identification_issuer_textbox1.get(),  # example
 
         # Persons
@@ -651,6 +863,7 @@ def export_to_xml():
     # Define the template path
     template = os.path.join(os.path.dirname(os.path.abspath(__file__)), "template.xml")
 
+    
     # Parse template, register namespaces
     ns = {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}
     for p,u in ns.items(): ET.register_namespace(p,u)
@@ -683,7 +896,7 @@ def export_to_xml():
     set_text(cd.find("dcc:countryCodeISO3166_1", ns), calibration_info["country_code_iso"])
     set_text(cd.find("dcc:usedLangCodeISO639_1", ns), calibration_info["used_lang_code"])
     set_text(cd.find("dcc:mandatoryLangCodeISO639_1", ns), calibration_info["mandatory_lang_code"])
-    set_text(cd.find("dcc:uniqueIdentifier", ns), calibration_info["certificate_number"])
+    set_text(cd.find("dcc:uniqueIdentifier", ns), "Calibration No. " + calibration_info["certificate_number"])
     set_text(cd.find("dcc:beginPerformanceDate", ns), calibration_info["calibration_date"])
     set_text(cd.find("dcc:endPerformanceDate", ns), calibration_info["calibration_enddate"])
     set_text(cd.find("dcc:performanceLocation", ns), calibration_info["calibration_location"])
@@ -695,7 +908,6 @@ def export_to_xml():
     if items:
         ci = items[0]
         set_text(ci.find("dcc:name/dcc:content", ns), calibration_info["calibration_item"])
-        set_text(ci.find("dcc:manufacturer/dcc:name/dcc:content", ns), calibration_info["manufacturer_name"])
         set_text(ci.find("dcc:model", ns), calibration_info["make_model"])
         ident = ci.find("dcc:identifications/dcc:identification", ns)
         if ident is not None:
@@ -705,15 +917,14 @@ def export_to_xml():
         desc = ci.find("dcc:description", ns)
         if desc is not None:
             cont = desc.findall("dcc:content", ns)
-            if len(cont)>0: set_text(cont[0], calibration_info["capacity"])
-            if len(cont)>1: set_text(cont[1], calibration_info["measurement_range"])
-            if len(cont)>2: set_text(cont[2], calibration_info["resolution"])
+            if len(cont)>0: set_text(cont[0], "Capacity: " + calibration_info["capacity"])
+            if len(cont)>1: set_text(cont[1], "Measurement Range: " +calibration_info["measurement_range"])
+            if len(cont)>2: set_text(cont[2], "Resolution: " + calibration_info["resolution"])
 
     # standard item
     if len(items)>1:
         si_el = items[1]
         set_text(si_el.find("dcc:name/dcc:content", ns), calibration_info["standard_item"])
-        set_text(si_el.find("dcc:manufacturer/dcc:name/dcc:content", ns), calibration_info["standard_manufacturer"])
         set_text(si_el.find("dcc:model", ns), calibration_info["standard_model"])
         ident2 = si_el.find("dcc:identifications/dcc:identification", ns)
         if ident2 is not None:
@@ -723,8 +934,8 @@ def export_to_xml():
         desc2 = si_el.find("dcc:description", ns)
         if desc2 is not None:
             cont2 = desc2.findall("dcc:content", ns)
-            if len(cont2)>0: set_text(cont2[0], calibration_info["standard_cert_number"])
-            if len(cont2)>1: set_text(cont2[1], calibration_info["standard_traceability"])
+            if len(cont2)>0: set_text(cont2[0], "Calibration Certificate No.: " + calibration_info["standard_cert_number"])
+            if len(cont2)>1: set_text(cont2[1], "Traceability: " + calibration_info["standard_traceability"])
 
     # 4) calibrationLaboratory
     lab = root.find(".//dcc:calibrationLaboratory", ns)
@@ -831,20 +1042,132 @@ def export_to_xml():
         messagebox.showinfo("Success", f"XML file saved successfully to:\n{output_path}")
 
         back_to_menu()
-        
 
 
-def back_to_menu():
-    app.destroy()  # Close the current app window
-    subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"index.py")])
 
-    
+
+
+#### PREVIEW PANEL ####
+# 1) create a right‑hand preview panel
+preview_frame = CTkFrame(master=app, fg_color="white")
+preview_frame.place(relx=0.5, rely=rely, relwidth=0.5, relheight=relheight)
+
+preview_textbox = CTkTextbox(
+    master=preview_frame,
+    font=("Inter", 12),
+    fg_color="white",
+    wrap="none"
+)
+preview_textbox.pack(fill="both", expand=True, padx=5, pady=5)
+
+# map each input widget to the XML tag name we want to scroll to
+widget_tag_map = {
+    # coreData
+    tsr_textbox:                   ("uniqueIdentifier", 0),
+    start_date_textbox:            ("beginPerformanceDate", 0),
+    end_date_textbox:              ("endPerformanceDate", 0),
+    calibration_dropdown:          ("performanceLocation", 0),
+
+    # first item
+    calibration_item_dropdown:     ("name", 2),  # Target the item name
+    model_textbox:                 ("identifications", 0),
+    identification_issuer_textbox: ("description", 0),
+    serial_number_textbox:         ("value", 2),
+    capacity_textbox:              ("content", 3),
+    range_textbox:                 ("content", 4),
+    resolution_textbox:            ("content", 5),
+
+    # second (standard)
+    standard_item_textbox1:        ("name", 3),  # Target the standard item name
+    model_textbox1:                ("model", 1),
+    identification_issuer_textbox1:("identification", 3),
+    serial_number_textbox1:        ("value", 1),
+    calibCert_textbox:             ("content", 6),
+    traceability_textbox:          ("content", 7),
+
+    # persons
+    analyst1_textbox:              ("respPerson", 0),
+    role1_textbox:                 ("role", 0),
+    analyst2_textbox:              ("respPerson", 1),
+    role2_textbox:                 ("role", 1),
+    authorized_textbox:            ("respPerson", 2),
+    authorized_role_textbox:       ("role", 2),
+
+    # customer
+    customer_textbox:              ("location", 1),
+    address_textbox:               ("further", 0),
+
+    # conditions
+    temperature_textbox:           ("value", 2),
+    temperature_unit_textbox:      ("unit", 0),
+    humidity_textbox:              ("value", 3),
+    humidity_unit_textbox:         ("unit", 1),
+
+    # results
+    applied_measurement_textbox:   ("valueXMLList", 0),
+    applied_measurement_unit_textbox:("unitXMLList", 0),
+    indicated_measurement_textbox: ("valueXMLList", 1),
+    indicated_measurement_unit_textbox:("unitXMLList", 1),
+    relative_expandedUn_textbox:   ("valueXMLList", 2),
+    relative_expandedUn_unit_textbox:("unitXMLList", 2),
+
+    # big text areas
+    uncertainty_textbox:           ("usedMethods", 0),
+    calibration_procedure_textbox: ("comment", 0),
+    remarks_textbox:               ("comment", 0),
+}
+
+# 2) update preview and scroll to the Nth occurrence
+import re
+def update_preview(active_widget=None):
+    xml = build_xml_string()
+    preview_textbox.delete("1.0", "end")
+    preview_textbox.insert("1.0", xml)
+
+    # highlight inner text…
+    text_widget = preview_textbox._textbox
+    text_widget.tag_delete("content")
+    text_widget.tag_config("content", foreground="#1E90FF")
+    for m in re.finditer(r'>([^<]+)<', xml):
+        text_widget.tag_add(
+            "content",
+            f"1.0 + {m.start(1)} chars",
+            f"1.0 + {m.end(1)} chars"
+        )
+
+    # scroll to the Nth <tag>
+    # inside update_preview(...)
+        if active_widget in widget_tag_map:
+            tag, idx = widget_tag_map[active_widget]
+            # allow for optional namespace prefix (e.g. dcc: or si:)
+            pattern = rf'<(?:\w+:)?{tag}\b'
+            starts = [m.start() for m in re.finditer(pattern, xml)]
+            if not starts:
+                return            # no such tag at all: bail
+            # if idx too big, clamp to last occurrence instead of first
+            pos = starts[min(idx, len(starts)-1)]
+            text_widget.mark_set("insert", f"1.0 + {pos} chars")
+            text_widget.see("insert")
+
+# 3) bind *all* inputs
+for child in scrollable_frame.winfo_children():
+    if isinstance(child, CTkEntry):
+        child._entry.bind("<KeyRelease>", lambda e, w=child: update_preview(w))
+    elif isinstance(child, CTkTextbox):
+        child._textbox.bind("<KeyRelease>", lambda e, w=child: update_preview(w))
+
+calibration_dropdown.configure(command=lambda *_: update_preview(calibration_dropdown))
+calibration_item_dropdown.configure(command=lambda *_: update_preview(calibration_item_dropdown))
+
+# 4) initial draw
+update_preview()
 
 # wire up the button
-exportButton.configure(command=export_to_xml)
-
-
-##########################
-# insert code for the preview of XML file here
+exportButton.configure(command=export_to_xml) 
 
 app.mainloop()
+
+
+
+
+

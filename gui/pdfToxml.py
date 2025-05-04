@@ -567,43 +567,43 @@ def preload_xml(path):
                     # Add syntax highlighting
                     lines = pretty_xml.split('\n')
                     for line in lines:
-                        line = line.rstrip()
                         # Process the line for highlighting
                         if line.strip().startswith('<?xml') or line.strip().startswith('<!DOCTYPE'):
                             # XML declaration or DOCTYPE - cyan
                             xml_preview.insert("end", line + "\n", ("declaration",))
                         elif '</' in line and '>' in line:
                             # Closing tag
-                            before_tag = line[:line.find('</')]
-                            tag_content = line[line.find('</'):line.find('>')+1]
-                            after_tag = line[line.find('>')+1:]
+                            parts = line.split('</')
+                            xml_preview.insert("end", parts[0], ("normal",))
                             
-                            xml_preview.insert("end", before_tag, ("content",))
-                            xml_preview.insert("end", tag_content, ("tag",))
-                            xml_preview.insert("end", after_tag + "\n", ("normal",))
+                            tag_parts = parts[1].split('>')
+                            xml_preview.insert("end", '</'+tag_parts[0]+'>', ("tag",))
+                            
+                            if len(tag_parts) > 1:
+                                xml_preview.insert("end", tag_parts[1], ("normal",))
+                            xml_preview.insert("end", "\n")
                         elif '<' in line and '>' in line and not line.strip().startswith('<!--'):
                             # Opening tag or self-closing tag
-                            before_tag = line[:line.find('<')]
+                            start_tag_pos = line.find('<')
+                            end_tag_pos = line.find('>', start_tag_pos)
                             
-                            # Find the end of the tag
-                            tag_start = line.find('<')
-                            tag_end = line.find('>', tag_start) + 1
-                            tag_content = line[tag_start:tag_end]
+                            # Before tag
+                            if start_tag_pos > 0:
+                                xml_preview.insert("end", line[:start_tag_pos], ("normal",))
                             
-                            # After tag - this is text content
-                            after_tag = line[tag_end:]
+                            # The tag itself
+                            xml_preview.insert("end", line[start_tag_pos:end_tag_pos+1], ("tag",))
                             
-                            if before_tag:
-                                xml_preview.insert("end", before_tag, ("content",))
-                            xml_preview.insert("end", tag_content, ("tag",))
-                            if after_tag:
-                                xml_preview.insert("end", after_tag, ("content",))
+                            # After tag - this is content
+                            if end_tag_pos < len(line)-1:
+                                xml_preview.insert("end", line[end_tag_pos+1:], ("content",))
+                            
                             xml_preview.insert("end", "\n")
                         elif line.strip().startswith('<!--'):
                             # Comment
                             xml_preview.insert("end", line + "\n", ("comment",))
                         else:
-                            # Pure text content or whitespace
+                            # Text content or whitespace
                             if line.strip():
                                 xml_preview.insert("end", line + "\n", ("content",))
                             else:
@@ -627,8 +627,8 @@ def preload_xml(path):
                     try:
                         parsed_xml = xml.dom.minidom.parseString(raw_xml)
                         pretty_xml = parsed_xml.toprettyxml(indent="  ")
-                        xml_preview.insert("0.0", "Failed to display with highlighting. Raw XML:\n\n")
-                        xml_preview.insert("end", pretty_xml)
+                        # Display with the same syntax highlighting (would duplicate code here)
+                        xml_preview.insert("0.0", pretty_xml)
                     except Exception as e:
                         parsed_xml = None
                         xml_preview.insert("0.0", f"Error parsing XML:\n{e}")
@@ -648,19 +648,11 @@ def update_xml_field(tag_name, new_value):
                 element.firstChild.nodeValue = new_value
             else:
                 element.appendChild(parsed_xml.createTextNode(new_value))
-            
-            # Display the updated XML with highlighting
             pretty_xml = parsed_xml.toprettyxml(indent="  ")
             xml_preview.configure(state="normal")
             xml_preview.delete("0.0", "end")
-            
-            # Re-apply the highlighting by calling preload_xml with a temporary file
-            temp_file = "temp_xml_preview.xml"
-            with open(temp_file, "w", encoding="utf-8") as f:
-                f.write(pretty_xml)
-            preload_xml(temp_file)
-            os.remove(temp_file)
-            
+            xml_preview.insert("0.0", pretty_xml)
+            xml_preview.configure(state="disabled")
         except Exception as e:
             xml_preview.configure(state="normal")
             xml_preview.delete("0.0", "end")

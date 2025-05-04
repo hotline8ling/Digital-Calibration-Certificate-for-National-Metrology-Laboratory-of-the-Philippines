@@ -4,9 +4,6 @@ from PIL import Image
 import os
 from PIL import Image
 import subprocess
-import sys
-import pdfplumber
-import re
 from datetime import datetime
 from lxml import etree as LET
 
