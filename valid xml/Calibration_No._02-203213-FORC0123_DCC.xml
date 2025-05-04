@@ -1,83 +1,77 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<dcc:digitalCalibrationCertificate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:dcc="https://ptb.de/dcc"
-  xmlns:si="https://ptb.de/si" xsi:schemaLocation="https://ptb.de/dcc https://ptb.de/dcc/v3.3.0/dcc.xsd" schemaVersion="3.3.0">
-  <!--        
-			DCC - Digital Calibration Certificate
-            Copyright (c) 2019 - 2025 Physikalisch-Technische Bundesanstalt
+<?xml version='1.0' encoding='utf-8'?>
+<dcc:digitalCalibrationCertificate xmlns:dcc="https://ptb.de/dcc" xmlns:si="https://ptb.de/si" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://ptb.de/dcc https://ptb.de/dcc/v3.3.0/dcc.xsd" schemaVersion="3.3.0">
 
-      This specific file is a template for the DCC Generator for the National Metrology Laboratory of the Philippines 
-      =================================
--->
+  
+
   <dcc:administrativeData>
     <dcc:dccSoftware>
       <dcc:software>
         <dcc:name>
-          <dcc:content></dcc:content>
+          <dcc:content>DigiCert</dcc:content>
         </dcc:name>
-        <dcc:release></dcc:release>     
+        <dcc:release>v0.0</dcc:release>        
       </dcc:software>
     </dcc:dccSoftware>
 
     <dcc:coreData>
-      <dcc:countryCodeISO3166_1></dcc:countryCodeISO3166_1> 
-      <dcc:usedLangCodeISO639_1></dcc:usedLangCodeISO639_1>    
-      <dcc:mandatoryLangCodeISO639_1></dcc:mandatoryLangCodeISO639_1>      
-      <dcc:uniqueIdentifier></dcc:uniqueIdentifier> 
-      <dcc:beginPerformanceDate></dcc:beginPerformanceDate>
-      <dcc:endPerformanceDate></dcc:endPerformanceDate>     
-      <dcc:performanceLocation></dcc:performanceLocation>
+      <dcc:countryCodeISO3166_1>PH</dcc:countryCodeISO3166_1>      
+      <dcc:usedLangCodeISO639_1>en</dcc:usedLangCodeISO639_1>      
+      <dcc:mandatoryLangCodeISO639_1>en</dcc:mandatoryLangCodeISO639_1>      
+      <dcc:uniqueIdentifier>Calibration No. 02-203213-FORC0123</dcc:uniqueIdentifier>      
+      <dcc:beginPerformanceDate />      
+      <dcc:endPerformanceDate />      
+      <dcc:performanceLocation>Onsite</dcc:performanceLocation>      
     </dcc:coreData>
 
-    <!-- Calibration Item -->
+    
     <dcc:items>
       <dcc:item>
         <dcc:name>
-          <dcc:content lang="en"></dcc:content>
+          <dcc:content lang="en">Box Compression Machine</dcc:content>
         </dcc:name>
 
-        <dcc:model></dcc:model>
+        <dcc:model />
 
         <dcc:identifications>
           <dcc:identification>
-            <dcc:issuer></dcc:issuer>
-            <dcc:value></dcc:value>
+            <dcc:issuer />
+            <dcc:value>Box Compression Machine</dcc:value>
             <dcc:name>
-              <dcc:content lang="en"></dcc:content>
+              <dcc:content lang="en" />
             </dcc:name>
           </dcc:identification>
         </dcc:identifications>
 
         <dcc:description>
-          <dcc:content lang="en"></dcc:content>
-          <dcc:content lang="en"></dcc:content>
-          <dcc:content lang="en"></dcc:content>
+          <dcc:content lang="en">Capacity: </dcc:content>
+          <dcc:content lang="en">Measurement Range: </dcc:content>
+          <dcc:content lang="en">Resolution: </dcc:content>
         </dcc:description>
 
       </dcc:item>
 
-      <!-- STANDARD EQUIPMENT -->
+      
       <dcc:item>
         <dcc:name>
-          <dcc:content lang="en"></dcc:content>
+          <dcc:content lang="en" />
         </dcc:name>
 
 
-        <dcc:model></dcc:model>
+        <dcc:model />
 
         <dcc:identifications>
           <dcc:identification>
-            <dcc:issuer></dcc:issuer>
-            <dcc:value></dcc:value>
+            <dcc:issuer />
+            <dcc:value />
             <dcc:name>
-              <dcc:content lang="en"></dcc:content>
+              <dcc:content lang="en" />
             </dcc:name>
           </dcc:identification>
         </dcc:identifications>
 
         <dcc:description>
-          <dcc:content lang="en"></dcc:content>
-          <dcc:content lang="en"></dcc:content>
+          <dcc:content lang="en">Calibration Certificate No.: </dcc:content>
+          <dcc:content lang="en">Traceability: </dcc:content>
         </dcc:description>
 
       </dcc:item>
@@ -86,16 +80,16 @@
 
 
     <dcc:calibrationLaboratory>
-      <dcc:calibrationLaboratoryCode></dcc:calibrationLaboratoryCode>  
+      <dcc:calibrationLaboratoryCode>FORC</dcc:calibrationLaboratoryCode>      
       <dcc:contact>
         <dcc:name>
-          <dcc:content lang="en"></dcc:content> 
+          <dcc:content lang="en">National Metrology Laboratory - Industrial Technology Development Institute</dcc:content>          
         </dcc:name>
         <dcc:location>
-          <dcc:city></dcc:city>     
-          <dcc:countryCode></dcc:countryCode>   
-          <dcc:postCode></dcc:postCode> 
-          <dcc:street></dcc:street>
+          <dcc:city>Taguig</dcc:city>          
+          <dcc:countryCode>PH</dcc:countryCode>          
+          <dcc:postCode>1633</dcc:postCode>          
+          <dcc:street>General Santos Ave</dcc:street>          
         </dcc:location>
       </dcc:contact>
     </dcc:calibrationLaboratory>
@@ -105,36 +99,36 @@
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>
+            <dcc:content lang="en" />            
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role>
+        <dcc:role />        
       </dcc:respPerson>
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>
+            <dcc:content lang="en" />            
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role>
+        <dcc:role />        
       </dcc:respPerson>
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>
+            <dcc:content lang="en" />            
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role> 
+        <dcc:role />        
       </dcc:respPerson>
     </dcc:respPersons>
 
     <dcc:customer>
       <dcc:name>
-        <dcc:content lang="en"></dcc:content>
+        <dcc:content lang="en" />
       </dcc:name>
       <dcc:location>
         <dcc:further>
-          <dcc:content lang="en"></dcc:content>
+          <dcc:content lang="en" />
         </dcc:further>
       </dcc:location>
     </dcc:customer>
@@ -142,71 +136,70 @@
 
   <dcc:measurementResults>
     <dcc:name>
-      <dcc:content lang="en"></dcc:content>
+      <dcc:content lang="en">Box Compression Machine</dcc:content>
     </dcc:name>
     <dcc:usedMethods>
       <dcc:usedMethod refType="basic_uncertainty">
         <dcc:name>
-          <dcc:content lang="en"></dcc:content>
+          <dcc:content lang="en">Relative Expanded Uncertainty</dcc:content>
         </dcc:name>
         <dcc:description>
-          <dcc:content lang="en">
-          </dcc:content>
+          <dcc:content lang="en" />
         </dcc:description>
       </dcc:usedMethod>
-      <dcc:usedMethods>
+      </dcc:usedMethods>
 
         <dcc:influenceConditions>
-          <!-- TEMPERATURE -->
+          
           <dcc:influenceCondition refType="basic_temperature">
             <dcc:name>
-              <dcc:content lang="en"></dcc:content>
+              <dcc:content lang="en">Ambient Temperature</dcc:content>
             </dcc:name>
             <dcc:data>
               <dcc:quantity>
                 <dcc:name>
-                  <dcc:content lang="en"></dcc:content>
+                  <dcc:content lang="en">Ambient Temperature</dcc:content>
                 </dcc:name>
                 <si:real>
-                  <si:value></si:value>
-                  <si:unit></si:unit>
+                  <si:value />
+                  <si:unit>'</si:unit>
                 </si:real>
               </dcc:quantity>
             </dcc:data>
           </dcc:influenceCondition>
 
 
-          <!-- HUMIDITY -->
+          
           <dcc:influenceCondition refType="basic_humidityRelative">
             <dcc:name>
-              <dcc:content lang="en"></dcc:content>
+              <dcc:content lang="en">Relative Humidity</dcc:content>
             </dcc:name>
             <dcc:data>
               <dcc:quantity>
                 <dcc:name>
-                  <dcc:content lang="en"></dcc:content>
+                  <dcc:content lang="en">Relative Humidity</dcc:content>
                 </dcc:name>
                 <si:real>
-                  <si:value></si:value>
-                  <si:unit></si:unit>
+                  <si:value />
+                  <si:unit>'</si:unit>
                 </si:real>
               </dcc:quantity>
             </dcc:data>
           </dcc:influenceCondition>
         </dcc:influenceConditions>
 
-        <!-- RESULTS -->
+        
         <dcc:results>
 
           <dcc:result>
             <dcc:name>
-              <dcc:content lang="en"></dcc:content>
+              <dcc:content lang="en">Standard Measurement</dcc:content>
             </dcc:name>
             <dcc:quantity refType="basic_measurementStandard">
               <si:hybrid>
                 <si:realListXMLList>
-                  <si:valueXMLList></si:valueXMLList>
-                  <si:unitXMLList></si:unitXMLList>
+                  <si:valueXMLList />
+                  <si:unitXMLList />
                 </si:realListXMLList>
               </si:hybrid>
             </dcc:quantity>
@@ -214,13 +207,13 @@
 
           <dcc:result>
             <dcc:name>
-              <dcc:content lang="en"></dcc:content>
+              <dcc:content lang="en">Indicated Measurement</dcc:content>
             </dcc:name>
             <dcc:quantity refType="basic_measuredValue">
               <si:hybrid>
                 <si:realListXMLList>
-                  <si:valueXMLList></si:valueXMLList>
-                  <si:unitXMLList></si:unitXMLList>
+                  <si:valueXMLList />
+                  <si:unitXMLList />
                 </si:realListXMLList>
               </si:hybrid>
             </dcc:quantity>
@@ -228,13 +221,13 @@
 
           <dcc:result>
             <dcc:name>
-              <dcc:content lang="en"></dcc:content>
+              <dcc:content lang="en">Relative Expanded Uncertainty</dcc:content>
             </dcc:name>
             <dcc:quantity refType="basic_measurementError">
               <si:hybrid>
                 <si:realListXMLList>
-                  <si:valueXMLList></si:valueXMLList>
-                  <si:unitXMLList></si:unitXMLList>
+                  <si:valueXMLList />
+                  <si:unitXMLList />
                 </si:realListXMLList>
               </si:hybrid>
             </dcc:quantity>
@@ -244,8 +237,7 @@
 
 
       <dcc:comment>
-        <dcc:content lang="en"></dcc:content>
-        <dcc:content lang="en"></dcc:content>
-      </dcc:comment>
+        <dcc:content lang="en">CALIBRATION PROCEDURE: </dcc:content>
+        <dcc:content lang="en">REMARKS: </dcc:content>
+      </dcc:comment>      
     </dcc:digitalCalibrationCertificate>
-

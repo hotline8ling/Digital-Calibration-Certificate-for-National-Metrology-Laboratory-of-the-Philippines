@@ -2,31 +2,32 @@
 <dcc:digitalCalibrationCertificate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:dcc="https://ptb.de/dcc"
   xmlns:si="https://ptb.de/si" xsi:schemaLocation="https://ptb.de/dcc https://ptb.de/dcc/v3.3.0/dcc.xsd" schemaVersion="3.3.0">
+
   <!--        
 			DCC - Digital Calibration Certificate
             Copyright (c) 2019 - 2025 Physikalisch-Technische Bundesanstalt
 
-      This specific file is a template for the DCC Generator for the National Metrology Laboratory of the Philippines 
-      =================================
+      This specific file is a template for the DCC Generator for the National Metrology Laboratory of the Philippines =================================
 -->
+
   <dcc:administrativeData>
     <dcc:dccSoftware>
       <dcc:software>
         <dcc:name>
           <dcc:content></dcc:content>
         </dcc:name>
-        <dcc:release></dcc:release>     
+        <dcc:release></dcc:release>        <!-- This must show the version of the DCC Generator -->
       </dcc:software>
     </dcc:dccSoftware>
 
     <dcc:coreData>
-      <dcc:countryCodeISO3166_1></dcc:countryCodeISO3166_1> 
-      <dcc:usedLangCodeISO639_1></dcc:usedLangCodeISO639_1>    
-      <dcc:mandatoryLangCodeISO639_1></dcc:mandatoryLangCodeISO639_1>      
-      <dcc:uniqueIdentifier></dcc:uniqueIdentifier> 
-      <dcc:beginPerformanceDate></dcc:beginPerformanceDate>
-      <dcc:endPerformanceDate></dcc:endPerformanceDate>     
-      <dcc:performanceLocation></dcc:performanceLocation>
+      <dcc:countryCodeISO3166_1></dcc:countryCodeISO3166_1>      <!-- (STATIC) This must show the Country Code of the calibration certificate origin -->
+      <dcc:usedLangCodeISO639_1></dcc:usedLangCodeISO639_1>      <!-- (STATIC) This must show the Language used in the calibration certificate -->
+      <dcc:mandatoryLangCodeISO639_1></dcc:mandatoryLangCodeISO639_1>      <!-- (STATIC) This must show the Language used in the calibration certificate -->
+      <dcc:uniqueIdentifier></dcc:uniqueIdentifier>      <!-- This must show the TSR Number used in the calibration certificate -->
+      <dcc:beginPerformanceDate></dcc:beginPerformanceDate>      <!-- This must show the Date of Calibration used in the calibration certificate -->
+      <dcc:endPerformanceDate></dcc:endPerformanceDate>      <!-- This must show the Date of Calibration used in the calibration certificate -->
+      <dcc:performanceLocation></dcc:performanceLocation>      <!-- (ONSITE or LABORATORY) This must show the place where the calibration was done -->
     </dcc:coreData>
 
     <!-- Calibration Item -->
@@ -86,16 +87,16 @@
 
 
     <dcc:calibrationLaboratory>
-      <dcc:calibrationLaboratoryCode></dcc:calibrationLaboratoryCode>  
+      <dcc:calibrationLaboratoryCode></dcc:calibrationLaboratoryCode>      <!-- (STATIC) This must be in the settings; Use SAMPLE CODE for the optional values -->
       <dcc:contact>
         <dcc:name>
-          <dcc:content lang="en"></dcc:content> 
+          <dcc:content lang="en"></dcc:content>          <!-- (STATIC) This must be NML-ITDI unless changed -->
         </dcc:name>
         <dcc:location>
-          <dcc:city></dcc:city>     
-          <dcc:countryCode></dcc:countryCode>   
-          <dcc:postCode></dcc:postCode> 
-          <dcc:street></dcc:street>
+          <dcc:city></dcc:city>          <!-- (STATIC) This must be Taguig unless relocated -->
+          <dcc:countryCode></dcc:countryCode>          <!-- (STATIC) This must be PH -->
+          <dcc:postCode></dcc:postCode>          <!-- (STATIC) This must be 1633 unless relocated -->
+          <dcc:street></dcc:street>          <!-- (STATIC) This must be General Santos Ave unless relocated -->
         </dcc:location>
       </dcc:contact>
     </dcc:calibrationLaboratory>
@@ -105,26 +106,26 @@
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>
+            <dcc:content lang="en"></dcc:content>            <!-- This must be the First Science Research Specialist -->
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role>
+        <dcc:role></dcc:role>        <!-- This must be the First Science Research Specialist Role-->
       </dcc:respPerson>
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>
+            <dcc:content lang="en"></dcc:content>            <!-- This must be the Second Science Research Specialist -->
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role>
+        <dcc:role></dcc:role>        <!-- This must be the Second Science Research Specialist Role-->
       </dcc:respPerson>
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>
+            <dcc:content lang="en"></dcc:content>            <!-- This must be the Head of the Standards Section Name -->
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role> 
+        <dcc:role></dcc:role>        <!-- This must be "Head, Pressure and Force Standards Section" -->
       </dcc:respPerson>
     </dcc:respPersons>
 
@@ -154,7 +155,7 @@
           </dcc:content>
         </dcc:description>
       </dcc:usedMethod>
-      <dcc:usedMethods>
+      </dcc:usedMethods>
 
         <dcc:influenceConditions>
           <!-- TEMPERATURE -->
@@ -246,6 +247,6 @@
       <dcc:comment>
         <dcc:content lang="en"></dcc:content>
         <dcc:content lang="en"></dcc:content>
-      </dcc:comment>
+      </dcc:comment>      <!-- This must include the CALIBRATION PROCEDURE and the Remarks in the document appended -->
     </dcc:digitalCalibrationCertificate>
 
