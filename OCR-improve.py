@@ -1,9 +1,12 @@
+# Tesseract source: https://github.com/tesseract-ocr/tesseract/releases/tag/5.5.0
+
 from PIL import Image
 import pytesseract
 from reportlab.pdfgen import canvas
 import cv2
 import numpy as np
 import os
+import datetime
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -29,9 +32,9 @@ def preprocess_image(image_path):
     enhanced = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
 
     # Save for inspection
-    os.makedirs("output/exp/finalize", exist_ok=True)
-    cv2.imwrite("output/exp/finalize/new-prepro-img.jpg", enhanced)
-    print("✅ Preprocessed image saved to: output/exp/finalize/new-prepro-img.jpg")
+    os.makedirs("output/", exist_ok=True)
+    # cv2.imwrite("output/new-prepro-img.jpg", enhanced)
+    # print("✅ Preprocessed image saved to: output/new-prepro-img.jpg")
 
     return image, enhanced
 
@@ -156,4 +159,9 @@ def image_to_searchable_pdf(image_path, pdf_path):
     print(f"✅ Searchable PDF saved to: {pdf_path}")
 
 if __name__ == '__main__':
-    image_to_searchable_pdf('input/test1.jpg', 'output/exp/finalize/tabular-output.pdf')
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+
+    input_path = 'input/cert.jpg'
+    output_path = f'output/output_{today_str}.pdf'
+
+    image_to_searchable_pdf(input_path, output_path)
