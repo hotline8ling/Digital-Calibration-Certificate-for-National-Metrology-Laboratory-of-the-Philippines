@@ -1,11 +1,43 @@
+import re
+import subprocess
+from tkinter import messagebox
+from xml.etree.ElementTree import ParseError
 from customtkinter import *
 from PIL import Image
 import os
 from PIL import Image
+import json
+import xml.etree.ElementTree as ET
+import lxml.etree as LET
+from io import BytesIO
+from tkinter import filedialog 
+
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, 'static_info.json')
+try:
+    with open(config_path, 'r') as file:
+        cfg = json.load(file)
+except FileNotFoundError:
+    print(f"Error: Could not find the configuration file at: {config_path}")
+    print("Current working directory:", os.getcwd())
+    print("Looking for file in directory:", script_dir)
+    raise
+
+
+def center_window(app, width, height):
+    app.update_idletasks()  # Ensure the window dimensions are updated
+    screen_width = app.winfo_screenwidth()
+    screen_height = app.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    app.geometry(f"{width}x{height}+{x}+{y}")
 
 app = CTk()
 app.title("DigiCert")
-app.geometry("1200x700")
+app_width = 1200
+app_height = 700
+center_window(app, app_width, app_height)  # Call the function to center the window
 set_appearance_mode("light")
 
 # Disable maximize button
@@ -121,14 +153,6 @@ serial_number_label.grid(row=8, column=1, padx=10, pady=(5, 5), sticky="w")
 serial_number_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 1122YL23002")
 serial_number_textbox.grid(row=9, column=1, padx=10, pady=(5, 10), sticky="w")
 
-# Manufacturer Name Label
-manufacturer_name_label = CTkLabel(master=scrollable_frame, text="Manufacturer Name:", font=("Inter", 12, "bold"), bg_color='white')
-manufacturer_name_label.grid(row=10, column=0, padx=10, pady=(5, 5), sticky="w")
-
-# Manufacturer Name Textbox
-manufacturer_name_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Not given")
-manufacturer_name_textbox.grid(row=11, column=0, padx=10, pady=(5, 10), sticky="w")
-
 # Capacity Label
 capacity_label = CTkLabel(master=scrollable_frame, text="Capacity:", font=("Inter", 12, "bold"), bg_color='white')
 capacity_label.grid(row=10, column=1, padx=10, pady=(5, 5), sticky="w")
@@ -155,19 +179,19 @@ range_textbox.grid(row=13, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # Identification Issuer Label
 identification_issuer_label = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
-identification_issuer_label.grid(row=14, column=0, padx=10, pady=(5, 5), sticky="w")
+identification_issuer_label.grid(row=10, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Identification Issuer Textbox
 identification_issuer_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. customer")
-identification_issuer_textbox.grid(row=15, column=0, padx=10, pady=(5, 10), sticky="w")
+identification_issuer_textbox.grid(row=11, column=0, padx=10, pady=(5, 10), sticky="w")
 
 # Resolution Label
 resolution_label = CTkLabel(master=scrollable_frame, text="Resolution:", font=("Inter", 12, "bold"), bg_color='white')
-resolution_label.grid(row=14, column=1, padx=10, pady=(5, 5), sticky="w")
+resolution_label.grid(row=14, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Resolution Textbox
 resolution_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 50 kgf")
-resolution_textbox.grid(row=15, column=1, padx=10, pady=(5, 10), sticky="w")
+resolution_textbox.grid(row=15, column=0, padx=10, pady=(5, 10), sticky="w")
 
 ##########################
 # Standard Equipment Label
@@ -190,53 +214,29 @@ serial_number_label.grid(row=17, column=1, padx=10, pady=(5, 5), sticky="w")
 serial_number_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. SN 1251056K0094")
 serial_number_textbox.grid(row=18, column=1, padx=10, pady=(5, 10), sticky="w")
 
-# Manufacturer Name Label
-manufacturer_name_label = CTkLabel(master=scrollable_frame, text="Manufacturer Name:", font=("Inter", 12, "bold"), bg_color='white')
-manufacturer_name_label.grid(row=19, column=0, padx=10, pady=(5, 5), sticky="w")
+# Calibration Cert Label
+calibCert_label = CTkLabel(master=scrollable_frame, text="Calibration Certificate No.", font=("Inter", 12, "bold"), bg_color='white')
+calibCert_label.grid(row=19, column=1, padx=10, pady=(5, 5), sticky="w")
 
-# Manufacturer Name Textbox
-manufacturer_name_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Not given")
-manufacturer_name_textbox.grid(row=20, column=0, padx=10, pady=(5, 10), sticky="w")
+# Calibration Cert Textbox
+calibCert_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 11-2020-FORC-0116")
+calibCert_textbox.grid(row=20, column=1, padx=10, pady=(5, 10), sticky="w")
 
-# Capacity Label
-capacity_label = CTkLabel(master=scrollable_frame, text="Capacity:", font=("Inter", 12, "bold"), bg_color='white')
-capacity_label.grid(row=19, column=1, padx=10, pady=(5, 5), sticky="w")
+# Traceability Label
+traceability_label = CTkLabel(master=scrollable_frame, text="Traceability:", font=("Inter", 12, "bold"), bg_color='white')
+traceability_label.grid(row=21, column=1, padx=10, pady=(5, 5), sticky="w")
 
-# Capacity Textbox
-capacity_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 15 000 kgf")
-capacity_textbox.grid(row=20, column=1, padx=10, pady=(5, 10), sticky="w")
-
-# Model Label
-model_label = CTkLabel(master=scrollable_frame, text="Model:", font=("Inter", 12, "bold"), bg_color='white')
-model_label.grid(row=21, column=0, padx=10, pady=(5, 5), sticky="w")
-
-# Model Textbox
-model_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Shimadzu/ UH-F1000kNX")
-model_textbox.grid(row=22, column=0, padx=10, pady=(5, 10), sticky="w")
-
-# Range Label
-range_label = CTkLabel(master=scrollable_frame, text="Range:", font=("Inter", 12, "bold"), bg_color='white')
-range_label.grid(row=21, column=1, padx=10, pady=(5, 5), sticky="w")
-
-# Range Textbox
-range_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0 kgf to 15 000 kgf")
-range_textbox.grid(row=22, column=1, padx=10, pady=(5, 10), sticky="w")
+# Traceability Textbox
+traceability_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Traceable to the SI through NMD-ITDI")
+traceability_textbox.grid(row=22, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # Identification Issuer Label
-identification_issuer_label = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
-identification_issuer_label.grid(row=23, column=0, padx=10, pady=(5, 5), sticky="w")
+identification_issuer_label1 = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
+identification_issuer_label1.grid(row=19, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Identification Issuer Textbox
-identification_issuer_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. laboratory")
-identification_issuer_textbox.grid(row=24, column=0, padx=10, pady=(5, 10), sticky="w")
-
-# Resolution Label
-resolution_label = CTkLabel(master=scrollable_frame, text="Resolution:", font=("Inter", 12, "bold"), bg_color='white')
-resolution_label.grid(row=23, column=1, padx=10, pady=(5, 5), sticky="w")
-
-# Resolution Textbox
-resolution_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 50 kgf")
-resolution_textbox.grid(row=24, column=1, padx=10, pady=(5, 10), sticky="w")
+identification_issuer_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. laboratory")
+identification_issuer_textbox1.grid(row=20, column=0, padx=10, pady=(5, 10), sticky="w")
 
 #################
 # Personnel Label
@@ -478,13 +478,15 @@ remarks_textbox.grid(row=50, column=0, columnspan=2, padx=10, pady=(5, 10), stic
 #########################################
 
 # Load and Resize the Image
-image = CTkImage(light_image=Image.open("itdi-logo.png"), size=(26, 25))
+itdi_logo_path = os.path.join(script_dir, "itdi-logo.png")
+image = CTkImage(light_image=Image.open(itdi_logo_path), size=(26, 25))
 # Create CTkLabel with Image
 image_label = CTkLabel(master=app, image=image, text="", bg_color='white') 
 image_label.place(relx=0.4525, rely=0.0457)
 
 # Load and Resize the Image
-image1 = CTkImage(light_image=Image.open("nml-logo1.png"), size=(29, 28))
+nml_logo_path = os.path.join(script_dir, "nml-logo1.png")
+image1 = CTkImage(light_image=Image.open(nml_logo_path), size=(29, 28))
 # Create CTkLabel with Image
 image_label = CTkLabel(master=app, image=image1, text="", bg_color='white') 
 image_label.place(relx=0.4225, rely=0.0457)
@@ -504,15 +506,10 @@ bg_frame.place(relx=0.5, rely=0.0, relwidth=0.5, relheight=1.0)
 footer_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
 footer_frame.place(relx=0.0, rely=0.89, relwidth=0.5, relheight=0.1114)
 
-# Save Edit button
-saveEButton = CTkButton(master=app, text="Save Edit", corner_radius=7, 
-                       fg_color="#000000", hover_color="#1A4F8B", font=("Inter", 13))
-saveEButton.place(relx=0.1417, rely=0.9220, relwidth=0.1008, relheight=0.0471)
-
 # Export button
 exportButton = CTkButton(master=app, text="Export", corner_radius=7, 
                          fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13))
-exportButton.place(relx=0.2575, rely=0.9220, relwidth=0.1008, relheight=0.0471)
+exportButton.place(relx=0.1958, rely=0.9214, relwidth=0.1008, relheight=0.0471)
 
 # Back button
 backButton = CTkButton(master=app, text="< ", corner_radius=7, 

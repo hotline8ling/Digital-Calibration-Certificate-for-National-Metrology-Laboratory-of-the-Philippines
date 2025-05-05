@@ -25,10 +25,20 @@ except FileNotFoundError:
     print("Looking for file in directory:", script_dir)
     raise
 
+# Center the application on the screen
+def center_window(app, width, height):
+    app.update_idletasks()
+    screen_width = app.winfo_screenwidth()
+    screen_height = app.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    app.geometry(f"{width}x{height}+{x}+{y}")
 
 app = CTk()
 app.title("DigiCert")
-app.geometry("500x500") 
+app_width = 500
+app_height = 500
+center_window(app, app_width, app_height)  # Call the function to center the window
 set_appearance_mode("light")
 
 # Disable maximize button

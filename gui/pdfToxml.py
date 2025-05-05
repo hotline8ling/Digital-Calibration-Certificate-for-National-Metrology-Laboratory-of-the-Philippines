@@ -48,13 +48,20 @@ def export_to_xml():
     back_to_menu()
   
 
-
+def center_window(app, width, height):
+    app.update_idletasks()  # Ensure the window dimensions are updated
+    screen_width = app.winfo_screenwidth()
+    screen_height = app.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    app.geometry(f"{width}x{height}+{x}+{y}")
 
 app = CTk()
 app.title("DigiCert")
-app.geometry("1200x700")
+app_width = 1200
+app_height = 700
+center_window(app, app_width, app_height)  # Call the function to center the window
 set_appearance_mode("light")
-
 
 # Disable maximize button
 app.resizable(False, False)
@@ -217,21 +224,21 @@ range_textbox.insert(0, calibration_info["measurement_range"])
 
 # Identification Issuer Label
 identification_issuer_label = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
-identification_issuer_label.grid(row=14, column=0, padx=10, pady=(5, 5), sticky="w")
+identification_issuer_label.grid(row=10, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Identification Issuer Textbox
 identification_issuer_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. customer")
-identification_issuer_textbox.grid(row=15, column=0, padx=10, pady=(5, 10), sticky="w")
+identification_issuer_textbox.grid(row=11, column=0, padx=10, pady=(5, 10), sticky="w")
 identification_issuer_textbox.insert(0, calibration_info["identification_issuer"])
 
 
 # Resolution Label
 resolution_label = CTkLabel(master=scrollable_frame, text="Resolution:", font=("Inter", 12, "bold"), bg_color='white')
-resolution_label.grid(row=14, column=1, padx=10, pady=(5, 5), sticky="w")
+resolution_label.grid(row=14, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Resolution Textbox
 resolution_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 50 kgf")
-resolution_textbox.grid(row=15, column=1, padx=10, pady=(5, 10), sticky="w")
+resolution_textbox.grid(row=15, column=0, padx=10, pady=(5, 10), sticky="w")
 resolution_textbox.insert(0, calibration_info["resolution"])
 
 ##########################
@@ -291,11 +298,11 @@ traceability_textbox.insert(0, calibration_info["standard_traceability"])
 
 # Identification Issuer Label
 identification_issuer_label1 = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
-identification_issuer_label1.grid(row=23, column=0, padx=10, pady=(5, 5), sticky="w")
+identification_issuer_label1.grid(row=19, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Identification Issuer Textbox
 identification_issuer_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. laboratory")
-identification_issuer_textbox1.grid(row=24, column=0, padx=10, pady=(5, 10), sticky="w")
+identification_issuer_textbox1.grid(row=20, column=0, padx=10, pady=(5, 10), sticky="w")
 identification_issuer_textbox1.insert(0, calibration_info["standard_item_issuer"])
 
 #################
@@ -642,25 +649,25 @@ image_label = CTkLabel(master=app, image=image1, text="", bg_color='white')
 image_label.place(relx=1.0, rely=0.0457)
 
 stroke = CTkFrame(master=app, fg_color="#0855B1", corner_radius=0)
-stroke.place(relx=0.0967, rely=0.0443, relwidth=0.012, relheight=0.045)
+stroke.place(relx=0.0483, rely=0.0438, relwidth=0.006, relheight=0.045)
 
 # Title label
 titleLabel = CTkLabel(master=app, text="DigiCert", font=("Montserrat", 32, "bold"), bg_color='white')
-titleLabel.place(relx=0.1133, rely=0.0330)
+titleLabel.place(relx=0.0567, rely=0.0330)
 
 # BG rectangle 
 footer_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-footer_frame.place(relx=0.0, rely=0.89, relwidth=1.0, relheight=0.1114)
+footer_frame.place(relx=0.0, rely=0.89, relwidth=0.5, relheight=0.1114)
 
 # Export button
 exportButton = CTkButton(master=app, text="Export", corner_radius=7, 
-                         fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13), command=export_to_xml)
-exportButton.place(relx=0.5150, rely=0.9220, relwidth=0.2016, relheight=0.0471)
+                         fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13))
+exportButton.place(relx=0.1958, rely=0.9214, relwidth=0.1008, relheight=0.0471)
 
 # Back button
 backButton = CTkButton(master=app, text="< ", corner_radius=7, 
                     fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 15), command=back_to_menu)
-backButton.place(relx=0.0450, rely=0.0486, relwidth=0.0400, relheight=0.0350)
+backButton.place(relx=0.0225, rely=0.0486, relwidth=0.0200, relheight=0.0350)
 
 # IMG to XML label
 titleLabel = CTkLabel(master=app, text="PDF -> XML", font=("Inter", 13, "bold"), bg_color='white')
@@ -670,19 +677,24 @@ titleLabel.place(relx=0.3600, rely=0.0514)
 
 
 #### PREVIEW PANEL ####
-# 1) create a right‑hand preview panel
-preview_frame = CTkFrame(master=app, fg_color="white")
-preview_frame.place(relx=0.5, rely=rely, relwidth=0.5, relheight=relheight)
+# 1) Create a right-hand preview panel with dark mode
+preview_frame = CTkFrame(
+    master=app,
+    fg_color="#2e2e2e",  # Dark background color
+    border_color="black",
+    border_width=1
+)
+preview_frame.place(relx=0.5, rely=0.0, relwidth=0.5, relheight=1.0)
 
+# 2) Create the preview textbox with dark mode
 preview_textbox = CTkTextbox(
     master=preview_frame,
-    font=("Inter", 12),
-    fg_color="white",
+    font=("Cascadia Code", 12),
+    fg_color="#333333",  # Darker background for the textbox
+    text_color="white",  # White text for contrast
     wrap="none"
 )
 preview_textbox.pack(fill="both", expand=True, padx=5, pady=5)
-
-# map each input widget to the XML tag name we want to scroll to
 
 # map each input widget to the XML tag name we want to scroll to
 widget_tag_map = {
@@ -961,9 +973,11 @@ def build_xml_string():
 # 2) update preview and scroll to the Nth occurrence
 
 def update_preview(active_widget=None):
+    preview_textbox.configure(state="normal")
     xml = build_xml_string()
     preview_textbox.delete("1.0", "end")
     preview_textbox.insert("1.0", xml)
+    preview_textbox.configure(state="disabled")
 
     # highlight inner text…
     text_widget = preview_textbox._textbox
