@@ -1,16 +1,16 @@
 {
-  "software_name":           "DigiCert",
-  "software_release":        "v0.0",
-  "country_code_iso":        "PH",
-  "used_lang_code":          "en",
-  "mandatory_lang_code":     "en",
-  "performance_location":    "LABORATORY",
-  "calibration_lab": {
-    "code":        "FORC",
-    "contact":     "National Metrology Laboratory - Industrial Technology Development Institute",
-    "city":        "Taguig",
-    "countrycode": "PH",
-    "postcode":    "1633",
-    "street":      "General Santos Ave"
-  }
+    "software_name": "DigiCert",
+    "software_release": "v0.0",
+    "country_code_iso": "PH",
+    "used_lang_code": "en",
+    "mandatory_lang_code": "en",
+    "performance_location": "LABORATORY",
+    "calibration_lab": {
+        "code": "FORC",
+        "contact": "National Metrology Laboratory - Industrial Technology Development Institute",
+        "city": "Taguig",
+        "countrycode": "PH",
+        "postcode": "1633",
+        "street": "General Santos Ave"
+    }
 }
