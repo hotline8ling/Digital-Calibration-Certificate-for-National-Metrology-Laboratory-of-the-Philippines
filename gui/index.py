@@ -51,7 +51,6 @@ def open_pdf():
     pdf_path = filedialog.askopenfilename(filetypes=[("PDF files","*.pdf")])
     if not pdf_path:
         return
-
     cal_info = extract_pdf(pdf_path)
     if not cal_info:
         messagebox.showerror("Error","No data extracted")
@@ -80,11 +79,6 @@ def open_settings():
     subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"settings.py")])  # Open the settings.py file
 
 def extract_pdf(pdf_path):
-    # Initialize an empty dictionary to store the extracted information
-    
-    
-    
-
     def extract_text(path):
         with pdfplumber.open(path) as pdf:
             return "\n".join(page.extract_text() or "" for page in pdf.pages)
@@ -114,7 +108,7 @@ def extract_pdf(pdf_path):
                             if sum(bool(cell and cell.strip()) for cell in row) >= len(row) // 2),
                             0
                         )
-                        headers = [cell.strip() for cell in table[header_idx]]
+                        headers = [cell.strip() for cell in table[header_idx] if cell]
 
                         # init dict
                         columns_data = {h: [] for h in headers if h}
@@ -133,7 +127,8 @@ def extract_pdf(pdf_path):
         # usage remains the same
     table_columns = extract_table_columns(pdf_path)
 
-    config_path = os.path.join(r"C:\Users\ADMIN\Documents\GitHub\Digital-Calibration-Certificate-for-National-Metrology-Laboratory-of-the-Philippines\gui\static_info.json")
+    # Use script_dir instead of hard-coded path
+    config_path = os.path.join(script_dir, 'static_info.json')
     try:
         with open(config_path, 'r') as file:
             cfg = json.load(file)

@@ -18,10 +18,10 @@
     </dcc:dccSoftware>
 
     <dcc:coreData>
-      <dcc:countryCodeISO3166_1>PH</dcc:countryCodeISO3166_1> 
-      <dcc:usedLangCodeISO639_1>en</dcc:usedLangCodeISO639_1>    
-      <dcc:mandatoryLangCodeISO639_1>en</dcc:mandatoryLangCodeISO639_1>      
-      <dcc:uniqueIdentifier>Calibration No. Calibration No. 02-2025-FORC-0043</dcc:uniqueIdentifier> 
+      <dcc:countryCodeISO3166_1/> 
+      <dcc:usedLangCodeISO639_1/>    
+      <dcc:mandatoryLangCodeISO639_1/>      
+      <dcc:uniqueIdentifier>Calibration No. 02-2025-FORC-0043</dcc:uniqueIdentifier> 
       <dcc:beginPerformanceDate>2025-02-24</dcc:beginPerformanceDate>
       <dcc:endPerformanceDate></dcc:endPerformanceDate>     
       <dcc:performanceLocation>Laboratory</dcc:performanceLocation>
@@ -41,15 +41,15 @@
             <dcc:issuer>Not given</dcc:issuer>
             <dcc:value>Axle Weighing Scale</dcc:value>
             <dcc:name>
-              <dcc:content lang="en">Not given</dcc:content>
+              <dcc:content lang="en">1122YL23002</dcc:content>
             </dcc:name>
           </dcc:identification>
         </dcc:identifications>
 
         <dcc:description>
-          <dcc:content lang="en">Capacity: Capacity: 15 000 kgf</dcc:content>
-          <dcc:content lang="en">Measurement Range: Measurement Range: 0 kgf to 15 000 kgf</dcc:content>
-          <dcc:content lang="en">Resolution: Resolution: 5 0 kgf</dcc:content>
+          <dcc:content lang="en">Capacity: 15 000 kgf</dcc:content>
+          <dcc:content lang="en">Measurement Range: 0 kgf to 15 000 kgf</dcc:content>
+          <dcc:content lang="en">Resolution: 5 0 kgf</dcc:content>
         </dcc:description>
 
       </dcc:item>
@@ -65,17 +65,17 @@
 
         <dcc:identifications>
           <dcc:identification>
-            <dcc:issuer>Force Measuring Instrument</dcc:issuer>
-            <dcc:value>SN 1251056K0094</dcc:value>
+            <dcc:issuer>Not given</dcc:issuer>
+            <dcc:value>Force Measuring Instrument</dcc:value>
             <dcc:name>
-              <dcc:content lang="en">Not given</dcc:content>
+              <dcc:content lang="en">SN 1251056K0094</dcc:content>
             </dcc:name>
           </dcc:identification>
         </dcc:identifications>
 
         <dcc:description>
-          <dcc:content lang="en">Calibration Certificate No.: Calibration Certificate No.: 11-2020-FORC-0116</dcc:content>
-          <dcc:content lang="en">Traceability: Traceability: Traceable to the SI through NMD-ITDI</dcc:content>
+          <dcc:content lang="en">Calibration Certificate No.: 11-2020-FORC-0116</dcc:content>
+          <dcc:content lang="en">Traceability: Traceable to the SI through NMD-ITDI</dcc:content>
         </dcc:description>
 
       </dcc:item>
@@ -84,16 +84,16 @@
 
 
     <dcc:calibrationLaboratory>
-      <dcc:calibrationLaboratoryCode>FORC</dcc:calibrationLaboratoryCode>  
+      <dcc:calibrationLaboratoryCode/>  
       <dcc:contact>
         <dcc:name>
-          <dcc:content lang="en">National Metrology Laboratory - Industrial Technology Development Institute</dcc:content> 
+          <dcc:content lang="en"/> 
         </dcc:name>
         <dcc:location>
-          <dcc:city>Taguig</dcc:city>     
-          <dcc:countryCode>PH</dcc:countryCode>   
-          <dcc:postCode>1633</dcc:postCode> 
-          <dcc:street>General Santos Ave</dcc:street>
+          <dcc:city/>     
+          <dcc:countryCode/>   
+          <dcc:postCode/> 
+          <dcc:street/>
         </dcc:location>
       </dcc:contact>
     </dcc:calibrationLaboratory>
@@ -114,15 +114,15 @@
             <dcc:content lang="en">RADLEY F. MANALO</dcc:content>
           </dcc:name>
         </dcc:person>
-        <dcc:role>Science Research Specialist II</dcc:role>
+        <dcc:role>Senior Science Research Specialist</dcc:role>
       </dcc:respPerson>
       <dcc:respPerson>
         <dcc:person>
           <dcc:name>
-            <dcc:content lang="en"></dcc:content>
+            <dcc:content lang="en">213123123</dcc:content>
           </dcc:name>
         </dcc:person>
-        <dcc:role></dcc:role> 
+        <dcc:role>23231</dcc:role> 
       </dcc:respPerson>
     </dcc:respPersons>
 
@@ -241,8 +241,8 @@
 
 
       <dcc:comment>
-        <dcc:content lang="en">The axle weighing scale was subjected to specified force values in comparison with force standard values. Three (3) series of increasing force values were applied to the axle weighing scale. The relevant references for this axle weighing scale calibration are the TP-S3-FORC-02: "Calibration of Axle Weighing Scales".</dcc:content>
-        <dcc:content lang="en">- The above results were those obtained at the time of calibration and refer only to the force measuring instrument (axle weighing scale) calibrated in static compression mode. - No adjustment was performed on the axle weighingscale. The user should determine suitabilityof the axle weighing scale for its intended use.</dcc:content>
+        <dcc:content lang="en">CALIBRATION PROCEDURE: The axle weighing scale was subjected to specified force values in comparison with force standard values. Three (3) series of increasing force values were applied to the axle weighing scale. The relevant references for this axle weighing scale calibration are the TP-S3-FORC-02: "Calibration of Axle Weighing Scales".</dcc:content>
+        <dcc:content lang="en">REMARKS: - The above results were those obtained at the time of calibration and refer only to the force measuring instrument (axle weighing scale) calibrated in static compression mode. - No adjustment was performed on the axle weighingscale. The user should determine suitabilityof the axle weighing scale for its intended use.</dcc:content>
       </dcc:comment>
     </dcc:usedMethods>
 

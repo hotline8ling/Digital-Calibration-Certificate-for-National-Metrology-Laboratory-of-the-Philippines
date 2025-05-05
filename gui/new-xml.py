@@ -566,6 +566,31 @@ titleLabel = CTkLabel(master=app, text="New XML", font=("Inter", 13, "bold"), bg
 titleLabel.place(relx=0.1800, rely=0.0514)
 
 
+def highlight_empty_fields():
+    for w in scrollable_frame.winfo_children():
+        # CTkEntry → use its internal _entry widget
+        if isinstance(w, CTkEntry):
+            def on_done(e, widget=w):
+                ok = widget.get().strip()
+                widget.configure(border_color="green" if ok else "red")
+            w._entry.bind("<FocusOut>", on_done)
+            on_done(None)  # set initial color
+
+        # CTkTextbox → use its internal _textbox widget
+        elif isinstance(w, CTkTextbox):
+            def on_done_txt(e, widget=w):
+                txt = widget.get("1.0","end-1c").strip()
+                is_ph = txt in (
+                    placeholder_text.strip(),
+                    remarks_placeholder.strip(),
+                    uncertainty_placeholder.strip()
+                )
+                widget.configure(border_color="green" if txt and not is_ph else "red")
+            w._textbox.bind("<FocusOut>", on_done_txt)
+            on_done_txt(None)  # initial color
+
+# call once after building all widgets
+highlight_empty_fields()
 
 # 1) Collect every field in collect_calibration_info()
 def collect_calibration_info():
@@ -677,7 +702,8 @@ def generate_xml_tree(info):
         ident = ci.find("dcc:identifications/dcc:identification", ns)
         if ident is not None:
             set_text(ident.find("dcc:issuer", ns), info["identification_issuer"])
-            set_text(ident.find("dcc:value", ns), info["serial_number"])
+            set_text(ident.find("dcc:value", ns), info["calibration_item"])
+            set_text(ident.find("dcc:name/dcc:content", ns), info["serial_number"])
         desc = ci.find("dcc:description", ns)
         if desc is not None:
             cont = desc.findall("dcc:content", ns)
@@ -693,12 +719,13 @@ def generate_xml_tree(info):
         ident2 = si_el.find("dcc:identifications/dcc:identification", ns)
         if ident2 is not None:
             set_text(ident2.find("dcc:issuer", ns), info["standard_item_issuer"])
-            set_text(ident2.find("dcc:value", ns), info["standard_serial_number"])
+            set_text(ident2.find("dcc:value", ns), info["standard_item"])
+            set_text(ident2.find("dcc:name/dcc:content", ns), info["standard_serial_number"])
         desc2 = si_el.find("dcc:description", ns)
         if desc2 is not None:
             cont2 = desc2.findall("dcc:content", ns)
-            set_text(cont2[0], info["standard_cert_number"])
-            set_text(cont2[1], info["standard_traceability"])
+            set_text(cont2[0], "Calibration Certificate No.: " + info["standard_cert_number"])
+            set_text(cont2[1], "Traceability: " + info["standard_traceability"])
 
     # 5) respPersons
     resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)
@@ -911,7 +938,7 @@ def export_to_xml():
         if ident is not None:
             set_text(ident.find("dcc:issuer", ns), calibration_info["identification_issuer"])
             set_text(ident.find("dcc:value", ns), calibration_info["calibration_item"])
-            set_text(ident.find("dcc:name/dcc:content", ns), calibration_info["identification_issuer"])
+            set_text(ident.find("dcc:name/dcc:content", ns), calibration_info["serial_number"])
         desc = ci.find("dcc:description", ns)
         if desc is not None:
             cont = desc.findall("dcc:content", ns)
@@ -926,9 +953,9 @@ def export_to_xml():
         set_text(si_el.find("dcc:model", ns), calibration_info["standard_model"])
         ident2 = si_el.find("dcc:identifications/dcc:identification", ns)
         if ident2 is not None:
-            set_text(ident2.find("dcc:issuer", ns), calibration_info["standard_item"])
-            set_text(ident2.find("dcc:value", ns), calibration_info["standard_serial_number"])
-            set_text(ident2.find("dcc:name/dcc:content", ns), calibration_info["standard_item_issuer"])
+            set_text(ident2.find("dcc:issuer", ns), calibration_info["standard_item_issuer"])
+            set_text(ident2.find("dcc:value", ns), calibration_info["standard_item"])
+            set_text(ident2.find("dcc:name/dcc:content", ns), calibration_info["standard_serial_number"])
         desc2 = si_el.find("dcc:description", ns)
         if desc2 is not None:
             cont2 = desc2.findall("dcc:content", ns)
@@ -1070,7 +1097,7 @@ widget_tag_map = {
     calibration_item_dropdown:     ("name", 2),  # Target the item name
     model_textbox:                 ("identifications", 0),
     identification_issuer_textbox: ("description", 0),
-    serial_number_textbox:         ("value", 2),
+    serial_number_textbox:         ("description", 0),
     capacity_textbox:              ("content", 3),
     range_textbox:                 ("content", 4),
     resolution_textbox:            ("content", 5),
@@ -1080,7 +1107,7 @@ widget_tag_map = {
     model_textbox1:                ("model", 1),
     identification_issuer_textbox1:("identification", 3),
     serial_number_textbox1:        ("value", 1),
-    calibCert_textbox:             ("content", 6),
+    calibCert_textbox:             ("content", 7),
     traceability_textbox:          ("content", 7),
 
     # persons
