@@ -1,0 +1,15 @@
+{
+  "software_name": "DigiCert",
+  "software_release": "1.0.0",
+  "country_code_iso": "PH",
+  "used_lang_code": "en",
+  "mandatory_lang_code": "en",
+  "calibration_lab": {
+    "code": "NMLP",
+    "contact": "John Doe",
+    "city": "Quezon City",
+    "countrycode": "PH",
+    "postcode": "1100",
+    "street": "123 Calibration St."
+  }
+}

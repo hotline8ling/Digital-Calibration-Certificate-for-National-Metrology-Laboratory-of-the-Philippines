@@ -65,7 +65,6 @@ relheight = 525 / 700
 scrollable_frame = CTkScrollableFrame(master=app, fg_color='white')
 scrollable_frame.place(relx=relx, rely=rely, relwidth=relwidth, relheight=relheight)
 
-
 ###############################
 # Title inside scrollable frame
 titleLabel = CTkLabel(master=scrollable_frame, text="Request Details:", font=("Inter", 14, "bold"), bg_color='white')

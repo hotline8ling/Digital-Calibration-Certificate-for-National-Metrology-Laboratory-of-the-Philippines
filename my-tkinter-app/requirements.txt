@@ -1,0 +1,10 @@
+pytesseract
+customtkinter
+Pillow
+opencv-python
+lxml
+jsonschema
+reportlab
+pdfplumber
+numpy
+threading

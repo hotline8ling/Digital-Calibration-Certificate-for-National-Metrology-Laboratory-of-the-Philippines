@@ -47,7 +47,6 @@ def export_to_xml():
 
     back_to_menu()
   
-
 def center_window(app, width, height):
     app.update_idletasks()  # Ensure the window dimensions are updated
     screen_width = app.winfo_screenwidth()
@@ -94,7 +93,10 @@ tsr_label.grid(row=1, column=0, padx=10, pady=(5, 5), sticky="w")
 
 tsr_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 02-2019-FORC-0028")
 tsr_textbox.grid(row=2, column=0, padx=10, pady=(5, 10), sticky="w")
-tsr_textbox.insert(0, calibration_info["certificate_number"])
+# Insert certificate number or show placeholder if it's empty or None
+cert_no = calibration_info.get("certificate_number")
+if cert_no and cert_no.strip():
+    tsr_textbox.insert(0, cert_no)
 
 
 # Calibration Type Label
@@ -140,7 +142,10 @@ except ValueError:
 
 calibration_info["calibration_date"] = begin_performance_date
 
-start_date_textbox.insert(0, calibration_info["calibration_date"])
+
+start_date = calibration_info.get("calibration_date")
+if start_date and start_date.strip():
+    start_date_textbox.insert(0, start_date)
 
 # End Date of Calibration Label
 end_date_label = CTkLabel(master=scrollable_frame, text="End Date of Calibration:", font=("Inter", 12, "bold"), bg_color='white')
@@ -149,7 +154,11 @@ end_date_label.grid(row=3, column=1, padx=10, pady=(5, 5), sticky="w")
 # End Date of Calibration Textbox
 end_date_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 2025-02-24")
 end_date_textbox.grid(row=4, column=1, padx=10, pady=(5, 10), sticky="w")
-end_date_textbox.insert(0, calibration_info["calibration_enddate"])
+
+end_date = calibration_info.get("calibration_enddate")
+if end_date and end_date.strip():
+    end_date_textbox.insert(0, end_date)
+
 
 #############################
 # Calibration Equipment Label
@@ -184,6 +193,11 @@ calibration_item_dropdown = CTkOptionMenu(
 calibration_item_dropdown.grid(row=9, column=0, padx=10, pady=(5, 10), sticky="w")
 calibration_item_dropdown.set(calibration_info["calibration_item"])
 
+calibration_item = calibration_info.get("calibration_enddate")
+if calibration_item and calibration_item.strip():
+    calibration_item_dropdown.set(0, calibration_item)
+
+
 # Serial Number Label
 serial_number_label = CTkLabel(master=scrollable_frame, text="Serial Number:", font=("Inter", 12, "bold"), bg_color='white')
 serial_number_label.grid(row=8, column=1, padx=10, pady=(5, 5), sticky="w")
@@ -191,7 +205,11 @@ serial_number_label.grid(row=8, column=1, padx=10, pady=(5, 5), sticky="w")
 # Serial Number Textbox
 serial_number_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 1122YL23002")
 serial_number_textbox.grid(row=9, column=1, padx=10, pady=(5, 10), sticky="w")
-serial_number_textbox.insert(0, calibration_info["serial_number"])
+serial_number = calibration_info.get("serial_number")
+if serial_number and serial_number.strip():
+    serial_number_textbox.insert(0, serial_number)
+
+
 
 # Capacity Label
 capacity_label = CTkLabel(master=scrollable_frame, text="Capacity:", font=("Inter", 12, "bold"), bg_color='white')
@@ -200,9 +218,11 @@ capacity_label.grid(row=10, column=1, padx=10, pady=(5, 5), sticky="w")
 # Capacity Textbox
 capacity_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 1000 kgf")
 capacity_textbox.grid(row=11, column=1, padx=10, pady=(5, 10), sticky="w")
-capacity_textbox.insert(0, calibration_info["capacity"])
+capacity = calibration_info.get("capacity")
+if capacity and capacity.strip():
+    capacity_textbox.insert(0, capacity)
 
-
+################### STOPPED HERE #######################
 # Model Label
 model_label = CTkLabel(master=scrollable_frame, text="Model:", font=("Inter", 12, "bold"), bg_color='white')
 model_label.grid(row=12, column=0, padx=10, pady=(5, 5), sticky="w")
@@ -210,7 +230,11 @@ model_label.grid(row=12, column=0, padx=10, pady=(5, 5), sticky="w")
 # Model Textbox
 model_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Intercomp")
 model_textbox.grid(row=13, column=0, padx=10, pady=(5, 10), sticky="w")
-model_textbox.insert(0, calibration_info["make_model"])
+model = calibration_info.get("model")
+if model and model.strip():
+    model_textbox.insert(0, model)
+
+
 
 # Range Label
 range_label = CTkLabel(master=scrollable_frame, text="Range:", font=("Inter", 12, "bold"), bg_color='white')
@@ -219,8 +243,9 @@ range_label.grid(row=12, column=1, padx=10, pady=(5, 5), sticky="w")
 # Range Textbox
 range_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0 kgf to 15 000 kgf")
 range_textbox.grid(row=13, column=1, padx=10, pady=(5, 10), sticky="w")
-range_textbox.insert(0, calibration_info["measurement_range"])
-
+range = calibration_info.get("measurement_range")
+if range and range.strip():
+    range_textbox.insert(0, range)
 
 # Identification Issuer Label
 identification_issuer_label = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
@@ -229,8 +254,9 @@ identification_issuer_label.grid(row=10, column=0, padx=10, pady=(5, 5), sticky=
 # Identification Issuer Textbox
 identification_issuer_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. customer")
 identification_issuer_textbox.grid(row=11, column=0, padx=10, pady=(5, 10), sticky="w")
-identification_issuer_textbox.insert(0, calibration_info["identification_issuer"])
-
+identification_issuer = calibration_info.get("identification_issuer")
+if identification_issuer and identification_issuer.strip():
+    identification_issuer_textbox.insert(0, identification_issuer)
 
 # Resolution Label
 resolution_label = CTkLabel(master=scrollable_frame, text="Resolution:", font=("Inter", 12, "bold"), bg_color='white')
@@ -239,7 +265,10 @@ resolution_label.grid(row=14, column=0, padx=10, pady=(5, 5), sticky="w")
 # Resolution Textbox
 resolution_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 50 kgf")
 resolution_textbox.grid(row=15, column=0, padx=10, pady=(5, 10), sticky="w")
-resolution_textbox.insert(0, calibration_info["resolution"])
+resolution = calibration_info.get("resolution")
+if resolution and resolution.strip():
+    resolution_textbox.insert(0, resolution)
+
 
 ##########################
 # Standard Equipment Label
@@ -253,8 +282,9 @@ standard_item_label.grid(row=17, column=0, padx=10, pady=(5, 5), sticky="w")
 # Standard Item Textbox
 standard_item_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Force Measuring Equipment")
 standard_item_textbox.grid(row=18, column=0, padx=10, pady=(5, 10), sticky="w")
-standard_item_textbox.insert(0, calibration_info["standard_item"])
-
+standard_item = calibration_info.get("standard_item")
+if standard_item and standard_item.strip():
+    standard_item_textbox.insert(0, standard_item)
 
 # Serial Number Label
 serial_number_label1 = CTkLabel(master=scrollable_frame, text="Serial Number:", font=("Inter", 12, "bold"), bg_color='white')
@@ -264,8 +294,9 @@ serial_number_label1.grid(row=17, column=1, padx=10, pady=(5, 5), sticky="w")
 # Serial Number Textbox
 serial_number_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. SN 1251056K0094")
 serial_number_textbox1.grid(row=18, column=1, padx=10, pady=(5, 10), sticky="w")
-serial_number_textbox1.insert(0, calibration_info["standard_serial_number"])
-
+serial_number1 = calibration_info.get("standard_serial_number")
+if serial_number1 and serial_number1.strip():
+    serial_number_textbox1.insert(0, serial_number1)
 
 # Calibration Cert Label
 calibCert_label = CTkLabel(master=scrollable_frame, text="Calibration Certificate No.", font=("Inter", 12, "bold"), bg_color='white')
@@ -274,8 +305,9 @@ calibCert_label.grid(row=19, column=1, padx=10, pady=(5, 5), sticky="w")
 # Calibration Cert Textbox
 calibCert_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 11-2020-FORC-0116")
 calibCert_textbox.grid(row=20, column=1, padx=10, pady=(5, 10), sticky="w")
-calibCert_textbox.insert(0, calibration_info["standard_cert_number"])  
-
+calibCert = calibration_info.get("standard_cert_number")
+if calibCert and calibCert.strip():
+    calibCert_textbox.insert(0, calibCert)
 
 # Model Label
 model_label1 = CTkLabel(master=scrollable_frame, text="Model:", font=("Inter", 12, "bold"), bg_color='white')
@@ -284,8 +316,9 @@ model_label1.grid(row=21, column=0, padx=10, pady=(5, 5), sticky="w")
 # Model Textbox
 model_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Shimadzu/ UH-F1000kNX")
 model_textbox1.grid(row=22, column=0, padx=10, pady=(5, 10), sticky="w")
-model_textbox1.insert(0, calibration_info["standard_model"])
-
+model1 = calibration_info.get("standard_model")
+if model1 and model1.strip():
+    model_textbox1.insert(0, model1)
 
 # Traceability Label
 traceability_label = CTkLabel(master=scrollable_frame, text="Traceability:", font=("Inter", 12, "bold"), bg_color='white')
@@ -294,7 +327,10 @@ traceability_label.grid(row=21, column=1, padx=10, pady=(5, 5), sticky="w")
 # Traceability Textbox
 traceability_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Traceable to the SI through NMD-ITDI")
 traceability_textbox.grid(row=22, column=1, padx=10, pady=(5, 10), sticky="w")
-traceability_textbox.insert(0, calibration_info["standard_traceability"])
+traceability = calibration_info.get("standard_traceability")
+if traceability and traceability.strip():
+    traceability_textbox.insert(0, traceability)
+
 
 # Identification Issuer Label
 identification_issuer_label1 = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
@@ -303,7 +339,9 @@ identification_issuer_label1.grid(row=19, column=0, padx=10, pady=(5, 5), sticky
 # Identification Issuer Textbox
 identification_issuer_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. laboratory")
 identification_issuer_textbox1.grid(row=20, column=0, padx=10, pady=(5, 10), sticky="w")
-identification_issuer_textbox1.insert(0, calibration_info["standard_item_issuer"])
+identification_issuer1 = calibration_info.get("standard_item_issuer")
+if identification_issuer1 and identification_issuer1.strip():
+    identification_issuer_textbox1.insert(0, identification_issuer1)
 
 #################
 # Personnel Label
@@ -317,7 +355,9 @@ analyst1_label.grid(row=26, column=0, padx=10, pady=(5, 5), sticky="w")
 # Analyst # 1 Textbox
 analyst1_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. John Doe")
 analyst1_textbox.grid(row=27, column=0, padx=10, pady=(5, 10), sticky="w")
-analyst1_textbox.insert(0, calibration_info["resp_person1_name"])
+analyst1 = calibration_info.get("resp_person1_name")
+if analyst1 and analyst1.strip():
+    analyst1_textbox.insert(0, analyst1)
 
 # Role Label
 role1_label = CTkLabel(master=scrollable_frame, text="Role:", font=("Inter", 12, "bold"), bg_color='white')
@@ -326,7 +366,9 @@ role1_label.grid(row=26, column=1, padx=10, pady=(5, 5), sticky="w")
 # Role Textbox
 role1_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Science Research Specialist II")
 role1_textbox.grid(row=27, column=1, padx=10, pady=(5, 10), sticky="w")
-role1_textbox.insert(0, calibration_info["resp_person1_role"])
+role1 = calibration_info.get("resp_person1_role")
+if role1 and role1.strip():
+    role1_textbox.insert(0, role1)
 
 # Analyst # 2 Label
 analyst2_label = CTkLabel(master=scrollable_frame, text="Analyst # 2:", font=("Inter", 12, "bold"), bg_color='white')
@@ -335,7 +377,9 @@ analyst2_label.grid(row=28, column=0, padx=10, pady=(5, 5), sticky="w")
 # Analyst # 2 Textbox
 analyst2_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Jane Smith")
 analyst2_textbox.grid(row=29, column=0, padx=10, pady=(5, 10), sticky="w")
-analyst2_textbox.insert(0, calibration_info["resp_person2_name"])
+analyst2 = calibration_info.get("resp_person2_name")
+if analyst2 and analyst2.strip():
+    analyst2_textbox.insert(0, analyst2)
 
 # Role Label
 role2_label = CTkLabel(master=scrollable_frame, text="Role:", font=("Inter", 12, "bold"), bg_color='white')
@@ -344,7 +388,10 @@ role2_label.grid(row=28, column=1, padx=10, pady=(5, 5), sticky="w")
 # Role Textbox
 role2_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Senior Science Research Specialist")
 role2_textbox.grid(row=29, column=1, padx=10, pady=(5, 10), sticky="w")
-role2_textbox.insert(0, calibration_info["resp_person2_role"])
+role2 = calibration_info.get("resp_person2_role")
+if role2 and role2.strip():
+    role2_textbox.insert(0, role2)
+
 
 # Authorized by Label
 authorized_label = CTkLabel(master=scrollable_frame, text="Authorized by:", font=("Inter", 12, "bold"), bg_color='white')
@@ -353,7 +400,9 @@ authorized_label.grid(row=30, column=0, padx=10, pady=(5, 5), sticky="w")
 # Authorized by Textbox
 authorized_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Maria Santos")
 authorized_textbox.grid(row=31, column=0, padx=10, pady=(5, 10), sticky="w")
-authorized_textbox.insert(0, calibration_info["resp_person3_name"])
+authorized = calibration_info.get("resp_person3_name")
+if authorized and authorized.strip():
+    authorized_textbox.insert(0, authorized)
 
 # Role Label
 authorized_role_label = CTkLabel(master=scrollable_frame, text="Role:", font=("Inter", 12, "bold"), bg_color='white')
@@ -362,7 +411,9 @@ authorized_role_label.grid(row=30, column=1, padx=10, pady=(5, 5), sticky="w")
 # Role Textbox
 authorized_role_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Head, Pressure and Force Standards Section")
 authorized_role_textbox.grid(row=31, column=1, padx=10, pady=(5, 10), sticky="w")
-authorized_role_textbox.insert(0, calibration_info["resp_person3_role"])
+authorized_role = calibration_info.get("resp_person3_role")
+if authorized_role and authorized_role.strip():
+    authorized_role_textbox.insert(0, authorized_role)
 
 ############################
 # Customer Information Label
@@ -376,7 +427,9 @@ customer_label.grid(row=33, column=0, padx=10, pady=(5, 5), sticky="w")
 # Customer Textbox
 customer_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. ABC Corporation")
 customer_textbox.grid(row=34, column=0, padx=10, pady=(5, 10), sticky="w")
-customer_textbox.insert(0, calibration_info["customer_name"])
+customer = calibration_info.get("customer_name")
+if customer and customer.strip():
+    customer_textbox.insert(0, customer)
 
 # Address Label
 address_label = CTkLabel(master=scrollable_frame, text="Address:", font=("Inter", 12, "bold"), bg_color='white')
@@ -385,7 +438,9 @@ address_label.grid(row=33, column=1, padx=10, pady=(5, 5), sticky="w")
 # Address Textbox
 address_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 123 Main St, City, Country")
 address_textbox.grid(row=34, column=1, padx=10, pady=(5, 10), sticky="w")
-address_textbox.insert(0, calibration_info["customer_address"])
+address = calibration_info.get("customer_address")
+if address and address.strip():
+    address_textbox.insert(0, address)
 
 ################################
 # Environmental Conditions Label
@@ -399,7 +454,9 @@ temperature_label.grid(row=36, column=0, padx=10, pady=(5, 5), sticky="w")
 # Temperature Textbox
 temperature_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. (22 +- 2)")
 temperature_textbox.grid(row=37, column=0, padx=10, pady=(5, 10), sticky="w")
-temperature_textbox.insert(0, calibration_info["temperature"])
+temperature = calibration_info.get("temperature")
+if temperature and temperature.strip():
+    temperature_textbox.insert(0, temperature)
 
 # Unit Label (Temperature)
 temperature_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -408,6 +465,9 @@ temperature_unit_label.grid(row=36, column=1, padx=10, pady=(5, 5), sticky="w")
 # Unit Textbox (Temperature)
 temperature_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \celcius")
 temperature_unit_textbox.grid(row=37, column=1, padx=10, pady=(5, 10), sticky="w")
+temperature_unit = calibration_info.get("temperature_unit")
+if temperature_unit and temperature_unit.strip():
+    temperature_unit_textbox.insert(0, temperature_unit)
 
 # Humidity Label
 humidity_label = CTkLabel(master=scrollable_frame, text="Humidity:", font=("Inter", 12, "bold"), bg_color='white')
@@ -416,7 +476,9 @@ humidity_label.grid(row=38, column=0, padx=10, pady=(5, 5), sticky="w")
 # Humidity Textbox
 humidity_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. (40 +- 5)")
 humidity_textbox.grid(row=39, column=0, padx=10, pady=(5, 10), sticky="w")
-humidity_textbox.insert(0, calibration_info["humidity"])
+humidity = calibration_info.get("humidity")
+if humidity and humidity.strip():
+    humidity_textbox.insert(0, humidity)
 
 # Unit Label (Humidity)
 humidity_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -425,7 +487,9 @@ humidity_unit_label.grid(row=38, column=1, padx=10, pady=(5, 5), sticky="w")
 # Unit Textbox (Humidity)
 humidity_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \%")
 humidity_unit_textbox.grid(row=39, column=1, padx=10, pady=(5, 10), sticky="w")
-
+humidity_unit = calibration_info.get("humidity_unit")
+if humidity_unit and humidity_unit.strip():
+    humidity_unit_textbox.insert(0, humidity_unit)
 
 ##########################
 # Results Label
@@ -439,8 +503,9 @@ applied_measurement_label.grid(row=41, column=0, padx=10, pady=(5, 5), sticky="w
 # Applied Force Textbox
 applied_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 3 000 6 000")
 applied_measurement_textbox.grid(row=42, column=0, padx=10, pady=(5, 10), sticky="w")
-applied_measurement_textbox.insert(0, calibration_info["standard_measurement_values"])
-
+applied_measurement_val = calibration_info.get("standard_measurement_values")
+if applied_measurement_val and applied_measurement_val.strip():
+    applied_measurement_textbox.insert(0, applied_measurement_val)
 
 # Unit Label (Applied Force)
 applied_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -449,16 +514,21 @@ applied_measurement_unit_label.grid(row=41, column=1, padx=10, pady=(5, 5), stic
 # Unit Textbox (Applied Force)
 applied_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
 applied_measurement_unit_textbox.grid(row=42, column=1, padx=10, pady=(5, 10), sticky="w")
-applied_measurement_unit_textbox.insert(0, calibration_info["standard_measurement_unit"])
+applied_measurement_unit = calibration_info.get("standard_measurement_unit")
+if applied_measurement_unit and applied_measurement_unit.strip():
+    applied_measurement_unit_textbox.insert(0, applied_measurement_unit)
+
 
 # Indicated Measurement Label
 indicated_measurement_label = CTkLabel(master=scrollable_frame, text="Indicated Measurement:", font=("Inter", 12, "bold"), bg_color='white')
 indicated_measurement_label.grid(row=43, column=0, padx=10, pady=(5, 5), sticky="w")
 
-# Indicated Measuremente Textbox
+# Indicated Measurement Textbox
 indicated_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 2 850 5 700")
 indicated_measurement_textbox.grid(row=44, column=0, padx=10, pady=(5, 10), sticky="w")
-indicated_measurement_textbox.insert(0, calibration_info["measured_item_values"])
+indicated_measurement_val = calibration_info.get("measured_item_values")
+if indicated_measurement_val and indicated_measurement_val.strip():
+    indicated_measurement_textbox.insert(0, indicated_measurement_val)
 
 # Unit Label (Indicated Measurement)
 indicated_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -467,7 +537,10 @@ indicated_measurement_unit_label.grid(row=43, column=1, padx=10, pady=(5, 5), st
 # Unit Textbox (Indicated Measurement)
 indicated_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
 indicated_measurement_unit_textbox.grid(row=44, column=1, padx=10, pady=(5, 10), sticky="w")
-indicated_measurement_unit_textbox.insert(0, calibration_info["measured_item_unit"])
+indicated_measurement_unit = calibration_info.get("measured_item_unit")
+if indicated_measurement_unit and indicated_measurement_unit.strip():
+    indicated_measurement_unit_textbox.insert(0, indicated_measurement_unit)
+
 
 # Relative Expanded Uncertainty Label
 relative_expandedUn_label = CTkLabel(master=scrollable_frame, text="Relative Measurement Error:", font=("Inter", 12, "bold"), bg_color='white')
@@ -476,7 +549,9 @@ relative_expandedUn_label.grid(row=45, column=0, padx=10, pady=(5, 5), sticky="w
 # Relative Expanded Uncertainty Textbox
 relative_expandedUn_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
 relative_expandedUn_textbox.grid(row=46, column=0, padx=10, pady=(5, 10), sticky="w")
-relative_expandedUn_textbox.insert(0, calibration_info["relative_uncertainty_values"])
+relative_expandedUn = calibration_info.get("relative_uncertainty_values")
+if relative_expandedUn and relative_expandedUn.strip():
+    relative_expandedUn_textbox.insert(0, relative_expandedUn)
 
 
 # Unit Label (Relative Expanded Uncertainty)
@@ -486,7 +561,9 @@ relative_expandedUn_unit_label.grid(row=45, column=1, padx=10, pady=(5, 5), stic
 # Unit Textbox (Relative Expanded Uncertainty)
 relative_expandedUn_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
 relative_expandedUn_unit_textbox.grid(row=46, column=1, padx=10, pady=(5, 10), sticky="w")
-relative_expandedUn_unit_textbox.insert(0, calibration_info["relative_uncertainty_unit"])
+relative_expandedUn_unit = calibration_info.get("relative_uncertainty_unit")
+if relative_expandedUn_unit and relative_expandedUn_unit.strip():
+    relative_expandedUn_unit_textbox.insert(0, relative_expandedUn_unit)
 
 #############################
 # Uncertainty of Measurement Label
@@ -558,7 +635,10 @@ calibration_procedure_textbox.insert("1.0", placeholder_text)
 calibration_procedure_textbox.bind("<FocusIn>", on_focus_in)
 calibration_procedure_textbox.bind("<FocusOut>", on_focus_out)
 calibration_procedure_textbox.grid(row=50, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
-calibration_procedure_textbox.insert("1.0", calibration_info["calibration_procedure"])
+calibration_procedure = calibration_info.get("calibration_procedure")
+if calibration_procedure and calibration_procedure.strip():
+    calibration_procedure_textbox.insert("1.0", calibration_procedure)
+calibration_procedure_textbox.configure(text_color="gray")  # start as placeholder
 
 ###############
 # Remarks Label
@@ -594,7 +674,6 @@ remarks_textbox.insert("1.0", remarks_placeholder)
 remarks_textbox.bind("<FocusIn>", on_remarks_focus_in)
 remarks_textbox.bind("<FocusOut>", on_remarks_focus_out)
 remarks_textbox.grid(row=52, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
-remarks_textbox.insert("1.0", calibration_info["remarks"])
 
 
 
@@ -661,7 +740,7 @@ footer_frame.place(relx=0.0, rely=0.89, relwidth=0.5, relheight=0.1114)
 
 # Export button
 exportButton = CTkButton(master=app, text="Export", corner_radius=7, 
-                         fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13))
+                         fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13), command=export_to_xml)
 exportButton.place(relx=0.1958, rely=0.9214, relwidth=0.1008, relheight=0.0471)
 
 # Back button

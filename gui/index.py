@@ -2,15 +2,25 @@ from tkinter import messagebox
 from customtkinter import *
 from PIL import Image
 import os
-from PIL import Image
 import subprocess
 from datetime import datetime
+import cv2
 from lxml import etree as LET
 import json
 import re
-
+import cv2
+import numpy as np
+import pytesseract
+from reportlab.pdfgen import canvas
+import tkinter as tk
+from tkinter import filedialog
 import pdfplumber
+import tempfile
+import threading
 
+
+
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 #import static_info.json
 # Load the JSON data from the file using absolute path
 
@@ -49,13 +59,199 @@ bg_frame = CTkFrame(master=app, fg_color="white")  # Set the color to white
 bg_frame.place(relx=0, rely=0, relwidth=1, relheight=1)  # Fill the entire window
 
 # Functions
-def open_cert():
-    filename = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg")])
-    global img_path
-    img_path = filename
-    certLabel.configure(text=os.path.basename(filename))
-    return filename
 
+
+def show_loading_screen(text="Loading, please wait..."):
+    # create a modal “loading” window
+    loading = CTkToplevel(app)
+    loading.geometry("300x80")
+    loading.title("")
+    loading.transient(app)
+    loading.grab_set()  # block interaction with main window
+    loading.resizable(False, False)
+    lbl = CTkLabel(loading, text=text, font=("Inter", 14))
+    lbl.pack(expand=True, fill="both", padx=20, pady=20)
+    return loading, lbl
+
+
+def open_images():
+    #Display a messagebox to inform the user that image to xml is not the most reliant option since it there are many factors that can affect the result such as lighting, image quality, etc.
+    messagebox.showinfo("Info", "Image to XML is not the most reliable option. Please check the results carefully.")
+
+
+    # Hide root and open multi-file dialog
+    root = tk.Tk()
+    root.withdraw()
+    image_files = filedialog.askopenfilenames(
+        title="Select image files",
+        filetypes=[("Image Files", "*.png *.jpg *.jpeg")]
+    )
+    if not image_files:
+        print("❌ No images selected.")
+        return
+
+    # 2) show “loading” overlay
+    loading_win, loading_label = show_loading_screen("Processing images...")
+
+    def worker():
+        # build temp PDF
+        tmp = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+        tmp_path = tmp.name;  tmp.close()
+        c = canvas.Canvas(tmp_path)
+        for i, image_path in enumerate(image_files, 1):
+            # optional: update loading text
+            app.after(0, lambda i=i: loading_label.configure(
+                text=f"Processing image {i}/{len(image_files)}..."
+            ))
+            add_image_to_pdf_canvas(image_path, c)
+        c.save()
+
+        # extract & hand off
+        cal_info = extract_pdf(tmp_path)
+        os.remove(tmp_path)
+        if not cal_info:
+            app.after(0, lambda:
+                messagebox.showerror("Error", "No data extracted")
+            )
+            return
+
+        tmp_json = os.path.join(script_dir, "calibration_info.json")
+        with open(tmp_json, "w", encoding="utf-8") as f:
+            json.dump(cal_info, f, ensure_ascii=False, indent=2)
+
+        # close loading, then main window, then launch xml GUI
+        def finish():
+            loading_win.destroy()
+            app.destroy()
+            subprocess.Popen([
+                sys.executable,
+                os.path.join(script_dir, "imgToxml.py"),
+                tmp_json
+            ])
+        app.after(0, finish)
+
+    # run the work in background so UI stays responsive
+    threading.Thread(target=worker, daemon=True).start()
+
+
+
+def preprocess_image(image_path):
+    image = cv2.imread(image_path)
+    denoised = cv2.fastNlMeansDenoisingColored(image, None, 5, 10, 7, 21)
+    lab = cv2.cvtColor(denoised, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l)
+    blur = cv2.GaussianBlur(cl, (5, 5), sigmaX=1.0)
+    sharp_l = cv2.addWeighted(cl, 1.3, blur, -0.3, 0)
+    merged = cv2.merge((sharp_l, a, b))
+    enhanced = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
+    return image, enhanced
+
+def detect_cells(image, min_cell_area=100, grid_divisor=50):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    bw = cv2.adaptiveThreshold(~gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+                               cv2.THRESH_BINARY, 15, -2)
+    horizontal = bw.copy()
+    vertical = bw.copy()
+    h_size = max(1, int(horizontal.shape[1] / grid_divisor))
+    v_size = max(1, int(vertical.shape[0] / grid_divisor))
+    h_struct = cv2.getStructuringElement(cv2.MORPH_RECT, (h_size, 1))
+    v_struct = cv2.getStructuringElement(cv2.MORPH_RECT, (1, v_size))
+    horizontal = cv2.erode(horizontal, h_struct)
+    horizontal = cv2.dilate(horizontal, h_struct)
+    vertical = cv2.erode(vertical, v_struct)
+    vertical = cv2.dilate(vertical, v_struct)
+    grid_mask = cv2.add(horizontal, vertical)
+    cnts, _ = cv2.findContours(grid_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    cells = []
+    for cnt in cnts:
+        x, y, w, h = cv2.boundingRect(cnt)
+        if w * h >= min_cell_area:
+            cells.append((x, y, w, h))
+    areas = [w * h for (_, _, w, h) in cells]
+    if areas:
+        median_area = np.median(areas)
+        max_allowed_area = 2 * median_area
+        cells = [(x, y, w, h) for (x, y, w, h) in cells if w * h <= max_allowed_area]
+    cells.sort(key=lambda b: (b[1], b[0]))
+    return cells
+
+def add_image_to_pdf_canvas(image_path, c):
+    orig, prep = preprocess_image(image_path)
+    h_img, w_img = orig.shape[:2]
+
+    data = pytesseract.image_to_data(
+        Image.fromarray(prep), output_type=pytesseract.Output.DICT,
+        config=r'--oem 3 --psm 12 -l eng'
+    )
+
+    cells = detect_cells(prep, min_cell_area=200, grid_divisor=60)
+    cell_text = []
+    for (cx, cy, cw, ch) in cells:
+        cell_img = prep[cy:cy+ch, cx:cx+cw]
+        cell_data = pytesseract.image_to_data(
+            Image.fromarray(cell_img), output_type=pytesseract.Output.DICT,
+            config=r'--oem 3 --psm 12 -l eng'
+        )
+        words = []
+        for i, txt in enumerate(cell_data['text']):
+            if int(cell_data['conf'][i]) > 60 and txt.strip():
+                words.append((cell_data['left'][i], txt))
+        words.sort(key=lambda w: w[0])
+        line = ' '.join(w for _, w in words)
+        cell_text.append(line)
+
+    used_idxs = set()
+    for i in range(len(data['text'])):
+        if int(data['conf'][i]) < 60 or not data['text'][i].strip():
+            continue
+        x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
+        cx, cy = x + w//2, y + h//2
+        for (bx, by, bw, bh) in cells:
+            if bx < cx < bx + bw and by < cy < by + bh:
+                used_idxs.add(i)
+                break
+
+    lines = {}
+    for i in range(len(data['text'])):
+        if i in used_idxs or int(data['conf'][i]) <= 60:
+            continue
+        txt = data['text'][i].strip()
+        if not txt:
+            continue
+        key = (data['block_num'][i], data['par_num'][i], data['line_num'][i])
+        lines.setdefault(key, []).append(i)
+
+        tmp = f'temp_page_{os.path.basename(image_path)}.jpg'
+        Image.fromarray(cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)).save(tmp)
+        c.setPageSize((w_img, h_img))
+        c.drawImage(tmp, 0, 0, width=w_img, height=h_img)
+
+
+    c.setFont('Helvetica', 20)
+    c.setFillColorRGB(1, 1, 1, alpha=0)
+    for idxs in lines.values():
+        xs = [data['left'][i] for i in idxs]
+        tops = [data['top'][i] for i in idxs]
+        heights = [data['height'][i] for i in idxs]
+        text_line = ' '.join(data['text'][i] for i in idxs)
+        x = min(xs)
+        avg_top = int(np.mean(tops))
+        avg_h = int(np.mean(heights))
+        y = h_img - avg_top - int(avg_h * 0.8)
+        c.drawString(x, y, text_line)
+
+    c.setStrokeColorRGB(1, 0, 0, alpha=0)
+    c.setFont('Helvetica', 10)
+    for (box, txt) in zip(cells, cell_text):
+        x, y, w, h = box
+        c.rect(x, h_img - y - h, w, h)
+        if txt:
+            c.drawString(x + 2, h_img - y - int(h * 0.2), txt)
+
+    os.remove(tmp)
+    c.showPage()
 
 def open_pdf():
     pdf_path = filedialog.askopenfilename(filetypes=[("PDF files","*.pdf")])
@@ -76,9 +272,6 @@ def open_pdf():
     subprocess.Popen([sys.executable,
                       os.path.join(script_dir, "pdfToxml.py"),
                       tmp])
-        
-
-
 
 def open_newxml_gui():
     app.destroy()  # Close the current app window
@@ -221,49 +414,48 @@ def extract_pdf(pdf_path):
         # Split text into lines for easier processing
         lines = raw_text.split('\n')
         
-        # Extract certificate number using regex
+            # Extract certificate number using regex
         cert_match = re.search(r'No\.\s+([\w\-]+)', raw_text)
         if cert_match:
             info['certificate_number'] = cert_match.group(1)
         
-        # Extract calibration date using regex
-        date_match = re.search(r'Date of Calibration\s*:\s*([^\n]+)', raw_text)
+        # Extract calibration date using regex (with or without colon)
+        date_match = re.search(r'Date of Calibration(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if date_match:
             info['calibration_date'] = date_match.group(1).strip()
-        
         # Extract calibration item
-        item_match = re.search(r'Calibration Item\s*:\s*([^\n]+)', raw_text)
+        item_match = re.search(r'Calibration Item(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if item_match:
             info['calibration_item'] = item_match.group(1).strip()
         
         # Extract capacity
-        capacity_match = re.search(r'Capacity\s*:\s*([^\n]+)', raw_text)
+        capacity_match = re.search(r'Capacity(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if capacity_match:
             info['capacity'] = capacity_match.group(1).strip()
         
         # Extract measurement range
-        range_match = re.search(r'Measurement Range\s*:\s*([^\n]+)', raw_text)
+        range_match = re.search(r'Measurement Range(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if range_match:
             info['measurement_range'] = range_match.group(1).strip()
         
         # Extract resolution
-        resolution_match = re.search(r'Resolution\s*:\s*([^\n]+)', raw_text)
+        resolution_match = re.search(r'Resolution(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if resolution_match:
             info['resolution'] = resolution_match.group(1).strip()
         
         # Extract make/model
-        make_match = re.search(r'Make / Model\s*:\s*([^\n]+)', raw_text)
+        make_match = re.search(r'Make / Model(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if make_match:
             info['make_model'] = make_match.group(1).strip()
         
         # Extract serial number
-        serial_match = re.search(r'Serial No\.\s*:\s*([^\n]+)', raw_text)
+        serial_match = re.search(r'Serial No\.(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if serial_match:
             info['serial_number'] = serial_match.group(1).strip()
         
         # Extract customer and address
         # First find the customer line
-        customer_match = re.search(r'Customer\s*:\s*([^\n]+)', raw_text)
+        customer_match = re.search(r'Customer(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if customer_match:
             info['customer_name'] = customer_match.group(1).strip()
             
@@ -301,12 +493,18 @@ def extract_pdf(pdf_path):
                     if address_lines:
                         info['customer_address'] = ' '.join(address_lines)
                         
-                # Extract environmental conditions
-        temp_match = re.search(r'Ambient Temperature\s*:\s*\(?([^\)\n]+)\)?', raw_text)
+                # Extract environmental conditions (with or without colon)
+        temp_match = re.search(
+            r'Ambient Temperature(?:\s*:\s*|\s+)\(?([^\)\n]+)\)?',
+            raw_text
+        )
         if temp_match:
             info['temperature'] = temp_match.group(1).strip()
-        
-        hum_match = re.search(r'Relative Humidity\s*:\s*\(?([^\)\n]+)\)?', raw_text)
+
+        hum_match = re.search(
+            r'Relative Humidity(?:\s*:\s*|\s+)\(?([^\)\n]+)\)?',
+            raw_text
+        )
         if hum_match:
             info['humidity'] = hum_match.group(1).strip()
         
@@ -336,11 +534,9 @@ def extract_pdf(pdf_path):
                     info[f'resp_person{idx+1}_role'] = role_txt
                     break
 
-
-        # Extract calibration procedure 
-        # Extract calibration procedure (multi-line until the next section header)
+        # Extract calibration procedure (with or without colon)
         proc_match = re.search(
-            r'CALIBRATION PROCEDURE:\s*(.*?)\nENVIRONMENTAL CONDITIONS:',
+            r'CALIBRATION PROCEDURE(?:\s*:\s*|\s+)(.*?)(?=\nENVIRONMENTAL CONDITIONS:)',
             raw_text,
             re.DOTALL
         )
@@ -383,7 +579,7 @@ def extract_pdf(pdf_path):
 
         # Extract uncertainty of measurement narrative, stopping at next section header or page break
         uom_match = re.search(
-            r'UNCERTAINTY OF MEASUREMENT:\s*(.*?)(?=\n[A-Z ]+?:|\nPage\s*\d+\s*of\s*\d+)',
+            r'UNCERTAINTY OF MEASUREMENT(?::\s*|\s+)(.*?)(?=\n[A-Z ]+?:|\nPage\s*\d+\s*of\s*\d+)',
             raw_text,
             re.DOTALL
         )
@@ -452,84 +648,77 @@ def extract_pdf(pdf_path):
     table_columns = extract_table_columns(pdf_path)
     
     # extract instrument name and serial number from Table 2
-    std_entry = table_columns[1]['Name of Standard'][0]
-    lines = std_entry.split('\n')
-    instrument_name = ' '.join(lines[:-1]).strip()
-    instrument_serial = lines[-1].strip()
+    try:
+        # extract instrument name and serial number from Table 2
+        std_entry = table_columns[1]['Name of Standard'][0]
+        lines = std_entry.split('\n')
+        instrument_name = ' '.join(lines[:-1]).strip()
+        instrument_serial = lines[-1].strip()
 
-    # Extract Make/Model from table 2 without newlines
-    make_model = " ".join(table_columns[1]['Make/Model'][0].split())
+        # Extract Make/Model from table 2 without newlines
+        make_model = " ".join(table_columns[1]['Make/Model'][0].split())
 
-    #Extract calibration certificate number from table 2
-    cert_number = table_columns[1]['Calibration Certificate No.'][0]
+        # Extract calibration certificate number from table 2
+        cert_number = table_columns[1]['Calibration Certificate No.'][0]
 
-    # Extract traceability from table 2
-    traceability = " ".join(table_columns[1]['Traceability'][0].split())
-
-
+        # Extract traceability from table 2
+        traceability = " ".join(table_columns[1]['Traceability'][0].split())
 
         #------------------------------------------------ MEASUREMENT RESULTS TABLE --------------------------------------------------
-        #Extract the first key of table 1 as standard measurement
-    standard_measurement = list(table_columns[0].keys())[0]
+        # Extract the first key of table 1 as standard measurement
+        standard_measurement = list(table_columns[0].keys())[0]
 
         # split the uncertainty column into unit and values
-    raw_standard = table_columns[0][standard_measurement]
-    standard_unit = raw_standard[0]
-
-    raw_standard_str = raw_standard[1]
-    standard_val = raw_standard_str.replace('\n', ' ')
-
+        raw_standard = table_columns[0][standard_measurement]
+        standard_unit = raw_standard[0]
+        raw_standard_str = raw_standard[1]
+        standard_val = raw_standard_str.replace('\n', ' ')
 
         # Extract the equipment measured values from table 1
-    measured_col = next((col for col in table_columns[0]
+        measured_col = next((col for col in table_columns[0]
                             if 'indicated' in col.lower()), None)
-    if measured_col:
+        if measured_col:
             raw_measured = table_columns[0][measured_col]
             measured_unit = raw_measured[0]
             measured_val = raw_measured[1].replace('\n', ' ')
-    else:
+        else:
             measured_unit = ''
             measured_val = ''
 
-    uncertainty_col = ""
-        # find the column in the first table whose header contains "uncertainty"
-    for col_name, col_values in table_columns[0].items():
-            uncertainty_col = ""
-            # find the column in the first table whose header contains "uncertainty"
-            for col_name in table_columns[0].keys():
-                if 'uncertainty' in col_name.lower():
-                    uncertainty_col = col_name
-                    break
-            # split the uncertainty column into unit and values
-            raw_uncertainty = table_columns[0][uncertainty_col]
-            uncertainty_unit = raw_uncertainty[0]
-            # count and replace newlines in the uncertainty values
-            uncertainty_str = raw_uncertainty[1]
-            value_count = uncertainty_str.count('\n') + 1
-            uncertainty_val = uncertainty_str.replace('\n', ' ')
+        # find uncertainty column
+        uncertainty_col = next((col for col in table_columns[0]
+                                if 'uncertainty' in col.lower()), "")
+        if not uncertainty_col:
+            raise KeyError("No uncertainty column found in table_columns[0]")
 
-
+        raw_uncertainty = table_columns[0][uncertainty_col]
+        uncertainty_unit = raw_uncertainty[0]
+        uncertainty_str = raw_uncertainty[1]
+        value_count = uncertainty_str.count('\n') + 1
+        uncertainty_val = uncertainty_str.replace('\n', ' ')
 
         # store into calibration_info
-    calibration_info['standard_item'] = instrument_name
-    calibration_info['standard_serial_number'] = instrument_serial
-    calibration_info["standard_model"] = make_model
-    calibration_info['standard_cert_number'] = cert_number
-    calibration_info['standard_traceability'] = traceability
+        calibration_info.update({
+            'standard_item':          instrument_name,
+            'standard_serial_number': instrument_serial,
+            'standard_model':         make_model,
+            'standard_cert_number':   cert_number,
+            'standard_traceability':  traceability,
+            'relative_uncertainty':       uncertainty_col.replace('\n', ' '),
+            'relative_uncertainty_unit':  ' '.join([f'\\{uncertainty_unit}'] * value_count),
+            'relative_uncertainty_values': uncertainty_val,
+            'measurement_standard':        standard_measurement.replace('\n', ' '),
+            'standard_measurement_unit':   ' '.join([f'\\{standard_unit}'] * value_count),
+            'standard_measurement_values': standard_val,
+            'measured_item':               measured_col.replace('\n', ' ') if measured_col else '',
+            'measured_item_unit':          ' '.join([f'\\{measured_unit}'] * value_count),
+            'measured_item_values':        measured_val
+        })
 
-    calibration_info['relative_uncertainty'] = uncertainty_col.replace('\n', ' ')
-    calibration_info['relative_uncertainty_unit'] = ' '.join([f'\\{uncertainty_unit}'] * value_count)
-    calibration_info['relative_uncertainty_values'] = uncertainty_val
-
-    calibration_info['measurement_standard'] = standard_measurement.replace('\n', ' ')
-    calibration_info['standard_measurement_unit'] = ' '.join([f'\\{standard_unit}'] * value_count)
-    calibration_info['standard_measurement_values'] = standard_val
-
-
-    # store into calibration_info
-    calibration_info['measured_item'] = measured_col.replace('\n', ' ') if measured_col else ''
-    calibration_info['measured_item_unit'] = ' '.join([f'\\{measured_unit}'] * value_count)
-    calibration_info['measured_item_values'] = measured_val
+    except (IndexError, KeyError) as e:
+        print(f"Table parsing error: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
     # return the calibration_info dictionary
     print(calibration_info)
@@ -585,7 +774,7 @@ importCertL.place(relx=0.124, rely=0.260)
 
 # import button for image
 importCert = CTkButton(master=app, text="Import Image", corner_radius=7, 
-                    fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_cert)
+                    fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_images)
 importCert.place(relx=0.124, rely=0.308, relwidth=0.368, relheight=0.066)
 
 # Textlabel for Certificate Image
