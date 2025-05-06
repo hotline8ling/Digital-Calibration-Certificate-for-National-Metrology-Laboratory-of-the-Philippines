@@ -222,7 +222,6 @@ capacity = calibration_info.get("capacity")
 if capacity and capacity.strip():
     capacity_textbox.insert(0, capacity)
 
-################### STOPPED HERE #######################
 # Model Label
 model_label = CTkLabel(master=scrollable_frame, text="Model:", font=("Inter", 12, "bold"), bg_color='white')
 model_label.grid(row=12, column=0, padx=10, pady=(5, 5), sticky="w")
@@ -230,11 +229,9 @@ model_label.grid(row=12, column=0, padx=10, pady=(5, 5), sticky="w")
 # Model Textbox
 model_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Intercomp")
 model_textbox.grid(row=13, column=0, padx=10, pady=(5, 10), sticky="w")
-model = calibration_info.get("model")
+model = calibration_info.get("make_model")
 if model and model.strip():
     model_textbox.insert(0, model)
-
-
 
 # Range Label
 range_label = CTkLabel(master=scrollable_frame, text="Range:", font=("Inter", 12, "bold"), bg_color='white')

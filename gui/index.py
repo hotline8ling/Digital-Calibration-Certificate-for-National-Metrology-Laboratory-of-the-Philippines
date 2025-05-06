@@ -507,7 +507,6 @@ def extract_pdf(pdf_path):
         )
         if hum_match:
             info['humidity'] = hum_match.group(1).strip()
-        
         # --- Replace old respPerson logic with this new block ---
         # Extract responsible persons by finding uppercase name lines and their following role lines
         exclude_prefixes = (
@@ -517,22 +516,32 @@ def extract_pdf(pdf_path):
         person_indices = []
         for i, line in enumerate(lines):
             txt = line.strip()
-            # line is all-caps (with spaces, commas, dots or hyphens), at least two words,
-            # and does not start with any known header
             if (re.match(r'^[A-Z][A-Z\s,\.\-]+$', txt)
                 and len(txt.split()) > 1
                 and not any(txt.startswith(pref) for pref in exclude_prefixes)):
                 person_indices.append(i)
 
-        # take up to three name/role pairs
-        for idx, li in enumerate(person_indices[:3]):
+        # take up to two name/role pairs for persons 1 and 2
+        for idx, li in enumerate(person_indices[:2]):
             info[f'resp_person{idx+1}_name'] = lines[li].strip()
-            # the role should be the next non-empty line after the name
             for j in range(li+1, min(li+5, len(lines))):
                 role_txt = lines[j].strip()
                 if role_txt and role_txt != lines[li].strip():
                     info[f'resp_person{idx+1}_role'] = role_txt
                     break
+
+        # Extract 3rd person (Chief) between "For the Chief, National Metrology Laboratory" and "Date issued:"
+        chief_match = re.search(
+            r'For the Chief, National Metrology Laboratory\s*(.*?)\s*Date issued:',
+            raw_text,
+            re.DOTALL
+        )
+        if chief_match:
+            block_lines = [l.strip() for l in chief_match.group(1).split('\n') if l.strip()]
+            if len(block_lines) >= 2:
+                info['resp_person3_name'] = block_lines[0]
+                info['resp_person3_role'] = block_lines[1]
+
 
         # Extract calibration procedure (with or without colon)
         proc_match = re.search(
@@ -802,7 +811,7 @@ importFormat = CTkButton(master=app, text="Import PDF", corner_radius=7,
 importFormat.place(relx=0.124, rely=0.524, relwidth=0.368, relheight=0.066)
 
 # Textlabel for Calibration Format XML
-formatLabel = CTkLabel(master=app, text="exampleFormat.xml", font=("Inter", 12), bg_color="#E0E0E0")
+formatLabel = CTkLabel(master=app, text="exampleCertificate.pdf", font=("Inter", 12), bg_color="#E0E0E0")
 formatLabel.place(relx=0.124, rely=0.591)
 
 # Textlabel for DCC Scratch
