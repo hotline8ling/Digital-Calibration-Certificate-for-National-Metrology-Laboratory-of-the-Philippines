@@ -599,7 +599,9 @@ uncertainty_textbox.insert("1.0", uncertainty_placeholder)
 uncertainty_textbox.bind("<FocusIn>", on_uncertainty_focus_in)
 uncertainty_textbox.bind("<FocusOut>", on_uncertainty_focus_out)
 uncertainty_textbox.grid(row=48, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+uncertainty_textbox.delete("1.0", "end")
 uncertainty_textbox.insert("1.0", calibration_info["uncertainty_of_measurement"])
+uncertainty_textbox.configure(text_color="black")
 
 #############################
 # Calibration Procedure Label
@@ -635,10 +637,9 @@ calibration_procedure_textbox.insert("1.0", placeholder_text)
 calibration_procedure_textbox.bind("<FocusIn>", on_focus_in)
 calibration_procedure_textbox.bind("<FocusOut>", on_focus_out)
 calibration_procedure_textbox.grid(row=50, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
-calibration_procedure = calibration_info.get("calibration_procedure")
-if calibration_procedure and calibration_procedure.strip():
-    calibration_procedure_textbox.insert("1.0", calibration_procedure)
-calibration_procedure_textbox.configure(text_color="gray")  # start as placeholder
+calibration_procedure_textbox.delete("1.0", "end")
+calibration_procedure_textbox.insert("1.0", calibration_info["calibration_procedure"])
+calibration_procedure_textbox.configure(text_color="black")
 
 ###############
 # Remarks Label
@@ -674,7 +675,9 @@ remarks_textbox.insert("1.0", remarks_placeholder)
 remarks_textbox.bind("<FocusIn>", on_remarks_focus_in)
 remarks_textbox.bind("<FocusOut>", on_remarks_focus_out)
 remarks_textbox.grid(row=52, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
-
+remarks_textbox.delete("1.0", "end")
+remarks_textbox.insert("1.0", calibration_info["remarks"])
+remarks_textbox.configure(text_color="black")
 
 
 # --- after you've built your scrollable_frame and all the widgets ---
@@ -716,7 +719,7 @@ image = CTkImage(light_image=Image.open(itdi_logo_path), size=(26, 25))
 
 # Create CTkLabel with Image
 image_label = CTkLabel(master=app, image=image, text="", bg_color='white') 
-image_label.place(relx=1.0, rely=0.0457)
+image_label.place(relx=0.4525, rely=0.0457)
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # Load and Resize the Image
@@ -725,7 +728,7 @@ image1 = CTkImage(light_image=Image.open(nml_logo_path), size=(29, 28))
 
 # Create CTkLabel with Image
 image_label = CTkLabel(master=app, image=image1, text="", bg_color='white') 
-image_label.place(relx=1.0, rely=0.0457)
+image_label.place(relx=0.4225, rely=0.0457)
 
 stroke = CTkFrame(master=app, fg_color="#0855B1", corner_radius=0)
 stroke.place(relx=0.0483, rely=0.0438, relwidth=0.006, relheight=0.045)
@@ -750,7 +753,7 @@ backButton.place(relx=0.0225, rely=0.0486, relwidth=0.0200, relheight=0.0350)
 
 # IMG to XML label
 titleLabel = CTkLabel(master=app, text="PDF -> XML", font=("Inter", 13, "bold"), bg_color='white')
-titleLabel.place(relx=0.3600, rely=0.0514)
+titleLabel.place(relx=0.1800, rely=0.0514)
 
 
 

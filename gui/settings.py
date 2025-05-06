@@ -20,9 +20,30 @@ def back_to_menu():
     app.destroy()  # Close the current app window
     subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"index.py")])
 
+
+# app = CTk()
+# app.title("DigiCert")
+# app.geometry("500x600")
+# set_appearance_mode("light")
+
+# # Disable maximize button
+# app.resizable(False, False)
+
+
+# Center the application on the screen
+def center_window(app, width, height):
+    app.update_idletasks()
+    screen_width = app.winfo_screenwidth()
+    screen_height = app.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    app.geometry(f"{width}x{height}+{x}+{y}")
+
 app = CTk()
 app.title("DigiCert")
-app.geometry("500x600")
+app_width = 500
+app_height = 600
+center_window(app, app_width, app_height)  # Call the function to center the window
 set_appearance_mode("light")
 
 # Disable maximize button
@@ -198,8 +219,8 @@ def save_fields():
 
 # Edit button
 editButton = CTkButton(master=app, text="Edit", corner_radius=7, 
-                       fg_color="#000000", hover_color="#1A4F8B", font=("Inter", 13), command=edit_fields)
-editButton.place(relx=0.244, rely=0.9017, relwidth=0.242, relheight=0.055)
+                       fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13), command=edit_fields)
+editButton.place(relx=0.384, rely=0.9, relwidth=0.242, relheight=0.055)
 
 # Back button
 backButton = CTkButton(master=app, text="< ", corner_radius=7, 
