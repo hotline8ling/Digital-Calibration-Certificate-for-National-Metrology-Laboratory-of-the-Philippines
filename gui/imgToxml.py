@@ -191,11 +191,11 @@ calibration_item_dropdown = CTkOptionMenu(
     text_color='black',
 )
 calibration_item_dropdown.grid(row=9, column=0, padx=10, pady=(5, 10), sticky="w")
-calibration_item_dropdown.set(calibration_info["calibration_item"])
-
-calibration_item = calibration_info.get("calibration_enddate")
-if calibration_item and calibration_item.strip():
-    calibration_item_dropdown.set(0, calibration_item)
+detected_item = calibration_info.get("calibration_item", "")
+if detected_item.strip() and detected_item in calibration_item_options:
+    calibration_item_dropdown.set(detected_item)
+else:
+    calibration_item_dropdown.set(calibration_item_options[0])
 
 
 # Serial Number Label
