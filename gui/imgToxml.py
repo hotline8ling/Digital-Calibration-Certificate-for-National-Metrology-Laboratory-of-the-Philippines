@@ -155,7 +155,7 @@ end_date_label.grid(row=3, column=1, padx=10, pady=(5, 5), sticky="w")
 end_date_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 2025-02-24")
 end_date_textbox.grid(row=4, column=1, padx=10, pady=(5, 10), sticky="w")
 
-end_date = calibration_info.get("calibration_enddate")
+end_date = calibration_info.get("calibration_date")
 if end_date and end_date.strip():
     end_date_textbox.insert(0, end_date)
 
@@ -222,7 +222,6 @@ capacity = calibration_info.get("capacity")
 if capacity and capacity.strip():
     capacity_textbox.insert(0, capacity)
 
-################### STOPPED HERE #######################
 # Model Label
 model_label = CTkLabel(master=scrollable_frame, text="Model:", font=("Inter", 12, "bold"), bg_color='white')
 model_label.grid(row=12, column=0, padx=10, pady=(5, 5), sticky="w")
@@ -230,11 +229,9 @@ model_label.grid(row=12, column=0, padx=10, pady=(5, 5), sticky="w")
 # Model Textbox
 model_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Intercomp")
 model_textbox.grid(row=13, column=0, padx=10, pady=(5, 10), sticky="w")
-model = calibration_info.get("model")
+model = calibration_info.get("make_model")
 if model and model.strip():
     model_textbox.insert(0, model)
-
-
 
 # Range Label
 range_label = CTkLabel(master=scrollable_frame, text="Range:", font=("Inter", 12, "bold"), bg_color='white')
@@ -495,29 +492,27 @@ if humidity_unit and humidity_unit.strip():
 # Results Label
 results_label = CTkLabel(master=scrollable_frame, text="Results:", font=("Inter", 14, "bold"), bg_color='white')
 results_label.grid(row=40, column=0, columnspan=2, padx=10, pady=(10, 5), sticky="w")
+# Standard Measurement Label
+standard_measurement_label = CTkLabel(master=scrollable_frame, text="Standard Measurement:", font=("Inter", 12, "bold"), bg_color='white')
+standard_measurement_label.grid(row=41, column=0, padx=10, pady=(5, 5), sticky="w")
 
-# Applied Measurement Label
-applied_measurement_label = CTkLabel(master=scrollable_frame, text="Applied Measurement:", font=("Inter", 12, "bold"), bg_color='white')
-applied_measurement_label.grid(row=41, column=0, padx=10, pady=(5, 5), sticky="w")
+# Standard Measurement Textbox
+standard_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 3 000 6 000")
+standard_measurement_textbox.grid(row=42, column=0, padx=10, pady=(5, 10), sticky="w")
+standard_measurement_val = calibration_info.get("standard_measurement_values")
+if standard_measurement_val and standard_measurement_val.strip():
+    standard_measurement_textbox.insert(0, standard_measurement_val)
 
-# Applied Force Textbox
-applied_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 3 000 6 000")
-applied_measurement_textbox.grid(row=42, column=0, padx=10, pady=(5, 10), sticky="w")
-applied_measurement_val = calibration_info.get("standard_measurement_values")
-if applied_measurement_val and applied_measurement_val.strip():
-    applied_measurement_textbox.insert(0, applied_measurement_val)
+# Unit Label (Standard Measurement)
+standard_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
+standard_measurement_unit_label.grid(row=41, column=1, padx=10, pady=(5, 5), sticky="w")
 
-# Unit Label (Applied Force)
-applied_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
-applied_measurement_unit_label.grid(row=41, column=1, padx=10, pady=(5, 5), sticky="w")
-
-# Unit Textbox (Applied Force)
-applied_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
-applied_measurement_unit_textbox.grid(row=42, column=1, padx=10, pady=(5, 10), sticky="w")
-applied_measurement_unit = calibration_info.get("standard_measurement_unit")
-if applied_measurement_unit and applied_measurement_unit.strip():
-    applied_measurement_unit_textbox.insert(0, applied_measurement_unit)
-
+# Unit Textbox (Standard Measurement)
+standard_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
+standard_measurement_unit_textbox.grid(row=42, column=1, padx=10, pady=(5, 10), sticky="w")
+standard_measurement_unit = calibration_info.get("standard_measurement_unit")
+if standard_measurement_unit and standard_measurement_unit.strip():
+    standard_measurement_unit_textbox.insert(0, standard_measurement_unit)
 
 # Indicated Measurement Label
 indicated_measurement_label = CTkLabel(master=scrollable_frame, text="Indicated Measurement:", font=("Inter", 12, "bold"), bg_color='white')
@@ -541,34 +536,79 @@ indicated_measurement_unit = calibration_info.get("measured_item_unit")
 if indicated_measurement_unit and indicated_measurement_unit.strip():
     indicated_measurement_unit_textbox.insert(0, indicated_measurement_unit)
 
+# Measurement Error Label
+measurement_error_label = CTkLabel(master=scrollable_frame, text="Measurement Error:", font=("Inter", 12, "bold"), bg_color='white')
+measurement_error_label.grid(row=45, column=0, padx=10, pady=(5, 5), sticky="w")
+
+# Measurement Error Textbox
+measurement_error_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
+measurement_error_textbox.grid(row=46, column=0, padx=10, pady=(5, 10), sticky="w")
+measurement_error_val = calibration_info.get("measurement_error_values")
+if measurement_error_val and measurement_error_val.strip():
+    measurement_error_textbox.insert(0, measurement_error_val)
+
+# Unit Label (Measurement Error)
+measurement_error_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
+measurement_error_unit_label.grid(row=45, column=1, padx=10, pady=(5, 5), sticky="w")
+
+# Unit Textbox (Measurement Error)
+measurement_error_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
+measurement_error_unit_textbox.grid(row=46, column=1, padx=10, pady=(5, 10), sticky="w")
+measurement_error_unit = calibration_info.get("measurement_error_unit")
+if measurement_error_unit and measurement_error_unit.strip():
+    measurement_error_unit_textbox.insert(0, measurement_error_unit)
 
 # Relative Expanded Uncertainty Label
-relative_expandedUn_label = CTkLabel(master=scrollable_frame, text="Relative Measurement Error:", font=("Inter", 12, "bold"), bg_color='white')
-relative_expandedUn_label.grid(row=45, column=0, padx=10, pady=(5, 5), sticky="w")
+relative_expanded_uncertainty_label = CTkLabel(master=scrollable_frame, text="Relative Expanded Uncertainty:", font=("Inter", 12, "bold"), bg_color='white')
+relative_expanded_uncertainty_label.grid(row=47, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Relative Expanded Uncertainty Textbox
-relative_expandedUn_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
-relative_expandedUn_textbox.grid(row=46, column=0, padx=10, pady=(5, 10), sticky="w")
-relative_expandedUn = calibration_info.get("relative_uncertainty_values")
-if relative_expandedUn and relative_expandedUn.strip():
-    relative_expandedUn_textbox.insert(0, relative_expandedUn)
-
+relative_expanded_uncertainty_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
+relative_expanded_uncertainty_textbox.grid(row=48, column=0, padx=10, pady=(5, 10), sticky="w")
+relative_expanded_uncertainty_val = calibration_info.get("relative_uncertainty_values")
+if relative_expanded_uncertainty_val and relative_expanded_uncertainty_val.strip():
+    relative_expanded_uncertainty_textbox.insert(0, relative_expanded_uncertainty_val)
 
 # Unit Label (Relative Expanded Uncertainty)
-relative_expandedUn_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
-relative_expandedUn_unit_label.grid(row=45, column=1, padx=10, pady=(5, 5), sticky="w")
+relative_expanded_uncertainty_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
+relative_expanded_uncertainty_unit_label.grid(row=47, column=1, padx=10, pady=(5, 5), sticky="w")
 
 # Unit Textbox (Relative Expanded Uncertainty)
-relative_expandedUn_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
-relative_expandedUn_unit_textbox.grid(row=46, column=1, padx=10, pady=(5, 10), sticky="w")
-relative_expandedUn_unit = calibration_info.get("relative_uncertainty_unit")
-if relative_expandedUn_unit and relative_expandedUn_unit.strip():
-    relative_expandedUn_unit_textbox.insert(0, relative_expandedUn_unit)
+relative_expanded_uncertainty_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
+relative_expanded_uncertainty_unit_textbox.grid(row=48, column=1, padx=10, pady=(5, 10), sticky="w")
+relative_expanded_uncertainty_unit = calibration_info.get("relative_uncertainty_unit")
+if relative_expanded_uncertainty_unit and relative_expanded_uncertainty_unit.strip():
+    relative_expanded_uncertainty_unit_textbox.insert(0, relative_expanded_uncertainty_unit)
+
+
+# Repeatability Error Label
+repeatability_error_label = CTkLabel(master=scrollable_frame, text="Repeatability Error:", font=("Inter", 12, "bold"), bg_color='white')
+repeatability_error_label.grid(row=49, column=0, padx=10, pady=(5, 5), sticky="w")
+
+# Repeatability Error Textbox
+repeatability_error_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 0.50 0.30")
+repeatability_error_textbox.grid(row=50, column=0, padx=10, pady=(5, 10), sticky="w")
+repeatability_error_val = calibration_info.get("repeatability_error_values")
+if repeatability_error_val and repeatability_error_val.strip():
+    repeatability_error_textbox.insert(0, repeatability_error_val)
+
+# Unit Label (Repeatability Error)
+repeatability_error_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
+repeatability_error_unit_label.grid(row=49, column=1, padx=10, pady=(5, 5), sticky="w")
+
+# Unit Textbox (Repeatability Error)
+repeatability_error_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
+repeatability_error_unit_textbox.grid(row=50, column=1, padx=10, pady=(5, 10), sticky="w")
+repeatability_error_unit = calibration_info.get("repeatability_error_unit")
+if repeatability_error_unit and repeatability_error_unit.strip():
+    repeatability_error_unit_textbox.insert(0, repeatability_error_unit)
+
+
 
 #############################
 # Uncertainty of Measurement Label
 uncertainty_label = CTkLabel(master=scrollable_frame, text="Uncertainty of Measurement:", font=("Inter", 14, "bold"), bg_color='white')
-uncertainty_label.grid(row=47, column=0, padx=10, pady=(5, 5), sticky="w")
+uncertainty_label.grid(row=51, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Define placeholder text and color
 uncertainty_placeholder = "e.g. The uncertainty stated is the expanded uncertainty obtained by multiplying the standard uncertainty..."
@@ -598,14 +638,15 @@ uncertainty_textbox = CTkTextbox(
 uncertainty_textbox.insert("1.0", uncertainty_placeholder)
 uncertainty_textbox.bind("<FocusIn>", on_uncertainty_focus_in)
 uncertainty_textbox.bind("<FocusOut>", on_uncertainty_focus_out)
-uncertainty_textbox.grid(row=48, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+uncertainty_textbox.grid(row=52, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
 uncertainty_textbox.delete("1.0", "end")
 uncertainty_textbox.insert("1.0", calibration_info["uncertainty_of_measurement"])
+uncertainty_textbox.configure(text_color="black")
 
 #############################
 # Calibration Procedure Label
 calibration_procedure_label = CTkLabel(master=scrollable_frame, text="Calibration Procedure:", font=("Inter", 14, "bold"), bg_color='white')
-calibration_procedure_label.grid(row=49, column=0, padx=10, pady=(5, 5), sticky="w")
+calibration_procedure_label.grid(row=53, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Define placeholder text and color
 placeholder_text = "e.g. CALIBRATION PROCEDURE: The axle weighing scale was subjected to specified..."
@@ -635,15 +676,15 @@ calibration_procedure_textbox = CTkTextbox(
 calibration_procedure_textbox.insert("1.0", placeholder_text)
 calibration_procedure_textbox.bind("<FocusIn>", on_focus_in)
 calibration_procedure_textbox.bind("<FocusOut>", on_focus_out)
-calibration_procedure_textbox.grid(row=50, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
-calibration_procedure = calibration_info.get("calibration_procedure")
+calibration_procedure_textbox.grid(row=54, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
 calibration_procedure_textbox.delete("1.0", "end")
 calibration_procedure_textbox.insert("1.0", calibration_info["calibration_procedure"])
+calibration_procedure_textbox.configure(text_color="black")
 
 ###############
 # Remarks Label
 remarks_label = CTkLabel(master=scrollable_frame, text="Remarks:", font=("Inter", 14, "bold"), bg_color='white')
-remarks_label.grid(row=51, column=0, padx=10, pady=(5, 5), sticky="w")
+remarks_label.grid(row=55, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Define placeholder text and color
 remarks_placeholder = "e.g. REMARKS: - The above results were those obtained at the time of calibration..."
@@ -673,10 +714,10 @@ remarks_textbox = CTkTextbox(
 remarks_textbox.insert("1.0", remarks_placeholder)
 remarks_textbox.bind("<FocusIn>", on_remarks_focus_in)
 remarks_textbox.bind("<FocusOut>", on_remarks_focus_out)
-remarks_textbox.grid(row=52, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+remarks_textbox.grid(row=56, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
 remarks_textbox.delete("1.0", "end")
 remarks_textbox.insert("1.0", calibration_info["remarks"])
-
+remarks_textbox.configure(text_color="black")
 
 
 # --- after you've built your scrollable_frame and all the widgets ---
@@ -715,6 +756,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 # Load and Resize the Image
 itdi_logo_path = os.path.join(script_dir, "itdi-logo.png")
 image = CTkImage(light_image=Image.open(itdi_logo_path), size=(26, 25))
+
 # Create CTkLabel with Image
 image_label = CTkLabel(master=app, image=image, text="", bg_color='white') 
 image_label.place(relx=0.4525, rely=0.0457)
@@ -820,12 +862,16 @@ widget_tag_map = {
     humidity_unit_textbox:         ("unit", 1),
 
     # results
-    applied_measurement_textbox:   ("valueXMLList", 0),
-    applied_measurement_unit_textbox:("unitXMLList", 0),
+    standard_measurement_textbox:   ("valueXMLList", 0),
+    standard_measurement_unit_textbox:("unitXMLList", 0),
     indicated_measurement_textbox: ("valueXMLList", 1),
     indicated_measurement_unit_textbox:("unitXMLList", 1),
-    relative_expandedUn_textbox:   ("valueXMLList", 2),
-    relative_expandedUn_unit_textbox:("unitXMLList", 2),
+    measurement_error_textbox:   ("valueXMLList", 2),
+    measurement_error_unit_textbox:("unitXMLList", 2),
+    relative_expanded_uncertainty_textbox: ("valueXMLList", 3),
+    relative_expanded_uncertainty_unit_textbox: ("unitXMLList", 3),
+    repeatability_error_textbox: ("valueXMLList", 4),
+    repeatability_error_unit_textbox: ("unitXMLList", 4),
 
     # big text areas
     uncertainty_textbox:           ("usedMethods", 0),
@@ -850,7 +896,7 @@ def collect_calibration_info():
         # core data
         "certificate_number": "Calibration No. " + tsr_textbox.get(),
         "calibration_date": start_date_textbox.get(),
-        "calibration_enddate": end_date_textbox.get(),
+        "calibration_enddate": start_date_textbox.get(),
         "calibration_location": calibration_dropdown.get(),
         # items
         "calibration_item": calibration_item_dropdown.get(),
@@ -884,15 +930,21 @@ def collect_calibration_info():
         "temperature_unit": temperature_unit_textbox.get(),
         "humidity": humidity_textbox.get(),
         "humidity_unit": humidity_unit_textbox.get(),
-        "standard_measurement_values": applied_measurement_textbox.get(),
-        "standard_measurement_unit": applied_measurement_unit_textbox.get(),
+        "standard_measurement_values": standard_measurement_textbox.get(),
+        "standard_measurement_unit": standard_measurement_unit_textbox.get(),
+        "measurement_standard": calibration_info["measurement_standard"],
+        "measured_item": calibration_info["measured_item"],
         "measured_item_values": indicated_measurement_textbox.get(),
         "measured_item_unit": indicated_measurement_unit_textbox.get(),
-        "relative_uncertainty_values": relative_expandedUn_textbox.get(),
-        "relative_uncertainty_unit": relative_expandedUn_unit_textbox.get(),
+        "relative_uncertainty_values": relative_expanded_uncertainty_textbox.get(),
+        "relative_uncertainty_unit": relative_expanded_uncertainty_unit_textbox.get(),
         "relative_uncertainty": calibration_info["relative_uncertainty"],
-        "measured_item": calibration_info["measured_item"],
-        "measurement_standard": calibration_info["measurement_standard"],
+        "measurement_error_values": measurement_error_textbox.get(),
+        "measurement_error_unit": measurement_error_unit_textbox.get(),
+        "measurement_error": calibration_info["measurement_error"],
+        "repeatability_error_values": repeatability_error_textbox.get(),
+        "repeatability_error_unit": repeatability_error_unit_textbox.get(),
+        "repeatability_error": calibration_info["repeatability_error"],
         # big text areas
         "calibration_procedure": calibration_procedure_textbox.get("1.0", "end-1c").replace(placeholder_text, ""),
         "remarks": remarks_textbox.get("1.0", "end-1c").replace(remarks_placeholder, ""),
@@ -1017,18 +1069,38 @@ def generate_xml_tree(info):
     if res is None:
         print("⚠️ results not found")
     else:
-        # define your three rows in lists
-        names = [info["measurement_standard"], info["measured_item"], info["relative_uncertainty"]]
-        values = [info["standard_measurement_values"], info["measured_item_values"], info["relative_uncertainty_values"]]
-        units = [info["standard_measurement_unit"],info["measured_item_unit"], info["relative_uncertainty_unit"]]
+        # now four rows per updated template:
+        names = [
+            info["measurement_standard"],
+            info["measured_item"],
+            info["measurement_error"],
+            info["relative_uncertainty"],
+            info["repeatability_error"]
+        ]
+        values = [
+            info["standard_measurement_values"],
+            info["measured_item_values"],
+            info["measurement_error_values"],
+            info["relative_uncertainty_values"],
+            info["repeatability_error_values"]
+        ]
+        units = [
+            info["standard_measurement_unit"],
+            info["measured_item_unit"],
+            info["measurement_error_unit"],
+            info["relative_uncertainty_unit"],
+            info["repeatability_error_unit"]
+        ]
         for idx, row in enumerate(res.findall("dcc:result", ns)):
-            # name
-            set_text(row.find("dcc:name/dcc:content", ns), names[idx], lang=info["used_lang_code"])
-            # realListXMLList
+            set_text(row.find("dcc:name/dcc:content", ns),
+                     names[idx],
+                     lang=info["used_lang_code"])
             real_list = row.find(".//si:realListXMLList", ns)
             if real_list is not None:
-                set_text(real_list.find("si:valueXMLList", ns), values[idx])
-                set_text(real_list.find("si:unitXMLList", ns), units[idx])
+                set_text(real_list.find("si:valueXMLList", ns),
+                         values[idx])
+                set_text(real_list.find("si:unitXMLList", ns),
+                         units[idx])
 
     # 8) comment
     comm = root.find(".//dcc:comment", ns)

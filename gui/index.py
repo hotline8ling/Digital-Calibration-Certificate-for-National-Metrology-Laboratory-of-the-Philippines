@@ -116,6 +116,7 @@ def open_images():
             return
 
         tmp_json = os.path.join(script_dir, "calibration_info.json")
+        print("Writing to:", tmp_json)
         with open(tmp_json, "w", encoding="utf-8") as f:
             json.dump(cal_info, f, ensure_ascii=False, indent=2)
 
@@ -392,24 +393,37 @@ def extract_pdf(pdf_path):
                         "customer_address": '',
                         # Environment & results
                         "temperature": '',
-                        "temperature_unit": '',
+                        "temperature_unit": '\\celcius',
 
                         "humidity": '',
-                        "humidity_unit": '',
+                        "humidity_unit": '\\%',
                         # measurement arrays – split on spaces or commas
-                        "standard_measurement_values": '',
-                        "standard_measurement_unit": '',
-                        "measured_item_values": '',
-                        "measured_item_unit": '',
-                        "relative_uncertainty":"Relative Expanded Uncertainty",
-                        "measured_item": "Indicated Measurement",
-                        "measurement_standard": "Standard Measurement",
-                        "relative_uncertainty_values": '',
-                        "relative_uncertainty_unit": '',
+                        'standard_item':          '',
+                        'standard_serial_number': '',
+                        'standard_model':         '',
+                        'standard_cert_number':   '',
+                        'standard_traceability':  '',
+                        'measurement_standard':     ''   ,
+                        'standard_measurement_unit': '',
+                        'standard_measurement_values': '',
+                        'measured_item':      '',
+                        'measured_item_unit':  '',
+                        'measured_item_values': ''       ,
+                        'measurement_error':     ''    ,
+                        'measurement_error_unit': ''   ,
+                        'measurement_error_values': '' ,
+                        'relative_uncertainty':     '' ,
+                        'relative_uncertainty_unit': '' ,
+                        'relative_uncertainty_values':'',
+                        'repeatability_error':      '',
+                        'repeatability_error_unit':  '',
+                        'repeatability_error_values': '',
+
                         # big text‐areas
                         "calibration_procedure": '',
                         "remarks": '',
                         "uncertainty_of_measurement": '',
+
          }     
         # Split text into lines for easier processing
         lines = raw_text.split('\n')
@@ -657,6 +671,7 @@ def extract_pdf(pdf_path):
     table_columns = extract_table_columns(pdf_path)
     
     # extract instrument name and serial number from Table 2
+    # extract instrument name and serial number from Table 2
     try:
         # extract instrument name and serial number from Table 2
         std_entry = table_columns[1]['Name of Standard'][0]
@@ -674,38 +689,199 @@ def extract_pdf(pdf_path):
         traceability = " ".join(table_columns[1]['Traceability'][0].split())
 
         #------------------------------------------------ MEASUREMENT RESULTS TABLE --------------------------------------------------
-        # Extract the first key of table 1 as standard measurement
-        standard_measurement = list(table_columns[0].keys())[0]
+        # MEASUREMENT RESULTS TABLE
+        # Get the first table from table_columns which should be the measurement results
+        results_table = table_columns[0]
 
-        # split the uncertainty column into unit and values
-        raw_standard = table_columns[0][standard_measurement]
-        standard_unit = raw_standard[0]
-        raw_standard_str = raw_standard[1]
-        standard_val = raw_standard_str.replace('\n', ' ')
+        # Find the standard measurement column (typically "Applied Force" or similar)
+        standard_col = next((col for col in results_table.keys() 
+                            if any(term in col.lower() for term in ['applied', 'standard'])), 
+                            list(results_table.keys())[0])  # Default to first column if not found
+        standard_measurement = standard_col.replace('\n', ' ')
 
-        # Extract the equipment measured values from table 1
-        measured_col = next((col for col in table_columns[0]
-                            if 'indicated' in col.lower()), None)
-        if measured_col:
-            raw_measured = table_columns[0][measured_col]
-            measured_unit = raw_measured[0]
-            measured_val = raw_measured[1].replace('\n', ' ')
+        # Get the unit and values from the standard column
+        raw_standard = results_table[standard_col]
+        standard_vals = []
+        standard_unit = ''
+        
+        if isinstance(raw_standard, list) and raw_standard:
+            # first element short? → unit
+            if isinstance(raw_standard[0], str) and len(raw_standard[0]) <= 5:
+                standard_unit = raw_standard[0].strip()
+                cells = raw_standard[1:]
+            else:
+                cells = raw_standard
+
+            # split any “\n” in each cell into separate values
+            for cell in cells:
+                for part in str(cell).split('\n'):
+                    part = part.strip()
+                    if part:
+                        standard_vals.append(part)
+
+        elif isinstance(raw_standard, str):
+            lines = [l.strip() for l in raw_standard.split('\n') if l.strip()]
+            if len(lines) > 1:
+                standard_unit = lines[0]
+                standard_vals = lines[1:]
+            else:
+                standard_vals = lines
+
         else:
+            standard_vals = [str(raw_standard)]
+
+        standard_val = ' '.join(standard_vals)
+
+        # Count the number of standard values for later unit repetition
+        value_count = len(standard_vals)
+
+
+        # Find the measured/indicated values column
+        measured_col = next((col for col in results_table.keys() 
+                            if any(term in col.lower() for term in ['indicated','measured','reading'])), 
+                            None)
+        if measured_col:
+            raw_measured = results_table[measured_col]
+            measured_vals = []
+            measured_unit = ''
+
+            if isinstance(raw_measured, list) and raw_measured:
+                # treat first short element as unit
+                if isinstance(raw_measured[0], str) and len(raw_measured[0]) <= 5:
+                    measured_unit = raw_measured[0].strip()
+                    cells = raw_measured[1:]
+                else:
+                    cells = raw_measured
+
+                # flatten any “\n” inside each cell
+                for cell in cells:
+                    for part in str(cell).split('\n'):
+                        part = part.strip()
+                        if part:
+                            measured_vals.append(part)
+
+            elif isinstance(raw_measured, str):
+                lines = [l.strip() for l in raw_measured.split('\n') if l.strip()]
+                if len(lines) > 1:
+                    measured_unit = lines[0]
+                    measured_vals = lines[1:]
+                else:
+                    measured_vals = lines
+
+            else:
+                measured_vals = [str(raw_measured)]
+
+            measured_val = ' '.join(measured_vals)
+
+        else:
+            measured_col = ''
             measured_unit = ''
             measured_val = ''
 
-        # find uncertainty column
-        uncertainty_col = next((col for col in table_columns[0]
-                                if 'uncertainty' in col.lower()), "")
+        # Find the uncertainty column - look for "uncertainty" first
+        uncertainty_col = next((col for col in results_table.keys() 
+                                if 'uncertainty' in col.lower()), 
+                            None)
         if not uncertainty_col:
-            raise KeyError("No uncertainty column found in table_columns[0]")
+            # Try alternative names if "uncertainty" not found
+            uncertainty_col = next((col for col in results_table.keys() 
+                                    ), 
+                                "")
+            if not uncertainty_col:
+                raise KeyError("No uncertainty column found in table_columns[0]")
 
-        raw_uncertainty = table_columns[0][uncertainty_col]
-        uncertainty_unit = raw_uncertainty[0]
-        uncertainty_str = raw_uncertainty[1]
-        value_count = uncertainty_str.count('\n') + 1
-        uncertainty_val = uncertainty_str.replace('\n', ' ')
+        raw_uncertainty = results_table[uncertainty_col]
+        # Handle different possible formats
+        if isinstance(raw_uncertainty, list) and raw_uncertainty:
+            if isinstance(raw_uncertainty[0], str) and len(raw_uncertainty[0]) <= 5:
+                uncertainty_unit = raw_uncertainty[0]
+                uncertainty_val = ' '.join(str(v) for v in raw_uncertainty[1:])
+            else:
+                uncertainty_unit = ''
+                uncertainty_val = ' '.join(str(v) for v in raw_uncertainty)
+        elif isinstance(raw_uncertainty, str):
+            lines = raw_uncertainty.split('\n')
+            if len(lines) > 1:
+                uncertainty_unit = lines[0]
+                uncertainty_val = ' '.join(lines[1:])
+            else:
+                uncertainty_unit = ''
+                uncertainty_val = raw_uncertainty
+        else:
+            uncertainty_unit = ''
+            uncertainty_val = str(raw_uncertainty)
 
+            
+        # Find the relative measurement error or accuracy error column
+        error_col = next((col for col in results_table.keys() 
+                        if any(term.lower() in col.lower().replace('\n', ' ') for term in ['measurement error', 'accuracy error'])), 
+                        None)
+        
+        if error_col:
+            raw_error = results_table[error_col]
+            # Handle different possible formats
+            if isinstance(raw_error, list) and raw_error:
+                if isinstance(raw_error[0], str) and len(raw_error[0]) <= 5:
+                    error_unit = raw_error[0]
+                    error_val = ' '.join(str(v) for v in raw_error[1:])
+                else:
+                    error_unit = ''
+                    error_val = ' '.join(str(v) for v in raw_error)
+            elif isinstance(raw_error, str):
+                lines = raw_error.split('\n')
+                if len(lines) > 1:
+                    error_unit = lines[0]
+                    error_val = ' '.join(lines[1:])
+                else:
+                    error_unit = ''
+                    error_val = raw_error
+            else:
+                error_unit = ''
+                error_val = str(raw_error)
+                
+            # Clean up column name
+            error_column_name = error_col.replace('\n', ' ')
+        else:
+            error_column_name = "Relative Measurement Error"
+            error_unit = ""
+            error_val = ""
+
+
+
+        # Find the repeatability error column
+        repeatability_col = next((col for col in results_table.keys() 
+                                if 'repeatability' in col.lower().replace('\n', ' ')), 
+                                None)
+
+        if repeatability_col:
+            raw_repeatability = results_table[repeatability_col]
+            # Handle different possible formats
+            if isinstance(raw_repeatability, list) and raw_repeatability:
+                if isinstance(raw_repeatability[0], str) and len(raw_repeatability[0]) <= 5:
+                    repeatability_unit = raw_repeatability[0]
+                    repeatability_val = ' '.join(str(v) for v in raw_repeatability[1:])
+                else:
+                    repeatability_unit = ''
+                    repeatability_val = ' '.join(str(v) for v in raw_repeatability)
+            elif isinstance(raw_repeatability, str):
+                lines = raw_repeatability.split('\n')
+                if len(lines) > 1:
+                    repeatability_unit = lines[0]
+                    repeatability_val = ' '.join(lines[1:])
+                else:
+                    repeatability_unit = ''
+                    repeatability_val = raw_repeatability
+            else:
+                repeatability_unit = ''
+                repeatability_val = str(raw_repeatability)
+                
+            # Clean up column name
+            repeatability_column_name = repeatability_col.replace('\n', ' ')
+        else:
+            repeatability_column_name = "Relative Repeatability Error"
+            repeatability_unit = ""
+            repeatability_val = ""
+    
         # store into calibration_info
         calibration_info.update({
             'standard_item':          instrument_name,
@@ -713,37 +889,37 @@ def extract_pdf(pdf_path):
             'standard_model':         make_model,
             'standard_cert_number':   cert_number,
             'standard_traceability':  traceability,
-            'relative_uncertainty':       uncertainty_col.replace('\n', ' '),
-            'relative_uncertainty_unit':  ' '.join([f'\\{uncertainty_unit}'] * value_count),
-            'relative_uncertainty_values': uncertainty_val,
             'measurement_standard':        standard_measurement.replace('\n', ' '),
             'standard_measurement_unit':   ' '.join([f'\\{standard_unit}'] * value_count),
             'standard_measurement_values': standard_val,
             'measured_item':               measured_col.replace('\n', ' ') if measured_col else '',
             'measured_item_unit':          ' '.join([f'\\{measured_unit}'] * value_count),
-            'measured_item_values':        measured_val
+            'measured_item_values':        measured_val,
+            'measurement_error':          error_column_name.replace('\n', ' '),
+            'measurement_error_unit':     ' '.join([f'\\{error_unit}'] * value_count),
+            'measurement_error_values':   error_val.replace('\n', ' '),
+            'relative_uncertainty':       uncertainty_col.replace('\n', ' '),
+            'relative_uncertainty_unit':  ' '.join([f'\\{uncertainty_unit}'] * value_count),
+            'relative_uncertainty_values': uncertainty_val.replace('\n', ' '),
+            'repeatability_error':       repeatability_column_name.replace('\n', ' '),
+            'repeatability_error_unit':  ' '.join([f'\\{repeatability_unit}'] * value_count),
+            'repeatability_error_values': repeatability_val.replace('\n', ' ')
         })
-
+    
     except (IndexError, KeyError) as e:
         print(f"Table parsing error: {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-    # return the calibration_info dictionary
+    # return the calibration_info dictionary with key and value pairs
     print(calibration_info)
+    calibration_info
+    
+    
     # Save the calibration_info to a JSON file
     # with open("calibration_info.json", "w") as f:
     #     json.dump(calibration_info, f, indent=4)
     return calibration_info
-
-        
-
-
-
-        
-      
-    
-   
 
 
 # Load and Resize the Image
@@ -761,17 +937,22 @@ image_label.place(relx=0.814, rely=0.064)
 stroke = CTkFrame(master=app, fg_color="#0855B1", corner_radius=0)
 stroke.place(relx=0.106, rely=0.064, relwidth=0.006, relheight=0.0675)
 
+
 # BG rectangle 1
 bg_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-bg_frame.place(relx=0, rely=0.242, relwidth=1, relheight=0.202)
+bg_frame.place(relx=0, rely=0.242, relwidth=1, relheight=0.16)
 
 # BG rectangle 2
 bg_frame2 = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-bg_frame2.place(relx=0, rely=0.458, relwidth=1, relheight=0.202)
+bg_frame2.place(relx=0, rely=0.42, relwidth=1.0, relheight=0.16)
 
 # BG rectangle 3
 bg_frame3 = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-bg_frame3.place(relx=0, rely=0.674, relwidth=1, relheight=0.202)
+bg_frame3.place(relx=0, rely=0.598, relwidth=1.0, relheight=0.16)
+
+# BG rectangle 4
+bg_frame4 = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
+bg_frame4.place(relx=0, rely=0.776, relwidth=1.0, relheight=0.16)
 
 # Title label
 titleLabel = CTkLabel(master=app, text="DigiCert", font=("Montserrat", 32, "bold"), bg_color='white')
@@ -788,7 +969,7 @@ importCert.place(relx=0.124, rely=0.308, relwidth=0.368, relheight=0.066)
 
 # Textlabel for Certificate Image
 certLabel = CTkLabel(master=app, text="exampleCertificate.jpg", font=("Inter", 12), bg_color="#E0E0E0")
-certLabel.place(relx=0.124, rely=0.375)
+certLabel.place(relx=0.534, rely=0.31)
 
 settings = CTkButton(
     master=app,
@@ -803,28 +984,38 @@ settings.place(relx=0.83, rely=0.158, relwidth=0.11, relheight=0.048)
 
 # Textlabel for Import Calibration Certificate image
 importFormatL = CTkLabel(master=app, text="Select a Calibration Certificate PDF", font=("Inter", 13), bg_color="#E0E0E0")
-importFormatL.place(relx=0.124, rely=0.478)
+importFormatL.place(relx=0.124, rely=0.44)
 
 # import button for pdf
 importFormat = CTkButton(master=app, text="Import PDF", corner_radius=7,
                     fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_pdf)
-importFormat.place(relx=0.124, rely=0.524, relwidth=0.368, relheight=0.066)
+importFormat.place(relx=0.124, rely=0.485, relwidth=0.368, relheight=0.066)
 
 # Textlabel for Calibration Format XML
 formatLabel = CTkLabel(master=app, text="exampleCertificate.pdf", font=("Inter", 12), bg_color="#E0E0E0")
-formatLabel.place(relx=0.124, rely=0.591)
+formatLabel.place(relx=0.534, rely=0.49)
 
 # Textlabel for DCC Scratch
 importFormatL = CTkLabel(master=app, text="Create a New Calibration Certificate", font=("Inter", 13), bg_color="#E0E0E0")
-importFormatL.place(relx=0.124, rely=0.700)
+importFormatL.place(relx=0.124, rely=0.618)
 
 # button for dcc-scratch
 importCert = CTkButton(master=app, text="Make a new DCC File", corner_radius=7, 
                     fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_newxml_gui)
-importCert.place(relx=0.124, rely=0.754, relwidth=0.368, relheight=0.066)
+importCert.place(relx=0.124, rely=0.664, relwidth=0.368, relheight=0.066)
 
+# Textlabel for XML to PDF
+importFormatL = CTkLabel(master=app, text="Convert XML Certificate into PDF", font=("Inter", 13), bg_color="#E0E0E0")
+importFormatL.place(relx=0.124, rely=0.796)
 
+# import button for xml to pdf
+importXML = CTkButton(master=app, text="Import XML", corner_radius=7,
+                    fg_color="#0855B1", hover_color="#010E54", font=("Inter", 13),command=open_pdf)
+importXML.place(relx=0.124, rely=0.842, relwidth=0.368, relheight=0.066)
 
+# Textlabel for Calibration Format XML
+formatLabel = CTkLabel(master=app, text="exampleCertificate.xml", font=("Inter", 12), bg_color="#E0E0E0")
+formatLabel.place(relx=0.528, rely=0.85)
 
 
 app.mainloop()
