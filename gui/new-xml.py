@@ -359,64 +359,99 @@ humidity_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg
 humidity_unit_textbox.grid(row=39, column=1, padx=10, pady=(5, 10), sticky="w")
 
 ##########################
-# Results Label
 results_label = CTkLabel(master=scrollable_frame, text="Results:", font=("Inter", 14, "bold"), bg_color='white')
 results_label.grid(row=40, column=0, columnspan=2, padx=10, pady=(10, 5), sticky="w")
+# Standard Measurement Label
+standard_measurement_label = CTkLabel(master=scrollable_frame, text="Standard Measurement:", font=("Inter", 12, "bold"), bg_color='white')
+standard_measurement_label.grid(row=41, column=0, padx=10, pady=(5, 5), sticky="w")
 
-# Applied Measurement Label
-applied_measurement_label = CTkLabel(master=scrollable_frame, text="Applied Measurement:", font=("Inter", 12, "bold"), bg_color='white')
-applied_measurement_label.grid(row=41, column=0, padx=10, pady=(5, 5), sticky="w")
+# Standard Measurement Textbox
+standard_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 3 000 6 000")
+standard_measurement_textbox.grid(row=42, column=0, padx=10, pady=(5, 10), sticky="w")
 
-# Applied Force Textbox
-applied_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 3 000 6 000")
-applied_measurement_textbox.grid(row=42, column=0, padx=10, pady=(5, 10), sticky="w")
+# Unit Label (Standard Measurement)
+standard_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
+standard_measurement_unit_label.grid(row=41, column=1, padx=10, pady=(5, 5), sticky="w")
 
-# Unit Label (Applied Measurement)
-applied_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
-applied_measurement_unit_label.grid(row=41, column=1, padx=10, pady=(5, 5), sticky="w")
+# Unit Textbox (Standard Measurement)
+standard_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
+standard_measurement_unit_textbox.grid(row=42, column=1, padx=10, pady=(5, 10), sticky="w")
 
-# Unit Textbox (Applied Measurement)
-applied_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
-applied_measurement_unit_textbox.grid(row=42, column=1, padx=10, pady=(5, 10), sticky="w")
 
 # Indicated Measurement Label
-indictated_measurement_label = CTkLabel(master=scrollable_frame, text="Indicated Measurement:", font=("Inter", 12, "bold"), bg_color='white')
-indictated_measurement_label.grid(row=43, column=0, padx=10, pady=(5, 5), sticky="w")
+indicated_measurement_label = CTkLabel(master=scrollable_frame, text="Indicated Measurement:", font=("Inter", 12, "bold"), bg_color='white')
+indicated_measurement_label.grid(row=43, column=0, padx=10, pady=(5, 5), sticky="w")
 
-# Indicated Force Textbox
+# Indicated Measurement Textbox
 indicated_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 2 850 5 700")
 indicated_measurement_textbox.grid(row=44, column=0, padx=10, pady=(5, 10), sticky="w")
+
 
 # Unit Label (Indicated Measurement)
 indicated_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
 indicated_measurement_unit_label.grid(row=43, column=1, padx=10, pady=(5, 5), sticky="w")
 
-
 # Unit Textbox (Indicated Measurement)
 indicated_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
 indicated_measurement_unit_textbox.grid(row=44, column=1, padx=10, pady=(5, 10), sticky="w")
 
+
+# Measurement Error Label
+measurement_error_label = CTkLabel(master=scrollable_frame, text="Measurement Error:", font=("Inter", 12, "bold"), bg_color='white')
+measurement_error_label.grid(row=45, column=0, padx=10, pady=(5, 5), sticky="w")
+
+# Measurement Error Textbox
+measurement_error_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
+measurement_error_textbox.grid(row=46, column=0, padx=10, pady=(5, 10), sticky="w")
+
+
+# Unit Label (Measurement Error)
+measurement_error_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
+measurement_error_unit_label.grid(row=45, column=1, padx=10, pady=(5, 5), sticky="w")
+
+# Unit Textbox (Measurement Error)
+measurement_error_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
+measurement_error_unit_textbox.grid(row=46, column=1, padx=10, pady=(5, 10), sticky="w")
+
 # Relative Expanded Uncertainty Label
-relative_expandedUn_label = CTkLabel(master=scrollable_frame, text="Relative Expanded Uncertainty:", font=("Inter", 12, "bold"), bg_color='white')
-relative_expandedUn_label.grid(row=45, column=0, padx=10, pady=(5, 5), sticky="w")
+relative_expanded_uncertainty_label = CTkLabel(master=scrollable_frame, text="Relative Expanded Uncertainty:", font=("Inter", 12, "bold"), bg_color='white')
+relative_expanded_uncertainty_label.grid(row=47, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Relative Expanded Uncertainty Textbox
-relative_expandedUn_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
-relative_expandedUn_textbox.grid(row=46, column=0, padx=10, pady=(5, 10), sticky="w")
+relative_expanded_uncertainty_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
+relative_expanded_uncertainty_textbox.grid(row=48, column=0, padx=10, pady=(5, 10), sticky="w")
+
 
 # Unit Label (Relative Expanded Uncertainty)
-relative_expandedUn_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
-relative_expandedUn_unit_label.grid(row=45, column=1, padx=10, pady=(5, 5), sticky="w")
+relative_expanded_uncertainty_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
+relative_expanded_uncertainty_unit_label.grid(row=47, column=1, padx=10, pady=(5, 5), sticky="w")
 
 # Unit Textbox (Relative Expanded Uncertainty)
-relative_expandedUn_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
-relative_expandedUn_unit_textbox.grid(row=46, column=1, padx=10, pady=(5, 10), sticky="w")
+relative_expanded_uncertainty_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
+relative_expanded_uncertainty_unit_textbox.grid(row=48, column=1, padx=10, pady=(5, 10), sticky="w")
+
+# Repeatability Error Label
+repeatability_error_label = CTkLabel(master=scrollable_frame, text="Repeatability Error:", font=("Inter", 12, "bold"), bg_color='white')
+repeatability_error_label.grid(row=49, column=0, padx=10, pady=(5, 5), sticky="w")
+
+# Repeatability Error Textbox
+repeatability_error_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 0.50 0.30")
+repeatability_error_textbox.grid(row=50, column=0, padx=10, pady=(5, 10), sticky="w")
+
+# Unit Label (Repeatability Error)
+repeatability_error_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
+repeatability_error_unit_label.grid(row=49, column=1, padx=10, pady=(5, 5), sticky="w")
+
+# Unit Textbox (Repeatability Error)
+repeatability_error_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
+repeatability_error_unit_textbox.grid(row=50, column=1, padx=10, pady=(5, 10), sticky="w")
+
 
 
 #############################
 # Uncertainty of Measurement Label
 uncertainty_label = CTkLabel(master=scrollable_frame, text="Uncertainty of Measurement:", font=("Inter", 14, "bold"), bg_color='white')
-uncertainty_label.grid(row=47, column=0, padx=10, pady=(5, 5), sticky="w")
+uncertainty_label.grid(row=51, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Define placeholder text and color
 uncertainty_placeholder = "e.g. The uncertainty stated is the expanded uncertainty obtained by multiplying the standard uncertainty..."
@@ -428,7 +463,7 @@ def on_uncertainty_focus_in(event):
         uncertainty_textbox.configure(text_color="black")
 
 def on_uncertainty_focus_out(event):
-    current_text = uncertainty_textbox.get("1.0", "end-1c")
+    current_text = uncertainty_textbox.get("1.0", "end-1c").strip()
     if current_text == "":
         uncertainty_textbox.insert("1.0", uncertainty_placeholder)
         uncertainty_textbox.configure(text_color="gray")
@@ -446,16 +481,17 @@ uncertainty_textbox = CTkTextbox(
 uncertainty_textbox.insert("1.0", uncertainty_placeholder)
 uncertainty_textbox.bind("<FocusIn>", on_uncertainty_focus_in)
 uncertainty_textbox.bind("<FocusOut>", on_uncertainty_focus_out)
-uncertainty_textbox.grid(row=48, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
-
+uncertainty_textbox.grid(row=52, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+uncertainty_textbox.delete("1.0", "end")
+uncertainty_textbox.configure(text_color="black")
 
 #############################
 # Calibration Procedure Label
 calibration_procedure_label = CTkLabel(master=scrollable_frame, text="Calibration Procedure:", font=("Inter", 14, "bold"), bg_color='white')
-calibration_procedure_label.grid(row=49, column=0, padx=10, pady=(5, 5), sticky="w")
+calibration_procedure_label.grid(row=53, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Define placeholder text and color
-placeholder_text = "e.g. The axle weighing scale was subjected to specified..."
+placeholder_text = "e.g. CALIBRATION PROCEDURE: The axle weighing scale was subjected to specified..."
 
 def on_focus_in(event):
     current_text = calibration_procedure_textbox.get("1.0", "end-1c")
@@ -464,7 +500,7 @@ def on_focus_in(event):
         calibration_procedure_textbox.configure(text_color="black")
 
 def on_focus_out(event):
-    current_text = calibration_procedure_textbox.get("1.0", "end-1c")
+    current_text = calibration_procedure_textbox.get("1.0", "end-1c").strip()
     if current_text == "":
         calibration_procedure_textbox.insert("1.0", placeholder_text)
         calibration_procedure_textbox.configure(text_color="gray")
@@ -482,16 +518,17 @@ calibration_procedure_textbox = CTkTextbox(
 calibration_procedure_textbox.insert("1.0", placeholder_text)
 calibration_procedure_textbox.bind("<FocusIn>", on_focus_in)
 calibration_procedure_textbox.bind("<FocusOut>", on_focus_out)
-calibration_procedure_textbox.grid(row=50, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
-
+calibration_procedure_textbox.grid(row=54, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+calibration_procedure_textbox.delete("1.0", "end")
+calibration_procedure_textbox.configure(text_color="black")
 
 ###############
 # Remarks Label
 remarks_label = CTkLabel(master=scrollable_frame, text="Remarks:", font=("Inter", 14, "bold"), bg_color='white')
-remarks_label.grid(row=51, column=0, padx=10, pady=(5, 5), sticky="w")
+remarks_label.grid(row=55, column=0, padx=10, pady=(5, 5), sticky="w")
 
 # Define placeholder text and color
-remarks_placeholder = "e.g. - The above results were those obtained at the time of calibration..."
+remarks_placeholder = "e.g. REMARKS: - The above results were those obtained at the time of calibration..."
 
 def on_remarks_focus_in(event):
     current_text = remarks_textbox.get("1.0", "end-1c")
@@ -500,7 +537,7 @@ def on_remarks_focus_in(event):
         remarks_textbox.configure(text_color="black")
 
 def on_remarks_focus_out(event):
-    current_text = remarks_textbox.get("1.0", "end-1c")
+    current_text = remarks_textbox.get("1.0", "end-1c").strip()
     if current_text == "":
         remarks_textbox.insert("1.0", remarks_placeholder)
         remarks_textbox.configure(text_color="gray")
@@ -518,7 +555,10 @@ remarks_textbox = CTkTextbox(
 remarks_textbox.insert("1.0", remarks_placeholder)
 remarks_textbox.bind("<FocusIn>", on_remarks_focus_in)
 remarks_textbox.bind("<FocusOut>", on_remarks_focus_out)
-remarks_textbox.grid(row=52, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+remarks_textbox.grid(row=56, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
+remarks_textbox.delete("1.0", "end")
+remarks_textbox.configure(text_color="black")
+
 
 
 # ^ content of scrollable frame
@@ -613,7 +653,7 @@ def collect_calibration_info():
         # core data
         "certificate_number": "Calibration No. " + tsr_textbox.get(),
         "calibration_date": start_date_textbox.get(),
-        "calibration_enddate": end_date_textbox.get(),
+        "calibration_enddate": start_date_textbox.get(),
         "calibration_location": calibration_dropdown.get(),
         # items
         "calibration_item": calibration_item_dropdown.get(),
@@ -628,8 +668,8 @@ def collect_calibration_info():
         "standard_item": standard_item_textbox1.get(),
         "standard_model": model_textbox1.get(),
         "standard_serial_number": serial_number_textbox1.get(),
-        "standard_cert_number": calibCert_textbox.get(),
-        "standard_traceability": traceability_textbox.get(),
+        "standard_cert_number": "Calibration Certificate No.: " + calibCert_textbox.get(),
+        "standard_traceability": "Traceability: " + traceability_textbox.get(),
         
         "standard_item_issuer": identification_issuer_textbox1.get(),
         # persons
@@ -647,15 +687,21 @@ def collect_calibration_info():
         "temperature_unit": temperature_unit_textbox.get(),
         "humidity": humidity_textbox.get(),
         "humidity_unit": humidity_unit_textbox.get(),
-        "standard_measurement_values": applied_measurement_textbox.get(),
-        "standard_measurement_unit": applied_measurement_unit_textbox.get(),
+        "standard_measurement_values": standard_measurement_textbox.get(),
+        "standard_measurement_unit": standard_measurement_unit_textbox.get(),
+        "measurement_standard": "Standard Measurement",
+        "measured_item": "Indicated Measurement",
         "measured_item_values": indicated_measurement_textbox.get(),
         "measured_item_unit": indicated_measurement_unit_textbox.get(),
-        "relative_uncertainty_values": relative_expandedUn_textbox.get(),
-        "relative_uncertainty_unit": relative_expandedUn_unit_textbox.get(),
-        "relative_uncertainty":"Relative Expanded Uncertainty",
-        "measured_item": "Indicated Measurement",
-        "measurement_standard": "Standard Measurement",
+        "relative_uncertainty_values": relative_expanded_uncertainty_textbox.get(),
+        "relative_uncertainty_unit": relative_expanded_uncertainty_unit_textbox.get(),
+        "relative_uncertainty": "Relative Expanded Uncertainty",
+        "measurement_error_values": measurement_error_textbox.get(),
+        "measurement_error_unit": measurement_error_unit_textbox.get(),
+        "measurement_error": "Measurement Error",
+        "repeatability_error_values": repeatability_error_textbox.get(),
+        "repeatability_error_unit": repeatability_error_unit_textbox.get(),
+        "repeatability_error": "Repeatability Error",
         # big text areas
         "calibration_procedure": calibration_procedure_textbox.get("1.0", "end-1c").replace(placeholder_text, ""),
         "remarks": remarks_textbox.get("1.0", "end-1c").replace(remarks_placeholder, ""),
@@ -706,7 +752,7 @@ def generate_xml_tree(info):
         if ident is not None:
             set_text(ident.find("dcc:issuer", ns), info["identification_issuer"])
             set_text(ident.find("dcc:value", ns), info["calibration_item"])
-            set_text(ident.find("dcc:name/dcc:content", ns), info["serial_number"])
+            set_text(ident.find("dcc:name/dcc:content",   ns), info["serial_number"])
         desc = ci.find("dcc:description", ns)
         if desc is not None:
             cont = desc.findall("dcc:content", ns)
@@ -727,8 +773,8 @@ def generate_xml_tree(info):
         desc2 = si_el.find("dcc:description", ns)
         if desc2 is not None:
             cont2 = desc2.findall("dcc:content", ns)
-            set_text(cont2[0], "Calibration Certificate No.: " + info["standard_cert_number"])
-            set_text(cont2[1], "Traceability: " + info["standard_traceability"])
+            set_text(cont2[0], info["standard_cert_number"])
+            set_text(cont2[1], info["standard_traceability"])
 
     # 5) respPersons
     resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)
@@ -781,18 +827,38 @@ def generate_xml_tree(info):
     if res is None:
         print("⚠️ results not found")
     else:
-        # define your three rows in lists
-        names = [info["measurement_standard"], info["measured_item"], info["relative_uncertainty"]]
-        values = [info["standard_measurement_values"], info["measured_item_values"], info["relative_uncertainty_values"]]
-        units = [info["standard_measurement_unit"],info["measured_item_unit"], info["relative_uncertainty_unit"]]
+        # now four rows per updated template:
+        names = [
+            info["measurement_standard"],
+            info["measured_item"],
+            info["measurement_error"],
+            info["relative_uncertainty"],
+            info["repeatability_error"]
+        ]
+        values = [
+            info["standard_measurement_values"],
+            info["measured_item_values"],
+            info["measurement_error_values"],
+            info["relative_uncertainty_values"],
+            info["repeatability_error_values"]
+        ]
+        units = [
+            info["standard_measurement_unit"],
+            info["measured_item_unit"],
+            info["measurement_error_unit"],
+            info["relative_uncertainty_unit"],
+            info["repeatability_error_unit"]
+        ]
         for idx, row in enumerate(res.findall("dcc:result", ns)):
-            # name
-            set_text(row.find("dcc:name/dcc:content", ns), names[idx], lang=info["used_lang_code"])
-            # realListXMLList
+            set_text(row.find("dcc:name/dcc:content", ns),
+                     names[idx],
+                     lang=info["used_lang_code"])
             real_list = row.find(".//si:realListXMLList", ns)
             if real_list is not None:
-                set_text(real_list.find("si:valueXMLList", ns), values[idx])
-                set_text(real_list.find("si:unitXMLList", ns), units[idx])
+                set_text(real_list.find("si:valueXMLList", ns),
+                         values[idx])
+                set_text(real_list.find("si:unitXMLList", ns),
+                         units[idx])
 
     # 8) comment
     comm = root.find(".//dcc:comment", ns)
@@ -817,7 +883,7 @@ def build_xml_string():
 
 def export_to_xml():
     # 1) collect raw UI inputs
-    calibration_info = {
+    info = {
         #STATIC INFORMATION FROM JSON
         "software_name": cfg["software_name"],
         "software_release": cfg["software_release"],
@@ -865,21 +931,28 @@ def export_to_xml():
         "customer_name": customer_textbox.get(),
         "customer_address": address_textbox.get(),
         # Environment & results
+
+        # measurement arrays – split on spaces or commas
         "temperature": temperature_textbox.get(),
         "temperature_unit": '\'' + temperature_unit_textbox.get(),
-
         "humidity": humidity_textbox.get(),
         "humidity_unit": '\'' + humidity_unit_textbox.get(),
-        # measurement arrays – split on spaces or commas
-        "standard_measurement_values": applied_measurement_textbox.get(),
-        "standard_measurement_unit": applied_measurement_unit_textbox.get(),
+        "standard_measurement_values": standard_measurement_textbox.get(),
+        "standard_measurement_unit": standard_measurement_unit_textbox.get(),
+        "measurement_standard": "Standard Measurement",
+        "measured_item": "Indicated Measurement",
         "measured_item_values": indicated_measurement_textbox.get(),
         "measured_item_unit": indicated_measurement_unit_textbox.get(),
-        "relative_uncertainty":"Relative Expanded Uncertainty",
-        "measured_item": "Indicated Measurement",
-        "measurement_standard": "Standard Measurement",
-        "relative_uncertainty_values": relative_expandedUn_textbox.get(),
-        "relative_uncertainty_unit": relative_expandedUn_unit_textbox.get(),
+        "relative_uncertainty_values": relative_expanded_uncertainty_textbox.get(),
+        "relative_uncertainty_unit": relative_expanded_uncertainty_unit_textbox.get(),
+        "relative_uncertainty": "Relative Expanded Uncertainty",
+        "measurement_error_values": measurement_error_textbox.get(),
+        "measurement_error_unit": measurement_error_unit_textbox.get(),
+        "measurement_error": "Measurement Error",
+        "repeatability_error_values": repeatability_error_textbox.get(),
+        "repeatability_error_unit": repeatability_error_unit_textbox.get(),
+        "repeatability_error": "Repeatability Error",
+
         # big text‐areas
         "calibration_procedure": "CALIBRATION PROCEDURE: " + calibration_procedure_textbox.get("1.0", "end-1c").replace(placeholder_text, ""),
         "remarks": "REMARKS: " + remarks_textbox.get("1.0", "end-1c").replace(remarks_placeholder, ""),
@@ -889,112 +962,90 @@ def export_to_xml():
     # Import necessary libraries for XML processing
 
     # Define the template path
-    template = os.path.join(os.path.dirname(os.path.abspath(__file__)), "template.xml")
-
-    
-    # Parse template, register namespaces
-    ns = {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}
-    for p,u in ns.items(): ET.register_namespace(p,u)
+    template = os.path.join(script_dir, "template.xml")
+    for p,u in {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}.items():
+        ET.register_namespace(p,u)
 
     try:
         tree = ET.parse(template)
-    except ParseError as e:
-        # fallback to lxml recovery if available
-        try:
-            parser = LET.XMLParser(recover=True)
-            tree = LET.parse(template, parser)
-        except ImportError:
-            messagebox.showerror("Error", f"Could not parse template: {e}")
-            return
-            
+    except ParseError:
+        parser = LET.XMLParser(recover=True)
+        tree = LET.parse(template, parser)
     root = tree.getroot()
 
     def set_text(elem, txt, lang=None):
         if elem is None or txt is None: return
         elem.text = txt
         if lang: elem.set("lang", lang)
-        
+
+    ns = {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}
+
     # 1) software
     sw = root.find(".//dcc:software", ns)
-    set_text(sw.find("dcc:name/dcc:content", ns), calibration_info["software_name"])
-    set_text(sw.find("dcc:release", ns), calibration_info["software_release"])
+    set_text(sw.find("dcc:name/dcc:content", ns), info["software_name"])
+    set_text(sw.find("dcc:release", ns), info["software_release"])
 
     # 2) coreData
     cd = root.find(".//dcc:coreData", ns)
-    set_text(cd.find("dcc:countryCodeISO3166_1", ns), calibration_info["country_code_iso"])
-    set_text(cd.find("dcc:usedLangCodeISO639_1", ns), calibration_info["used_lang_code"])
-    set_text(cd.find("dcc:mandatoryLangCodeISO639_1", ns), calibration_info["mandatory_lang_code"])
-    set_text(cd.find("dcc:uniqueIdentifier", ns), "Calibration No. " + calibration_info["certificate_number"])
-    set_text(cd.find("dcc:beginPerformanceDate", ns), calibration_info["calibration_date"])
-    set_text(cd.find("dcc:endPerformanceDate", ns), calibration_info["calibration_enddate"])
-    set_text(cd.find("dcc:performanceLocation", ns), calibration_info["calibration_location"])
+    set_text(cd.find("dcc:uniqueIdentifier", ns), info["certificate_number"])
+    set_text(cd.find("dcc:beginPerformanceDate", ns), info["calibration_date"])
+    set_text(cd.find("dcc:endPerformanceDate", ns), info["calibration_enddate"])
+    set_text(cd.find("dcc:performanceLocation", ns), info["calibration_location"])
 
-    # 3) items: first is calibration, second is standard
+    # 3) first item (your device)
     items = root.findall(".//dcc:items/dcc:item", ns)
-
-    # calibration item
     if items:
         ci = items[0]
-        set_text(ci.find("dcc:name/dcc:content", ns), calibration_info["calibration_item"])
-        set_text(ci.find("dcc:model", ns), calibration_info["make_model"])
+        set_text(ci.find("dcc:name/dcc:content", ns), info["calibration_item"], lang=info["used_lang_code"])
+        set_text(ci.find("dcc:model", ns), info["make_model"])
         ident = ci.find("dcc:identifications/dcc:identification", ns)
         if ident is not None:
-            set_text(ident.find("dcc:issuer", ns), calibration_info["identification_issuer"])
-            set_text(ident.find("dcc:value", ns), calibration_info["calibration_item"])
-            set_text(ident.find("dcc:name/dcc:content", ns), calibration_info["serial_number"])
+            set_text(ident.find("dcc:issuer", ns), info["identification_issuer"])
+            set_text(ident.find("dcc:value", ns), info["calibration_item"])
+            set_text(ident.find("dcc:name/dcc:content",   ns), info["serial_number"])
         desc = ci.find("dcc:description", ns)
         if desc is not None:
             cont = desc.findall("dcc:content", ns)
-            if len(cont)>0: set_text(cont[0], "Capacity: " + calibration_info["capacity"])
-            if len(cont)>1: set_text(cont[1], "Measurement Range: " +calibration_info["measurement_range"])
-            if len(cont)>2: set_text(cont[2], "Resolution: " + calibration_info["resolution"])
+            set_text(cont[0], info["capacity"])
+            set_text(cont[1], info["measurement_range"])
+            set_text(cont[2], info["resolution"])
 
-    # standard item
-    if len(items)>1:
+    # 4) second item (standard)
+    if len(items) > 1:
         si_el = items[1]
-        set_text(si_el.find("dcc:name/dcc:content", ns), calibration_info["standard_item"])
-        set_text(si_el.find("dcc:model", ns), calibration_info["standard_model"])
+        set_text(si_el.find("dcc:name/dcc:content", ns), info["standard_item"], lang=info["used_lang_code"])
+        set_text(si_el.find("dcc:model", ns), info["standard_model"])
         ident2 = si_el.find("dcc:identifications/dcc:identification", ns)
         if ident2 is not None:
-            set_text(ident2.find("dcc:issuer", ns), calibration_info["standard_item_issuer"])
-            set_text(ident2.find("dcc:value", ns), calibration_info["standard_item"])
-            set_text(ident2.find("dcc:name/dcc:content", ns), calibration_info["standard_serial_number"])
+            set_text(ident2.find("dcc:issuer", ns), info["standard_item_issuer"])
+            set_text(ident2.find("dcc:value", ns), info["standard_item"])
+            set_text(ident2.find("dcc:name/dcc:content", ns), info["standard_serial_number"])
         desc2 = si_el.find("dcc:description", ns)
         if desc2 is not None:
             cont2 = desc2.findall("dcc:content", ns)
-            if len(cont2)>0: set_text(cont2[0], "Calibration Certificate No.: " + calibration_info["standard_cert_number"])
-            if len(cont2)>1: set_text(cont2[1], "Traceability: " + calibration_info["standard_traceability"])
-
-    # 4) calibrationLaboratory
-    lab = root.find(".//dcc:calibrationLaboratory", ns)
-    set_text(lab.find("dcc:calibrationLaboratoryCode", ns), calibration_info["calibration_labcode"])
-    set_text(lab.find("dcc:contact/dcc:name/dcc:content", ns), calibration_info["calibration_contactname"])
-    loc = lab.find("dcc:contact/dcc:location", ns)
-    set_text(loc.find("dcc:city", ns), calibration_info["calibration_labcity"])
-    set_text(loc.find("dcc:countryCode", ns), calibration_info["calibration_labcountrycode"])
-    set_text(loc.find("dcc:postCode", ns), calibration_info["calibration_lab_postcode"])
-    set_text(loc.find("dcc:street", ns), calibration_info["calibration_labstreet"])
+            set_text(cont2[0], info["standard_cert_number"])
+            set_text(cont2[1], info["standard_traceability"])
 
     # 5) respPersons
     resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)
-    for idx,(name,role) in enumerate([(calibration_info["resp_person1_name"],calibration_info["resp_person1_role"]),(calibration_info["resp_person2_name"],calibration_info["resp_person1_role"]),(calibration_info["resp_person3_name"],calibration_info["resp_person3_role"])]):
+    for idx,(name,role) in enumerate([(info["resp_person1_name"],info["resp_person1_role"]),(info["resp_person2_name"],info["resp_person2_role"]),(info["resp_person3_name"],info["resp_person3_role"])]):
         if idx<len(resp_nodes):
             rp = resp_nodes[idx]
-            set_text(rp.find("dcc:person/dcc:name/dcc:content", ns), name, lang=calibration_info["used_lang_code"])
+            set_text(rp.find("dcc:person/dcc:name/dcc:content", ns), name, lang=info["used_lang_code"])
             set_text(rp.find("dcc:role", ns), role)
 
     # 6) customer
     cust = root.find(".//dcc:customer", ns)
-    set_text(cust.find("dcc:name/dcc:content", ns), calibration_info["customer_name"])
+    set_text(cust.find("dcc:name/dcc:content", ns), info["customer_name"])
     f = cust.find("dcc:location/dcc:further/dcc:content", ns)
-    set_text(f, calibration_info["customer_address"], lang=calibration_info["used_lang_code"])
+    set_text(f, info["customer_address"], lang=info["used_lang_code"])
 
     # 7) measurementResults
     mr = root.find(".//dcc:measurementResults", ns)
-    set_text(mr.find("dcc:name/dcc:content", ns), calibration_info["calibration_item"], lang=calibration_info["used_lang_code"])
+    set_text(mr.find("dcc:name/dcc:content", ns), info["calibration_item"], lang=info["used_lang_code"])
     um = mr.find("dcc:usedMethods/dcc:usedMethod", ns)
-    set_text(um.find("dcc:name/dcc:content", ns), calibration_info["relative_uncertainty"], lang=calibration_info["used_lang_code"])
-    set_text(um.find("dcc:description/dcc:content", ns), calibration_info["uncertainty_of_measurement"], lang=calibration_info["used_lang_code"])
+    set_text(um.find("dcc:name/dcc:content", ns), info["relative_uncertainty"], lang=info["used_lang_code"])
+    set_text(um.find("dcc:description/dcc:content", ns), info["uncertainty_of_measurement"], lang=info["used_lang_code"])
 
     # 7) influenceConditions
     ic = mr.find(".//dcc:influenceConditions", ns)
@@ -1005,74 +1056,98 @@ def export_to_xml():
         # first condition
         if len(conds) > 0:
             infl = conds[0]
-            set_text(infl.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=calibration_info["used_lang_code"])
+            set_text(infl.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=info["used_lang_code"])
             dq = infl.find(".//dcc:quantity", ns)
-            set_text(dq.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=calibration_info["used_lang_code"])
+            set_text(dq.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=info["used_lang_code"])
             real = dq.find("si:real", ns)
-            set_text(real.find("si:value", ns), calibration_info["temperature"])
-            set_text(real.find("si:unit", ns), calibration_info["temperature_unit"])
+            set_text(real.find("si:value", ns), info["temperature"])
+            set_text(real.find("si:unit", ns), info["temperature_unit"])
         # second condition
         if len(conds) > 1:
             infl = conds[1]
-            set_text(infl.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=calibration_info["used_lang_code"])
+            set_text(infl.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=info["used_lang_code"])
             dq = infl.find(".//dcc:quantity", ns)
-            set_text(dq.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=calibration_info["used_lang_code"])
+            set_text(dq.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=info["used_lang_code"])
             real = dq.find("si:real", ns)
-            set_text(real.find("si:value", ns), calibration_info["humidity"])
-            set_text(real.find("si:unit", ns), calibration_info["humidity_unit"])
+            set_text(real.find("si:value", ns), info["humidity"])
+            set_text(real.find("si:unit", ns), info["humidity_unit"])
 
     # 8) results
     res = mr.find(".//dcc:results", ns)
     if res is None:
         print("⚠️ results not found")
     else:
-        # define your three rows in lists
-        names = [calibration_info["measurement_standard"], calibration_info["measured_item"], calibration_info["relative_uncertainty"]]
-        values = [calibration_info["standard_measurement_values"], calibration_info["measured_item_values"], calibration_info["relative_uncertainty_values"]]
-        units = [calibration_info["standard_measurement_unit"], calibration_info["measured_item_unit"], calibration_info["relative_uncertainty_unit"]]
+        # now four rows per updated template:
+        names = [
+            info["measurement_standard"],
+            info["measured_item"],
+            info["measurement_error"],
+            info["relative_uncertainty"],
+            info["repeatability_error"]
+        ]
+        values = [
+            info["standard_measurement_values"],
+            info["measured_item_values"],
+            info["measurement_error_values"],
+            info["relative_uncertainty_values"],
+            info["repeatability_error_values"]
+        ]
+        units = [
+            info["standard_measurement_unit"],
+            info["measured_item_unit"],
+            info["measurement_error_unit"],
+            info["relative_uncertainty_unit"],
+            info["repeatability_error_unit"]
+        ]
         for idx, row in enumerate(res.findall("dcc:result", ns)):
-            # name
-            set_text(row.find("dcc:name/dcc:content", ns), names[idx], lang=calibration_info["used_lang_code"])
-            # realListXMLList
+            set_text(row.find("dcc:name/dcc:content", ns),
+                     names[idx],
+                     lang=info["used_lang_code"])
             real_list = row.find(".//si:realListXMLList", ns)
             if real_list is not None:
-                set_text(real_list.find("si:valueXMLList", ns), values[idx])
-                set_text(real_list.find("si:unitXMLList", ns), units[idx])
+                set_text(real_list.find("si:valueXMLList", ns),
+                         values[idx])
+                set_text(real_list.find("si:unitXMLList", ns),
+                         units[idx])
 
     # 8) comment
     comm = root.find(".//dcc:comment", ns)
     cc = comm.findall("dcc:content", ns)
     if cc: 
-        set_text(cc[0], calibration_info["calibration_procedure"], lang=calibration_info["used_lang_code"])
+        set_text(cc[0], "CALIBRATION PROCEDURE: " + info["calibration_procedure"], lang=info["used_lang_code"])
     if len(cc)>1: 
-        set_text(cc[1], calibration_info["remarks"], lang=calibration_info["used_lang_code"])
+        set_text(cc[1], "REMARKS: " +info["remarks"], lang=info["used_lang_code"]) 
 
         # Let the user choose where to save the file
-        suggested_filename = calibration_info["certificate_number"].replace(" ", "_") + "_DCC.xml"
-        output_path = filedialog.asksaveasfilename(
-            defaultextension=".xml",
-            initialfile=suggested_filename,
-            filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
-        )
+    suggested_filename = info["certificate_number"].replace(" ", "_") + "_DCC.xml"
+    output_path = filedialog.asksaveasfilename(
+        defaultextension=".xml",
+        initialfile=suggested_filename,
+        filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
+    )
 
-        # Check if user canceled the save dialog
-        if not output_path:
-            messagebox.showinfo("Operation Canceled", "File save operation canceled.")
-            return
+    # Check if user canceled the save dialog
+    if not output_path:
+        messagebox.showinfo("Operation Canceled", "File save operation canceled.")
+        return
 
-        # Ensure the directory exists
-        output_dir = os.path.dirname(output_path)
-        if output_dir and not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-            
-        # Write the file
-        tree.write(output_path, encoding="utf-8", xml_declaration=True)
-        messagebox.showinfo("Success", f"XML file saved successfully to:\n{output_path}")
+    # Ensure the directory exists
+    output_dir = os.path.dirname(output_path)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
+    # Write the file
+    tree.write(output_path, encoding="utf-8", xml_declaration=True)
+    messagebox.showinfo("Success", f"XML file saved successfully to:\n{output_path}")
 
-        back_to_menu()
+    back_to_menu()
 
 
 
+
+
+#### PREVIEW PANEL ####
+# 1) Create a right-hand preview panel with dark mode
 
 
 #### PREVIEW PANEL ####
@@ -1139,12 +1214,16 @@ widget_tag_map = {
     humidity_unit_textbox:         ("unit", 1),
 
     # results
-    applied_measurement_textbox:   ("valueXMLList", 0),
-    applied_measurement_unit_textbox:("unitXMLList", 0),
+    standard_measurement_textbox:   ("valueXMLList", 0),
+    standard_measurement_unit_textbox:("unitXMLList", 0),
     indicated_measurement_textbox: ("valueXMLList", 1),
     indicated_measurement_unit_textbox:("unitXMLList", 1),
-    relative_expandedUn_textbox:   ("valueXMLList", 2),
-    relative_expandedUn_unit_textbox:("unitXMLList", 2),
+    measurement_error_textbox:   ("valueXMLList", 2),
+    measurement_error_unit_textbox:("unitXMLList", 2),
+    relative_expanded_uncertainty_textbox: ("valueXMLList", 3),
+    relative_expanded_uncertainty_unit_textbox: ("unitXMLList", 3),
+    repeatability_error_textbox: ("valueXMLList", 4),
+    repeatability_error_unit_textbox: ("unitXMLList", 4),
 
     # big text areas
     uncertainty_textbox:           ("usedMethods", 0),
