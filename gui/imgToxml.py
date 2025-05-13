@@ -1017,6 +1017,16 @@ def generate_xml_tree(info):
             cont2 = desc2.findall("dcc:content", ns)
             set_text(cont2[0], info["standard_cert_number"])
             set_text(cont2[1], info["standard_traceability"])
+            
+    lab = root.find(".//dcc:calibrationLaboratory", ns)
+    set_text(lab.find("dcc:calibrationLaboratoryCode", ns), info["calibration_labcode"])
+    set_text(lab.find("dcc:contact/dcc:name/dcc:content", ns), info["calibration_contactname"])
+    loc = lab.find("dcc:contact/dcc:location", ns)
+    set_text(loc.find("dcc:city", ns), info["calibration_labcity"])
+    set_text(loc.find("dcc:countryCode", ns), info["calibration_labcountrycode"])
+    set_text(loc.find("dcc:postCode", ns), info["calibration_lab_postcode"])
+    set_text(loc.find("dcc:street", ns), info["calibration_labstreet"])
+
 
     # 5) respPersons
     resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)

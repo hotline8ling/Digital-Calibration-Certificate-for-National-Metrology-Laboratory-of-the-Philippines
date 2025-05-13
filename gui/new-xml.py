@@ -811,7 +811,7 @@ def generate_xml_tree(info):
             set_text(dq.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=info["used_lang_code"])
             real = dq.find("si:real", ns)
             set_text(real.find("si:value", ns), info["temperature"])
-            set_text(real.find("si:unit", ns), info["temperature_unit"])
+            set_text(real.find("si:unit", ns), "\\" + info["temperature_unit"])
         # second condition
         if len(conds) > 1:
             infl = conds[1]
@@ -820,7 +820,7 @@ def generate_xml_tree(info):
             set_text(dq.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=info["used_lang_code"])
             real = dq.find("si:real", ns)
             set_text(real.find("si:value", ns), info["humidity"])
-            set_text(real.find("si:unit", ns), info["humidity_unit"])
+            set_text(real.find("si:unit", ns), "\\" + info["humidity_unit"])
 
     # 8) results
     res = mr.find(".//dcc:results", ns)
@@ -1026,6 +1026,16 @@ def export_to_xml():
             set_text(cont2[0], info["standard_cert_number"])
             set_text(cont2[1], info["standard_traceability"])
 
+
+    lab = root.find(".//dcc:calibrationLaboratory", ns)
+    set_text(lab.find("dcc:calibrationLaboratoryCode", ns), info["calibration_labcode"])
+    set_text(lab.find("dcc:contact/dcc:name/dcc:content", ns), info["calibration_contactname"])
+    loc = lab.find("dcc:contact/dcc:location", ns)
+    set_text(loc.find("dcc:city", ns), info["calibration_labcity"])
+    set_text(loc.find("dcc:countryCode", ns), info["calibration_labcountrycode"])
+    set_text(loc.find("dcc:postCode", ns), info["calibration_lab_postcode"])
+    set_text(loc.find("dcc:street", ns), info["calibration_labstreet"])
+    
     # 5) respPersons
     resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)
     for idx,(name,role) in enumerate([(info["resp_person1_name"],info["resp_person1_role"]),(info["resp_person2_name"],info["resp_person2_role"]),(info["resp_person3_name"],info["resp_person3_role"])]):
