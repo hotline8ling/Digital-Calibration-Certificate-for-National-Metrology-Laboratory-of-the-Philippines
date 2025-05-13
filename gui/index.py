@@ -712,10 +712,11 @@ def extract_pdf(pdf_path):
         if range_match:
             info['measurement_range'] = range_match.group(1).strip()
         
-        # Extract resolution
+        # Extract resolution and remove internal spaces
         resolution_match = re.search(r'Resolution(?:\s*:\s*|\s+)([^\n]+)', raw_text)
         if resolution_match:
-            info['resolution'] = resolution_match.group(1).strip()
+            raw_resolution = resolution_match.group(1).strip()
+            info['resolution'] = re.sub(r'\s+', '', raw_resolution)
         
         # Extract make/model
         make_match = re.search(r'Make / Model(?:\s*:\s*|\s+)([^\n]+)', raw_text)
