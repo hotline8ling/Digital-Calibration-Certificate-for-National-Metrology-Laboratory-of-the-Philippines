@@ -25,7 +25,9 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from PyPDF2 import PdfReader, PdfWriter
 
-
+import pdfToxml
+import imgToxml
+import newxml
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 #import static_info.json
@@ -384,11 +386,7 @@ def open_images():
         def finish():
             loading_win.destroy()
             app.destroy()
-            subprocess.Popen([
-                sys.executable,
-                os.path.join(script_dir, "imgToxml.py"),
-                tmp_json
-            ])
+            imgToxml.run_app(tmp_json, script_dir)
         app.after(0, finish)
 
     # run the work in background so UI stays responsive
@@ -529,14 +527,15 @@ def open_pdf():
         json.dump(cal_info, f, ensure_ascii=False, indent=2)
 
     app.destroy()
-    # pass the JSON file, not the PDF!
-    subprocess.Popen([sys.executable,
-                      os.path.join(script_dir, "pdfToxml.py"),
-                      tmp])
+
+    pdfToxml.run_app(tmp, script_dir)
 
 def open_newxml_gui():
     app.destroy()  # Close the current app window
-    subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"new-xml.py")])
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, 'static_info.json')
+
+    newxml.run_app(script_dir, config_path)
 
 def open_settings():
     app.destroy()  # Close the current app window

@@ -1,54 +1,39 @@
+import re
+import subprocess
+from tkinter import messagebox
+from xml.etree.ElementTree import ParseError
 from customtkinter import *
 from PIL import Image
 import os
-from tkinter import messagebox
+from PIL import Image
 import json
 import xml.etree.ElementTree as ET
 import lxml.etree as LET
 from io import BytesIO
-from tkinter import filedialog 
-import sys
-import re
-import subprocess
-from xml.etree.ElementTree import ParseError
-import re
-from datetime import datetime
+from tkinter import filedialog   # you’ll need this up top if you also do file‐saves later
 
-def run_app(json_pathing, script_dir):
+
+#import static_info.json
+# Load the JSON data from the file using absolute path
+def run_app(script_dir, config_path):
     
-    json_path = json_pathing
-    with open(json_path, encoding="utf-8") as f:
-        calibration_info = json.load(f)
+    # script_dir = os.path.dirname(os.path.abspath(__file__))
+    # config_path = os.path.join(script_dir, 'static_info.json')
+    try:
+        with open(config_path, 'r') as file:
+            cfg = json.load(file)
+    except FileNotFoundError:
+        print(f"Error: Could not find the configuration file at: {config_path}")
+        print("Current working directory:", os.getcwd())
+        print("Looking for file in directory:", script_dir)
+        raise
+
 
     def back_to_menu():
         app.destroy()  # Close the current app window
         subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"index.py")])
 
-    def export_to_xml():
-        # grab all the current UI values
-        info = collect_calibration_info()
-        # build the XML tree
-        tree = generate_xml_tree(info)
 
-        # Let the user choose where to save the file
-        suggested_filename = calibration_info["certificate_number"].replace(" ", "_") + "_DCC.xml"
-        output_path = filedialog.asksaveasfilename(
-            defaultextension=".xml",
-            initialfile=suggested_filename,
-            filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
-        )
-
-        # Check if user canceled the save dialog
-        if not output_path:
-            messagebox.showinfo("Operation Canceled", "File save operation canceled.")
-            return
-
-        # Write the file
-        tree.write(output_path, encoding="utf-8", xml_declaration=True)
-        messagebox.showinfo("Success", f"XML file saved successfully to:\n{output_path}")
-
-        back_to_menu()
-    
     def center_window(app, width, height):
         app.update_idletasks()  # Ensure the window dimensions are updated
         screen_width = app.winfo_screenwidth()
@@ -76,7 +61,6 @@ def run_app(json_pathing, script_dir):
     rely = 84 / 700 
     relwidth = 475 / 1200  
     relheight = 525 / 700  
-    
 
     # Create a scrollable frame
     scrollable_frame = CTkScrollableFrame(master=app, fg_color='white')
@@ -92,20 +76,12 @@ def run_app(json_pathing, script_dir):
     tsr_label.grid(row=1, column=0, padx=10, pady=(5, 5), sticky="w")
 
     # TSR Number Textbox
-
     tsr_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 02-2019-FORC-0028")
     tsr_textbox.grid(row=2, column=0, padx=10, pady=(5, 10), sticky="w")
-    # Insert certificate number or show placeholder if it's empty or None
-    cert_no = calibration_info.get("certificate_number")
-    if cert_no and cert_no.strip():
-        tsr_textbox.insert(0, cert_no)
-
 
     # Calibration Type Label
     calibration_label = CTkLabel(master=scrollable_frame, text="Calibration Type:", font=("Inter", 12, "bold"), bg_color='white')
     calibration_label.grid(row=1, column=1, padx=10, pady=(5, 5), sticky="w")
-
-
 
     # Calibration Type Dropdown
     calibration_options = ["Onsite", "Laboratory"]  # Replace with your actual options
@@ -119,35 +95,14 @@ def run_app(json_pathing, script_dir):
         text_color='black',
     )
     calibration_dropdown.grid(row=2, column=1, padx=10, pady=(5, 10), sticky="w")
-    calibration_dropdown.set(calibration_info["calibration_location"])
-
 
     # Start Date of Calibration Label
     start_date_label = CTkLabel(master=scrollable_frame, text="Start Date of Calibration:", font=("Inter", 12, "bold"), bg_color='white')
     start_date_label.grid(row=3, column=0, padx=10, pady=(5, 5), sticky="w")
 
-
-
     # Start Date of Calibration Textbox
     start_date_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 2025-02-24")
     start_date_textbox.grid(row=4, column=0, padx=10, pady=(5, 10), sticky="w")
-    # Apply date normalization logic
-    raw_date = calibration_info["calibration_date"]
-    step1 = re.sub(r"([A-Za-z]+)(\d)", r"\1 \2", raw_date)
-    step2 = step1.replace(",", ", ")
-    norm = re.sub(r"\s+", " ", step2).strip()
-    try:
-        dt = datetime.strptime(norm, "%B %d, %Y")
-        begin_performance_date = dt.strftime("%Y-%m-%d")
-    except ValueError:
-        begin_performance_date = raw_date
-
-    calibration_info["calibration_date"] = begin_performance_date
-
-
-    start_date = calibration_info.get("calibration_date")
-    if start_date and start_date.strip():
-        start_date_textbox.insert(0, start_date)
 
     # End Date of Calibration Label
     end_date_label = CTkLabel(master=scrollable_frame, text="End Date of Calibration:", font=("Inter", 12, "bold"), bg_color='white')
@@ -156,11 +111,6 @@ def run_app(json_pathing, script_dir):
     # End Date of Calibration Textbox
     end_date_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 2025-02-24")
     end_date_textbox.grid(row=4, column=1, padx=10, pady=(5, 10), sticky="w")
-
-    end_date = calibration_info.get("calibration_date")
-    if end_date and end_date.strip():
-        end_date_textbox.insert(0, end_date)
-
 
     #############################
     # Calibration Equipment Label
@@ -193,11 +143,6 @@ def run_app(json_pathing, script_dir):
         text_color='black',
     )
     calibration_item_dropdown.grid(row=9, column=0, padx=10, pady=(5, 10), sticky="w")
-    detected_item = calibration_info.get("calibration_item", "")
-    if detected_item.strip() and detected_item in calibration_item_options:
-        calibration_item_dropdown.set(detected_item)
-    else:
-        calibration_item_dropdown.set(calibration_item_options[0])
 
 
     # Serial Number Label
@@ -207,10 +152,6 @@ def run_app(json_pathing, script_dir):
     # Serial Number Textbox
     serial_number_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 1122YL23002")
     serial_number_textbox.grid(row=9, column=1, padx=10, pady=(5, 10), sticky="w")
-    serial_number = calibration_info.get("serial_number")
-    if serial_number and serial_number.strip():
-        serial_number_textbox.insert(0, serial_number)
-
 
 
     # Capacity Label
@@ -220,9 +161,6 @@ def run_app(json_pathing, script_dir):
     # Capacity Textbox
     capacity_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 1000 kgf")
     capacity_textbox.grid(row=11, column=1, padx=10, pady=(5, 10), sticky="w")
-    capacity = calibration_info.get("capacity")
-    if capacity and capacity.strip():
-        capacity_textbox.insert(0, capacity)
 
     # Model Label
     model_label = CTkLabel(master=scrollable_frame, text="Model:", font=("Inter", 12, "bold"), bg_color='white')
@@ -231,9 +169,6 @@ def run_app(json_pathing, script_dir):
     # Model Textbox
     model_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Intercomp")
     model_textbox.grid(row=13, column=0, padx=10, pady=(5, 10), sticky="w")
-    model = calibration_info.get("make_model")
-    if model and model.strip():
-        model_textbox.insert(0, model)
 
     # Range Label
     range_label = CTkLabel(master=scrollable_frame, text="Range:", font=("Inter", 12, "bold"), bg_color='white')
@@ -242,9 +177,6 @@ def run_app(json_pathing, script_dir):
     # Range Textbox
     range_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0 kgf to 15 000 kgf")
     range_textbox.grid(row=13, column=1, padx=10, pady=(5, 10), sticky="w")
-    range = calibration_info.get("measurement_range")
-    if range and range.strip():
-        range_textbox.insert(0, range)
 
     # Identification Issuer Label
     identification_issuer_label = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
@@ -253,9 +185,6 @@ def run_app(json_pathing, script_dir):
     # Identification Issuer Textbox
     identification_issuer_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. customer")
     identification_issuer_textbox.grid(row=11, column=0, padx=10, pady=(5, 10), sticky="w")
-    identification_issuer = calibration_info.get("identification_issuer")
-    if identification_issuer and identification_issuer.strip():
-        identification_issuer_textbox.insert(0, identification_issuer)
 
     # Resolution Label
     resolution_label = CTkLabel(master=scrollable_frame, text="Resolution:", font=("Inter", 12, "bold"), bg_color='white')
@@ -264,10 +193,6 @@ def run_app(json_pathing, script_dir):
     # Resolution Textbox
     resolution_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 50 kgf")
     resolution_textbox.grid(row=15, column=0, padx=10, pady=(5, 10), sticky="w")
-    resolution = calibration_info.get("resolution")
-    if resolution and resolution.strip():
-        resolution_textbox.insert(0, resolution)
-
 
     ##########################
     # Standard Equipment Label
@@ -275,27 +200,21 @@ def run_app(json_pathing, script_dir):
     standard_equipment_label.grid(row=16, column=0, columnspan=2, padx=10, pady=(10, 5), sticky="w")
 
     # Standard Item Label
-    standard_item_label = CTkLabel(master=scrollable_frame, text="Standard Item:", font=("Inter", 12, "bold"), bg_color='white')
-    standard_item_label.grid(row=17, column=0, padx=10, pady=(5, 5), sticky="w")
+    standard_item_label1 = CTkLabel(master=scrollable_frame, text="Standard Item:", font=("Inter", 12, "bold"), bg_color='white')
+    standard_item_label1.grid(row=17, column=0, padx=10, pady=(5, 5), sticky="w")
 
     # Standard Item Textbox
-    standard_item_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Force Measuring Equipment")
-    standard_item_textbox.grid(row=18, column=0, padx=10, pady=(5, 10), sticky="w")
-    standard_item = calibration_info.get("standard_item")
-    if standard_item and standard_item.strip():
-        standard_item_textbox.insert(0, standard_item)
+    standard_item_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Force Measuring Equipment")
+    standard_item_textbox1.grid(row=18, column=0, padx=10, pady=(5, 10), sticky="w")
 
     # Serial Number Label
     serial_number_label1 = CTkLabel(master=scrollable_frame, text="Serial Number:", font=("Inter", 12, "bold"), bg_color='white')
     serial_number_label1.grid(row=17, column=1, padx=10, pady=(5, 5), sticky="w")
 
-
     # Serial Number Textbox
     serial_number_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. SN 1251056K0094")
     serial_number_textbox1.grid(row=18, column=1, padx=10, pady=(5, 10), sticky="w")
-    serial_number1 = calibration_info.get("standard_serial_number")
-    if serial_number1 and serial_number1.strip():
-        serial_number_textbox1.insert(0, serial_number1)
+
 
     # Calibration Cert Label
     calibCert_label = CTkLabel(master=scrollable_frame, text="Calibration Certificate No.", font=("Inter", 12, "bold"), bg_color='white')
@@ -304,9 +223,6 @@ def run_app(json_pathing, script_dir):
     # Calibration Cert Textbox
     calibCert_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 11-2020-FORC-0116")
     calibCert_textbox.grid(row=20, column=1, padx=10, pady=(5, 10), sticky="w")
-    calibCert = calibration_info.get("standard_cert_number")
-    if calibCert and calibCert.strip():
-        calibCert_textbox.insert(0, calibCert)
 
     # Model Label
     model_label1 = CTkLabel(master=scrollable_frame, text="Model:", font=("Inter", 12, "bold"), bg_color='white')
@@ -315,9 +231,6 @@ def run_app(json_pathing, script_dir):
     # Model Textbox
     model_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Shimadzu/ UH-F1000kNX")
     model_textbox1.grid(row=22, column=0, padx=10, pady=(5, 10), sticky="w")
-    model1 = calibration_info.get("standard_model")
-    if model1 and model1.strip():
-        model_textbox1.insert(0, model1)
 
     # Traceability Label
     traceability_label = CTkLabel(master=scrollable_frame, text="Traceability:", font=("Inter", 12, "bold"), bg_color='white')
@@ -326,10 +239,6 @@ def run_app(json_pathing, script_dir):
     # Traceability Textbox
     traceability_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Traceable to the SI through NMD-ITDI")
     traceability_textbox.grid(row=22, column=1, padx=10, pady=(5, 10), sticky="w")
-    traceability = calibration_info.get("standard_traceability")
-    if traceability and traceability.strip():
-        traceability_textbox.insert(0, traceability)
-
 
     # Identification Issuer Label
     identification_issuer_label1 = CTkLabel(master=scrollable_frame, text="Identification Issuer:", font=("Inter", 12, "bold"), bg_color='white')
@@ -338,9 +247,6 @@ def run_app(json_pathing, script_dir):
     # Identification Issuer Textbox
     identification_issuer_textbox1 = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. laboratory")
     identification_issuer_textbox1.grid(row=20, column=0, padx=10, pady=(5, 10), sticky="w")
-    identification_issuer1 = calibration_info.get("standard_item_issuer")
-    if identification_issuer1 and identification_issuer1.strip():
-        identification_issuer_textbox1.insert(0, identification_issuer1)
 
     #################
     # Personnel Label
@@ -354,9 +260,6 @@ def run_app(json_pathing, script_dir):
     # Analyst # 1 Textbox
     analyst1_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. John Doe")
     analyst1_textbox.grid(row=27, column=0, padx=10, pady=(5, 10), sticky="w")
-    analyst1 = calibration_info.get("resp_person1_name")
-    if analyst1 and analyst1.strip():
-        analyst1_textbox.insert(0, analyst1)
 
     # Role Label
     role1_label = CTkLabel(master=scrollable_frame, text="Role:", font=("Inter", 12, "bold"), bg_color='white')
@@ -365,9 +268,6 @@ def run_app(json_pathing, script_dir):
     # Role Textbox
     role1_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Science Research Specialist II")
     role1_textbox.grid(row=27, column=1, padx=10, pady=(5, 10), sticky="w")
-    role1 = calibration_info.get("resp_person1_role")
-    if role1 and role1.strip():
-        role1_textbox.insert(0, role1)
 
     # Analyst # 2 Label
     analyst2_label = CTkLabel(master=scrollable_frame, text="Analyst # 2:", font=("Inter", 12, "bold"), bg_color='white')
@@ -376,9 +276,6 @@ def run_app(json_pathing, script_dir):
     # Analyst # 2 Textbox
     analyst2_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Jane Smith")
     analyst2_textbox.grid(row=29, column=0, padx=10, pady=(5, 10), sticky="w")
-    analyst2 = calibration_info.get("resp_person2_name")
-    if analyst2 and analyst2.strip():
-        analyst2_textbox.insert(0, analyst2)
 
     # Role Label
     role2_label = CTkLabel(master=scrollable_frame, text="Role:", font=("Inter", 12, "bold"), bg_color='white')
@@ -387,10 +284,6 @@ def run_app(json_pathing, script_dir):
     # Role Textbox
     role2_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Senior Science Research Specialist")
     role2_textbox.grid(row=29, column=1, padx=10, pady=(5, 10), sticky="w")
-    role2 = calibration_info.get("resp_person2_role")
-    if role2 and role2.strip():
-        role2_textbox.insert(0, role2)
-
 
     # Authorized by Label
     authorized_label = CTkLabel(master=scrollable_frame, text="Authorized by:", font=("Inter", 12, "bold"), bg_color='white')
@@ -399,9 +292,6 @@ def run_app(json_pathing, script_dir):
     # Authorized by Textbox
     authorized_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Maria Santos")
     authorized_textbox.grid(row=31, column=0, padx=10, pady=(5, 10), sticky="w")
-    authorized = calibration_info.get("resp_person3_name")
-    if authorized and authorized.strip():
-        authorized_textbox.insert(0, authorized)
 
     # Role Label
     authorized_role_label = CTkLabel(master=scrollable_frame, text="Role:", font=("Inter", 12, "bold"), bg_color='white')
@@ -410,9 +300,6 @@ def run_app(json_pathing, script_dir):
     # Role Textbox
     authorized_role_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. Head, Pressure and Force Standards Section")
     authorized_role_textbox.grid(row=31, column=1, padx=10, pady=(5, 10), sticky="w")
-    authorized_role = calibration_info.get("resp_person3_role")
-    if authorized_role and authorized_role.strip():
-        authorized_role_textbox.insert(0, authorized_role)
 
     ############################
     # Customer Information Label
@@ -426,9 +313,6 @@ def run_app(json_pathing, script_dir):
     # Customer Textbox
     customer_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. ABC Corporation")
     customer_textbox.grid(row=34, column=0, padx=10, pady=(5, 10), sticky="w")
-    customer = calibration_info.get("customer_name")
-    if customer and customer.strip():
-        customer_textbox.insert(0, customer)
 
     # Address Label
     address_label = CTkLabel(master=scrollable_frame, text="Address:", font=("Inter", 12, "bold"), bg_color='white')
@@ -437,9 +321,6 @@ def run_app(json_pathing, script_dir):
     # Address Textbox
     address_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 123 Main St, City, Country")
     address_textbox.grid(row=34, column=1, padx=10, pady=(5, 10), sticky="w")
-    address = calibration_info.get("customer_address")
-    if address and address.strip():
-        address_textbox.insert(0, address)
 
     ################################
     # Environmental Conditions Label
@@ -453,20 +334,14 @@ def run_app(json_pathing, script_dir):
     # Temperature Textbox
     temperature_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. (22 +- 2)")
     temperature_textbox.grid(row=37, column=0, padx=10, pady=(5, 10), sticky="w")
-    temperature = calibration_info.get("temperature")
-    if temperature and temperature.strip():
-        temperature_textbox.insert(0, temperature)
 
     # Unit Label (Temperature)
     temperature_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
     temperature_unit_label.grid(row=36, column=1, padx=10, pady=(5, 5), sticky="w")
 
     # Unit Textbox (Temperature)
-    temperature_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \celcius")
+    temperature_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. celcius")
     temperature_unit_textbox.grid(row=37, column=1, padx=10, pady=(5, 10), sticky="w")
-    temperature_unit = calibration_info.get("temperature_unit")
-    if temperature_unit and temperature_unit.strip():
-        temperature_unit_textbox.insert(0, temperature_unit)
 
     # Humidity Label
     humidity_label = CTkLabel(master=scrollable_frame, text="Humidity:", font=("Inter", 12, "bold"), bg_color='white')
@@ -475,23 +350,16 @@ def run_app(json_pathing, script_dir):
     # Humidity Textbox
     humidity_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. (40 +- 5)")
     humidity_textbox.grid(row=39, column=0, padx=10, pady=(5, 10), sticky="w")
-    humidity = calibration_info.get("humidity")
-    if humidity and humidity.strip():
-        humidity_textbox.insert(0, humidity)
 
     # Unit Label (Humidity)
     humidity_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
     humidity_unit_label.grid(row=38, column=1, padx=10, pady=(5, 5), sticky="w")
 
     # Unit Textbox (Humidity)
-    humidity_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \%")
+    humidity_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. %")
     humidity_unit_textbox.grid(row=39, column=1, padx=10, pady=(5, 10), sticky="w")
-    humidity_unit = calibration_info.get("humidity_unit")
-    if humidity_unit and humidity_unit.strip():
-        humidity_unit_textbox.insert(0, humidity_unit)
 
     ##########################
-    # Results Label
     results_label = CTkLabel(master=scrollable_frame, text="Results:", font=("Inter", 14, "bold"), bg_color='white')
     results_label.grid(row=40, column=0, columnspan=2, padx=10, pady=(10, 5), sticky="w")
     # Standard Measurement Label
@@ -501,9 +369,6 @@ def run_app(json_pathing, script_dir):
     # Standard Measurement Textbox
     standard_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 3 000 6 000")
     standard_measurement_textbox.grid(row=42, column=0, padx=10, pady=(5, 10), sticky="w")
-    standard_measurement_val = calibration_info.get("standard_measurement_values")
-    if standard_measurement_val and standard_measurement_val.strip():
-        standard_measurement_textbox.insert(0, standard_measurement_val)
 
     # Unit Label (Standard Measurement)
     standard_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -512,9 +377,7 @@ def run_app(json_pathing, script_dir):
     # Unit Textbox (Standard Measurement)
     standard_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
     standard_measurement_unit_textbox.grid(row=42, column=1, padx=10, pady=(5, 10), sticky="w")
-    standard_measurement_unit = calibration_info.get("standard_measurement_unit")
-    if standard_measurement_unit and standard_measurement_unit.strip():
-        standard_measurement_unit_textbox.insert(0, standard_measurement_unit)
+
 
     # Indicated Measurement Label
     indicated_measurement_label = CTkLabel(master=scrollable_frame, text="Indicated Measurement:", font=("Inter", 12, "bold"), bg_color='white')
@@ -523,9 +386,7 @@ def run_app(json_pathing, script_dir):
     # Indicated Measurement Textbox
     indicated_measurement_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 2 850 5 700")
     indicated_measurement_textbox.grid(row=44, column=0, padx=10, pady=(5, 10), sticky="w")
-    indicated_measurement_val = calibration_info.get("measured_item_values")
-    if indicated_measurement_val and indicated_measurement_val.strip():
-        indicated_measurement_textbox.insert(0, indicated_measurement_val)
+
 
     # Unit Label (Indicated Measurement)
     indicated_measurement_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -534,9 +395,7 @@ def run_app(json_pathing, script_dir):
     # Unit Textbox (Indicated Measurement)
     indicated_measurement_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \kgf \kgf \kgf")
     indicated_measurement_unit_textbox.grid(row=44, column=1, padx=10, pady=(5, 10), sticky="w")
-    indicated_measurement_unit = calibration_info.get("measured_item_unit")
-    if indicated_measurement_unit and indicated_measurement_unit.strip():
-        indicated_measurement_unit_textbox.insert(0, indicated_measurement_unit)
+
 
     # Measurement Error Label
     measurement_error_label = CTkLabel(master=scrollable_frame, text="Measurement Error:", font=("Inter", 12, "bold"), bg_color='white')
@@ -545,9 +404,7 @@ def run_app(json_pathing, script_dir):
     # Measurement Error Textbox
     measurement_error_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
     measurement_error_textbox.grid(row=46, column=0, padx=10, pady=(5, 10), sticky="w")
-    measurement_error_val = calibration_info.get("measurement_error_values")
-    if measurement_error_val and measurement_error_val.strip():
-        measurement_error_textbox.insert(0, measurement_error_val)
+
 
     # Unit Label (Measurement Error)
     measurement_error_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -556,9 +413,6 @@ def run_app(json_pathing, script_dir):
     # Unit Textbox (Measurement Error)
     measurement_error_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
     measurement_error_unit_textbox.grid(row=46, column=1, padx=10, pady=(5, 10), sticky="w")
-    measurement_error_unit = calibration_info.get("measurement_error_unit")
-    if measurement_error_unit and measurement_error_unit.strip():
-        measurement_error_unit_textbox.insert(0, measurement_error_unit)
 
     # Relative Expanded Uncertainty Label
     relative_expanded_uncertainty_label = CTkLabel(master=scrollable_frame, text="Relative Expanded Uncertainty:", font=("Inter", 12, "bold"), bg_color='white')
@@ -567,9 +421,7 @@ def run_app(json_pathing, script_dir):
     # Relative Expanded Uncertainty Textbox
     relative_expanded_uncertainty_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 1.04 0.56")
     relative_expanded_uncertainty_textbox.grid(row=48, column=0, padx=10, pady=(5, 10), sticky="w")
-    relative_expanded_uncertainty_val = calibration_info.get("relative_uncertainty_values")
-    if relative_expanded_uncertainty_val and relative_expanded_uncertainty_val.strip():
-        relative_expanded_uncertainty_textbox.insert(0, relative_expanded_uncertainty_val)
+
 
     # Unit Label (Relative Expanded Uncertainty)
     relative_expanded_uncertainty_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -578,10 +430,6 @@ def run_app(json_pathing, script_dir):
     # Unit Textbox (Relative Expanded Uncertainty)
     relative_expanded_uncertainty_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
     relative_expanded_uncertainty_unit_textbox.grid(row=48, column=1, padx=10, pady=(5, 10), sticky="w")
-    relative_expanded_uncertainty_unit = calibration_info.get("relative_uncertainty_unit")
-    if relative_expanded_uncertainty_unit and relative_expanded_uncertainty_unit.strip():
-        relative_expanded_uncertainty_unit_textbox.insert(0, relative_expanded_uncertainty_unit)
-
 
     # Repeatability Error Label
     repeatability_error_label = CTkLabel(master=scrollable_frame, text="Repeatability Error:", font=("Inter", 12, "bold"), bg_color='white')
@@ -590,9 +438,6 @@ def run_app(json_pathing, script_dir):
     # Repeatability Error Textbox
     repeatability_error_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. 0.00 0.50 0.30")
     repeatability_error_textbox.grid(row=50, column=0, padx=10, pady=(5, 10), sticky="w")
-    repeatability_error_val = calibration_info.get("repeatability_error_values")
-    if repeatability_error_val and repeatability_error_val.strip():
-        repeatability_error_textbox.insert(0, repeatability_error_val)
 
     # Unit Label (Repeatability Error)
     repeatability_error_unit_label = CTkLabel(master=scrollable_frame, text="Unit:", font=("Inter", 12, "bold"), bg_color='white')
@@ -601,9 +446,6 @@ def run_app(json_pathing, script_dir):
     # Unit Textbox (Repeatability Error)
     repeatability_error_unit_textbox = CTkEntry(master=scrollable_frame, font=("Inter", 12), fg_color='white', border_width=2, width=170, height=30, placeholder_text="e.g. \% \% \%")
     repeatability_error_unit_textbox.grid(row=50, column=1, padx=10, pady=(5, 10), sticky="w")
-    repeatability_error_unit = calibration_info.get("repeatability_error_unit")
-    if repeatability_error_unit and repeatability_error_unit.strip():
-        repeatability_error_unit_textbox.insert(0, repeatability_error_unit)
 
 
 
@@ -642,7 +484,6 @@ def run_app(json_pathing, script_dir):
     uncertainty_textbox.bind("<FocusOut>", on_uncertainty_focus_out)
     uncertainty_textbox.grid(row=52, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
     uncertainty_textbox.delete("1.0", "end")
-    uncertainty_textbox.insert("1.0", calibration_info["uncertainty_of_measurement"])
     uncertainty_textbox.configure(text_color="black")
 
     #############################
@@ -680,7 +521,6 @@ def run_app(json_pathing, script_dir):
     calibration_procedure_textbox.bind("<FocusOut>", on_focus_out)
     calibration_procedure_textbox.grid(row=54, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
     calibration_procedure_textbox.delete("1.0", "end")
-    calibration_procedure_textbox.insert("1.0", calibration_info["calibration_procedure"])
     calibration_procedure_textbox.configure(text_color="black")
 
     ###############
@@ -718,11 +558,57 @@ def run_app(json_pathing, script_dir):
     remarks_textbox.bind("<FocusOut>", on_remarks_focus_out)
     remarks_textbox.grid(row=56, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="we")
     remarks_textbox.delete("1.0", "end")
-    remarks_textbox.insert("1.0", calibration_info["remarks"])
     remarks_textbox.configure(text_color="black")
 
 
-    # --- after you've built your scrollable_frame and all the widgets ---
+
+    # ^ content of scrollable frame
+    #########################################
+
+    # Load and Resize the Image
+
+    itdi_logo_path = os.path.join(script_dir, "itdi-logo.png")
+    image = CTkImage(light_image=Image.open(itdi_logo_path), size=(26, 25))
+    # Create CTkLabel with Image
+    image_label = CTkLabel(master=app, image=image, text="", bg_color='white') 
+    image_label.place(relx=0.4525, rely=0.0457)
+
+    # Load and Resize the Image
+    nml_logo_path = os.path.join(script_dir, "nml-logo1.png")
+    image1 = CTkImage(light_image=Image.open(nml_logo_path), size=(29, 28))
+    # Create CTkLabel with Image
+    image_label = CTkLabel(master=app, image=image1, text="", bg_color='white') 
+    image_label.place(relx=0.4225, rely=0.0457)
+
+    stroke = CTkFrame(master=app, fg_color="#0855B1", corner_radius=0)
+    stroke.place(relx=0.0483, rely=0.0438, relwidth=0.006, relheight=0.045)
+
+    # Title label
+    titleLabel = CTkLabel(master=app, text="DigiCert", font=("Montserrat", 32, "bold"), bg_color='white')
+    titleLabel.place(relx=0.0567, rely=0.0330)
+
+    # BG rectangle 1
+    bg_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
+    bg_frame.place(relx=0.5, rely=0.0, relwidth=0.5, relheight=1.0)
+
+    # BG rectangle 
+    footer_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
+    footer_frame.place(relx=0.0, rely=0.89, relwidth=0.5, relheight=0.1114)
+
+    # Export button
+    exportButton = CTkButton(master=app, text="Export", corner_radius=7, 
+                            fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13))
+    exportButton.place(relx=0.1958, rely=0.9214, relwidth=0.1008, relheight=0.0471)
+
+    # Back button
+    backButton = CTkButton(master=app, text="< ", corner_radius=7, 
+                        fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 15),
+                        command=back_to_menu)
+    backButton.place(relx=0.0225, rely=0.0486, relwidth=0.0200, relheight=0.0350)
+    # PDF to XML label
+    titleLabel = CTkLabel(master=app, text="New XML", font=("Inter", 13, "bold"), bg_color='white')
+    titleLabel.place(relx=0.1800, rely=0.0514)
+
 
     def highlight_empty_fields():
         for w in scrollable_frame.winfo_children():
@@ -750,151 +636,21 @@ def run_app(json_pathing, script_dir):
     # call once after building all widgets
     highlight_empty_fields()
 
-
-    # ^ content of scrollable frame
-    #########################################
-
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Load and Resize the Image
-    itdi_logo_path = os.path.join(script_dir, "itdi-logo.png")
-    image = CTkImage(light_image=Image.open(itdi_logo_path), size=(26, 25))
-
-    # Create CTkLabel with Image
-    image_label = CTkLabel(master=app, image=image, text="", bg_color='white') 
-    image_label.place(relx=0.4525, rely=0.0457)
-
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Load and Resize the Image
-    nml_logo_path = os.path.join(script_dir, "nml-logo1.png")
-    image1 = CTkImage(light_image=Image.open(nml_logo_path), size=(29, 28))
-
-    # Create CTkLabel with Image
-    image_label = CTkLabel(master=app, image=image1, text="", bg_color='white') 
-    image_label.place(relx=0.4225, rely=0.0457)
-
-    stroke = CTkFrame(master=app, fg_color="#0855B1", corner_radius=0)
-    stroke.place(relx=0.0483, rely=0.0438, relwidth=0.006, relheight=0.045)
-
-    # Title label
-    titleLabel = CTkLabel(master=app, text="DigiCert", font=("Montserrat", 32, "bold"), bg_color='white')
-    titleLabel.place(relx=0.0567, rely=0.0330)
-
-    # BG rectangle 
-    footer_frame = CTkFrame(master=app, fg_color="#E0E0E0", corner_radius=0)
-    footer_frame.place(relx=0.0, rely=0.89, relwidth=0.5, relheight=0.1114)
-
-    # Export button
-    exportButton = CTkButton(master=app, text="Export", corner_radius=7, 
-                            fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 13), command=export_to_xml)
-    exportButton.place(relx=0.1958, rely=0.9214, relwidth=0.1008, relheight=0.0471)
-
-    # Back button
-    backButton = CTkButton(master=app, text="< ", corner_radius=7, 
-                        fg_color="#010E54", hover_color="#1A4F8B", font=("Inter", 15), command=back_to_menu)
-    backButton.place(relx=0.0225, rely=0.0486, relwidth=0.0200, relheight=0.0350)
-
-    # IMG to XML label
-    titleLabel = CTkLabel(master=app, text="PDF -> XML", font=("Inter", 13, "bold"), bg_color='white')
-    titleLabel.place(relx=0.1800, rely=0.0514)
-
-
-
-
-    #### PREVIEW PANEL ####
-    # 1) Create a right-hand preview panel with dark mode
-    preview_frame = CTkFrame(
-        master=app,
-        fg_color="#2e2e2e",  # Dark background color
-        border_color="black",
-        border_width=1
-    )
-    preview_frame.place(relx=0.5, rely=0.0, relwidth=0.5, relheight=1.0)
-
-    # 2) Create the preview textbox with dark mode
-    preview_textbox = CTkTextbox(
-        master=preview_frame,
-        font=("Cascadia Code", 12),
-        fg_color="#333333",  # Darker background for the textbox
-        text_color="white",  # White text for contrast
-        wrap="none"
-    )
-    preview_textbox.pack(fill="both", expand=True, padx=5, pady=5)
-
-    # map each input widget to the XML tag name we want to scroll to
-    widget_tag_map = {
-        # coreData
-        tsr_textbox:                   ("uniqueIdentifier", 0),
-        start_date_textbox:            ("beginPerformanceDate", 0),
-        end_date_textbox:              ("endPerformanceDate", 0),
-        calibration_dropdown:          ("performanceLocation", 0),
-
-        # first item
-        calibration_item_dropdown:     ("name", 2),  # Target the item name
-        model_textbox:                 ("identifications", 0),
-        identification_issuer_textbox: ("description", 0),
-        serial_number_textbox:         ("description", 0),
-        capacity_textbox:              ("content", 3),
-        range_textbox:                 ("content", 4),
-        resolution_textbox:            ("content", 5),
-
-        # second (standard)
-        standard_item_textbox:        ("name", 3),  # Target the standard item name
-        model_textbox1:                ("model", 1),
-        identification_issuer_textbox1:("identification", 3),
-        serial_number_textbox1:        ("value", 1),
-        calibCert_textbox:             ("content", 7),
-        traceability_textbox:          ("content", 7),
-
-        # persons
-        analyst1_textbox:              ("respPerson", 0),
-        role1_textbox:                 ("role", 0),
-        analyst2_textbox:              ("respPerson", 1),
-        role2_textbox:                 ("role", 1),
-        authorized_textbox:            ("respPerson", 2),
-        authorized_role_textbox:       ("role", 2),
-
-        # customer
-        customer_textbox:              ("location", 1),
-        address_textbox:               ("further", 0),
-
-        # conditions
-        temperature_textbox:           ("value", 2),
-        temperature_unit_textbox:      ("unit", 0),
-        humidity_textbox:              ("value", 3),
-        humidity_unit_textbox:         ("unit", 1),
-
-        # results
-        standard_measurement_textbox:   ("valueXMLList", 0),
-        standard_measurement_unit_textbox:("unitXMLList", 0),
-        indicated_measurement_textbox: ("valueXMLList", 1),
-        indicated_measurement_unit_textbox:("unitXMLList", 1),
-        measurement_error_textbox:   ("valueXMLList", 2),
-        measurement_error_unit_textbox:("unitXMLList", 2),
-        relative_expanded_uncertainty_textbox: ("valueXMLList", 3),
-        relative_expanded_uncertainty_unit_textbox: ("unitXMLList", 3),
-        repeatability_error_textbox: ("valueXMLList", 4),
-        repeatability_error_unit_textbox: ("unitXMLList", 4),
-
-        # big text areas
-        uncertainty_textbox:           ("usedMethods", 0),
-        calibration_procedure_textbox: ("comment", 0),
-        remarks_textbox:               ("comment", 0),
-    }
     # 1) Collect every field in collect_calibration_info()
     def collect_calibration_info():
-        textfield_info = {
+        calibration_info = {
             # static JSON:
-            "software_name": calibration_info["software_name"],
-            "software_release": calibration_info["software_release"],
-            "country_code_iso": calibration_info["country_code_iso"],
-            "used_lang_code": calibration_info["used_lang_code"],
-            "mandatory_lang_code": calibration_info["mandatory_lang_code"],
-            "calibration_labcode": calibration_info["calibration_labcode"],
-            "calibration_contactname": calibration_info["calibration_contactname"],
-            "calibration_labcity": calibration_info["calibration_labcity"],
-            "calibration_labcountrycode": calibration_info["calibration_labcountrycode"],
-            "calibration_lab_postcode": calibration_info["calibration_lab_postcode"],
-            "calibration_labstreet": calibration_info["calibration_labstreet"],
+            "software_name": cfg["software_name"],
+            "software_release": cfg["software_release"],
+            "country_code_iso": cfg["country_code_iso"],
+            "used_lang_code": cfg["used_lang_code"],
+            "mandatory_lang_code": cfg["mandatory_lang_code"],
+            "calibration_labcode": cfg["calibration_lab"]["code"],
+            "calibration_contactname": cfg["calibration_lab"]["contact"],
+            "calibration_labcity": cfg["calibration_lab"]["city"],
+            "calibration_labcountrycode": cfg["calibration_lab"]["countrycode"],
+            "calibration_lab_postcode": cfg["calibration_lab"]["postcode"],
+            "calibration_labstreet": cfg["calibration_lab"]["street"],
             # core data
             "certificate_number": "Calibration No. " + tsr_textbox.get(),
             "calibration_date": start_date_textbox.get(),
@@ -910,7 +666,7 @@ def run_app(json_pathing, script_dir):
             "identification_issuer": identification_issuer_textbox.get(),
             
             # standard
-            "standard_item": standard_item_textbox.get(),
+            "standard_item": standard_item_textbox1.get(),
             "standard_model": model_textbox1.get(),
             "standard_serial_number": serial_number_textbox1.get(),
             "standard_cert_number": "Calibration Certificate No.: " + calibCert_textbox.get(),
@@ -934,26 +690,27 @@ def run_app(json_pathing, script_dir):
             "humidity_unit": humidity_unit_textbox.get(),
             "standard_measurement_values": standard_measurement_textbox.get(),
             "standard_measurement_unit": standard_measurement_unit_textbox.get(),
-            "measurement_standard": calibration_info["measurement_standard"],
-            "measured_item": calibration_info["measured_item"],
+            "measurement_standard": "Standard Measurement",
+            "measured_item": "Indicated Measurement",
             "measured_item_values": indicated_measurement_textbox.get(),
             "measured_item_unit": indicated_measurement_unit_textbox.get(),
             "relative_uncertainty_values": relative_expanded_uncertainty_textbox.get(),
             "relative_uncertainty_unit": relative_expanded_uncertainty_unit_textbox.get(),
-            "relative_uncertainty": calibration_info["relative_uncertainty"],
+            "relative_uncertainty": "Relative Expanded Uncertainty",
             "measurement_error_values": measurement_error_textbox.get(),
             "measurement_error_unit": measurement_error_unit_textbox.get(),
-            "measurement_error": calibration_info["measurement_error"],
+            "measurement_error": "Measurement Error",
             "repeatability_error_values": repeatability_error_textbox.get(),
             "repeatability_error_unit": repeatability_error_unit_textbox.get(),
-            "repeatability_error": calibration_info["repeatability_error"],
+            "repeatability_error": "Repeatability Error",
             # big text areas
             "calibration_procedure": calibration_procedure_textbox.get("1.0", "end-1c").replace(placeholder_text, ""),
             "remarks": remarks_textbox.get("1.0", "end-1c").replace(remarks_placeholder, ""),
             "uncertainty_of_measurement": uncertainty_textbox.get("1.0", "end-1c").replace(uncertainty_placeholder, "")
 
         }
-        return textfield_info
+        return calibration_info
+
 
     def generate_xml_tree(info):
         template = os.path.join(script_dir, "template.xml")
@@ -1020,6 +777,257 @@ def run_app(json_pathing, script_dir):
                 set_text(cont2[0], info["standard_cert_number"])
                 set_text(cont2[1], info["standard_traceability"])
 
+        # 5) respPersons
+        resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)
+        for idx,(name,role) in enumerate([(info["resp_person1_name"],info["resp_person1_role"]),(info["resp_person2_name"],info["resp_person2_role"]),(info["resp_person3_name"],info["resp_person3_role"])]):
+            if idx<len(resp_nodes):
+                rp = resp_nodes[idx]
+                set_text(rp.find("dcc:person/dcc:name/dcc:content", ns), name, lang=info["used_lang_code"])
+                set_text(rp.find("dcc:role", ns), role)
+
+        # 6) customer
+        cust = root.find(".//dcc:customer", ns)
+        set_text(cust.find("dcc:name/dcc:content", ns), info["customer_name"])
+        f = cust.find("dcc:location/dcc:further/dcc:content", ns)
+        set_text(f, info["customer_address"], lang=info["used_lang_code"])
+
+        # 7) measurementResults
+        mr = root.find(".//dcc:measurementResults", ns)
+        set_text(mr.find("dcc:name/dcc:content", ns), info["calibration_item"], lang=info["used_lang_code"])
+        um = mr.find("dcc:usedMethods/dcc:usedMethod", ns)
+        set_text(um.find("dcc:name/dcc:content", ns), info["relative_uncertainty"], lang=info["used_lang_code"])
+        set_text(um.find("dcc:description/dcc:content", ns), info["uncertainty_of_measurement"], lang=info["used_lang_code"])
+
+        # 7) influenceConditions
+        ic = mr.find(".//dcc:influenceConditions", ns)
+        if ic is None:
+            print("⚠️ influenceConditions not found")
+        else:
+            conds = ic.findall("dcc:influenceCondition", ns)
+            # first condition
+            if len(conds) > 0:
+                infl = conds[0]
+                set_text(infl.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=info["used_lang_code"])
+                dq = infl.find(".//dcc:quantity", ns)
+                set_text(dq.find("dcc:name/dcc:content", ns), "Ambient Temperature", lang=info["used_lang_code"])
+                real = dq.find("si:real", ns)
+                set_text(real.find("si:value", ns), info["temperature"])
+                set_text(real.find("si:unit", ns), "\\" + info["temperature_unit"])
+            # second condition
+            if len(conds) > 1:
+                infl = conds[1]
+                set_text(infl.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=info["used_lang_code"])
+                dq = infl.find(".//dcc:quantity", ns)
+                set_text(dq.find("dcc:name/dcc:content", ns), "Relative Humidity", lang=info["used_lang_code"])
+                real = dq.find("si:real", ns)
+                set_text(real.find("si:value", ns), info["humidity"])
+                set_text(real.find("si:unit", ns), "\\" + info["humidity_unit"])
+
+        # 8) results
+        res = mr.find(".//dcc:results", ns)
+        if res is None:
+            print("⚠️ results not found")
+        else:
+            # now four rows per updated template:
+            names = [
+                info["measurement_standard"],
+                info["measured_item"],
+                info["measurement_error"],
+                info["relative_uncertainty"],
+                info["repeatability_error"]
+            ]
+            values = [
+                info["standard_measurement_values"],
+                info["measured_item_values"],
+                info["measurement_error_values"],
+                info["relative_uncertainty_values"],
+                info["repeatability_error_values"]
+            ]
+            units = [
+                info["standard_measurement_unit"],
+                info["measured_item_unit"],
+                info["measurement_error_unit"],
+                info["relative_uncertainty_unit"],
+                info["repeatability_error_unit"]
+            ]
+            for idx, row in enumerate(res.findall("dcc:result", ns)):
+                set_text(row.find("dcc:name/dcc:content", ns),
+                        names[idx],
+                        lang=info["used_lang_code"])
+                real_list = row.find(".//si:realListXMLList", ns)
+                if real_list is not None:
+                    set_text(real_list.find("si:valueXMLList", ns),
+                            values[idx])
+                    set_text(real_list.find("si:unitXMLList", ns),
+                            units[idx])
+
+        # 8) comment
+        comm = root.find(".//dcc:comment", ns)
+        cc = comm.findall("dcc:content", ns)
+        if cc: 
+            set_text(cc[0], "CALIBRATION PROCEDURE: " + info["calibration_procedure"], lang=info["used_lang_code"])
+        if len(cc)>1: 
+            set_text(cc[1], "REMARKS: " +info["remarks"], lang=info["used_lang_code"]) 
+        # 5) laboratory, 6) persons, 7) conditions, 8) results, 9) comments…
+        #    (copy each block from export_to_xml here, replacing `calibration_info` with `info`)
+
+        return tree
+
+    def build_xml_string():
+        info = collect_calibration_info()
+        tree = generate_xml_tree(info)
+        buf = BytesIO()
+        tree.write(buf, encoding="utf-8", xml_declaration=True)
+        return buf.getvalue().decode("utf-8")
+
+
+
+    def export_to_xml():
+        # 1) collect raw UI inputs
+        info = {
+            #STATIC INFORMATION FROM JSON
+            "software_name": cfg["software_name"],
+            "software_release": cfg["software_release"],
+            "country_code_iso": cfg["country_code_iso"],
+            "used_lang_code": cfg["used_lang_code"],
+            "mandatory_lang_code": cfg["mandatory_lang_code"],
+            "calibration_labcode": cfg["calibration_lab"]["code"],
+            "calibration_contactname": cfg["calibration_lab"]["contact"],
+            "calibration_labcity": cfg["calibration_lab"]["city"],
+            "calibration_labcountrycode": cfg["calibration_lab"]["countrycode"],
+            "calibration_lab_postcode": cfg["calibration_lab"]["postcode"],
+            "calibration_labstreet": cfg["calibration_lab"]["street"],
+
+            # Core data
+            "certificate_number": "Calibration No. " + tsr_textbox.get(),
+            "calibration_date": start_date_textbox.get(),
+            "calibration_enddate": end_date_textbox.get(),
+            "calibration_location": calibration_dropdown.get(),
+            # Items
+            "calibration_item": calibration_item_dropdown.get(),
+            "make_model": model_textbox.get(),
+            "serial_number": serial_number_textbox.get(),
+            "capacity": "Capacity: " + capacity_textbox.get(),
+            "measurement_range": "Measurement Range: " + range_textbox.get(),
+            "resolution": "Resolution: " + resolution_textbox.get(),
+            "identification_issuer": identification_issuer_textbox.get(),
+
+            # Standard equipment
+            "standard_item": standard_item_textbox1.get(),             # rename your widget if needed
+            "standard_model": model_textbox1.get(),             # rename your widget if needed
+            "standard_serial_number": serial_number_textbox1.get(),             # rename your widget if needed
+            "standard_cert_number": "Calibration Certificate No.: " + calibCert_textbox.get(),             # rename your widget if needed    # example
+            "standard_traceability": "Traceability: " +traceability_textbox.get(),
+            "standard_item_issuer": identification_issuer_textbox1.get(),  # example
+
+            # Persons
+            "resp_person1_name": analyst1_textbox.get(),
+            "resp_person1_role": role1_textbox.get(),
+            "resp_person2_name": analyst2_textbox.get(),
+            "resp_person2_role": role2_textbox.get(),
+            "resp_person3_name": authorized_textbox.get(),
+            "resp_person3_role": authorized_role_textbox.get(),
+
+            # Customer
+            "customer_name": customer_textbox.get(),
+            "customer_address": address_textbox.get(),
+            # Environment & results
+
+            # measurement arrays – split on spaces or commas
+            "temperature": temperature_textbox.get(),
+            "temperature_unit": '\'' + temperature_unit_textbox.get(),
+            "humidity": humidity_textbox.get(),
+            "humidity_unit": '\'' + humidity_unit_textbox.get(),
+            "standard_measurement_values": standard_measurement_textbox.get(),
+            "standard_measurement_unit": standard_measurement_unit_textbox.get(),
+            "measurement_standard": "Standard Measurement",
+            "measured_item": "Indicated Measurement",
+            "measured_item_values": indicated_measurement_textbox.get(),
+            "measured_item_unit": indicated_measurement_unit_textbox.get(),
+            "relative_uncertainty_values": relative_expanded_uncertainty_textbox.get(),
+            "relative_uncertainty_unit": relative_expanded_uncertainty_unit_textbox.get(),
+            "relative_uncertainty": "Relative Expanded Uncertainty",
+            "measurement_error_values": measurement_error_textbox.get(),
+            "measurement_error_unit": measurement_error_unit_textbox.get(),
+            "measurement_error": "Measurement Error",
+            "repeatability_error_values": repeatability_error_textbox.get(),
+            "repeatability_error_unit": repeatability_error_unit_textbox.get(),
+            "repeatability_error": "Repeatability Error",
+
+            # big text‐areas
+            "calibration_procedure": "CALIBRATION PROCEDURE: " + calibration_procedure_textbox.get("1.0", "end-1c").replace(placeholder_text, ""),
+            "remarks": "REMARKS: " + remarks_textbox.get("1.0", "end-1c").replace(remarks_placeholder, ""),
+            "uncertainty_of_measurement": uncertainty_textbox.get("1.0", "end-1c").replace(uncertainty_placeholder, ""),
+        }
+    
+        # Import necessary libraries for XML processing
+
+        # Define the template path
+        template = os.path.join(script_dir, "template.xml")
+        for p,u in {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}.items():
+            ET.register_namespace(p,u)
+
+        try:
+            tree = ET.parse(template)
+        except ParseError:
+            parser = LET.XMLParser(recover=True)
+            tree = LET.parse(template, parser)
+        root = tree.getroot()
+
+        def set_text(elem, txt, lang=None):
+            if elem is None or txt is None: return
+            elem.text = txt
+            if lang: elem.set("lang", lang)
+
+        ns = {"dcc":"https://ptb.de/dcc","si":"https://ptb.de/si"}
+
+        # 1) software
+        sw = root.find(".//dcc:software", ns)
+        set_text(sw.find("dcc:name/dcc:content", ns), info["software_name"])
+        set_text(sw.find("dcc:release", ns), info["software_release"])
+
+        # 2) coreData
+        cd = root.find(".//dcc:coreData", ns)
+        set_text(cd.find("dcc:uniqueIdentifier", ns), info["certificate_number"])
+        set_text(cd.find("dcc:beginPerformanceDate", ns), info["calibration_date"])
+        set_text(cd.find("dcc:endPerformanceDate", ns), info["calibration_enddate"])
+        set_text(cd.find("dcc:performanceLocation", ns), info["calibration_location"])
+
+        # 3) first item (your device)
+        items = root.findall(".//dcc:items/dcc:item", ns)
+        if items:
+            ci = items[0]
+            set_text(ci.find("dcc:name/dcc:content", ns), info["calibration_item"], lang=info["used_lang_code"])
+            set_text(ci.find("dcc:model", ns), info["make_model"])
+            ident = ci.find("dcc:identifications/dcc:identification", ns)
+            if ident is not None:
+                set_text(ident.find("dcc:issuer", ns), info["identification_issuer"])
+                set_text(ident.find("dcc:value", ns), info["calibration_item"])
+                set_text(ident.find("dcc:name/dcc:content",   ns), info["serial_number"])
+            desc = ci.find("dcc:description", ns)
+            if desc is not None:
+                cont = desc.findall("dcc:content", ns)
+                set_text(cont[0], info["capacity"])
+                set_text(cont[1], info["measurement_range"])
+                set_text(cont[2], info["resolution"])
+
+        # 4) second item (standard)
+        if len(items) > 1:
+            si_el = items[1]
+            set_text(si_el.find("dcc:name/dcc:content", ns), info["standard_item"], lang=info["used_lang_code"])
+            set_text(si_el.find("dcc:model", ns), info["standard_model"])
+            ident2 = si_el.find("dcc:identifications/dcc:identification", ns)
+            if ident2 is not None:
+                set_text(ident2.find("dcc:issuer", ns), info["standard_item_issuer"])
+                set_text(ident2.find("dcc:value", ns), info["standard_item"])
+                set_text(ident2.find("dcc:name/dcc:content", ns), info["standard_serial_number"])
+            desc2 = si_el.find("dcc:description", ns)
+            if desc2 is not None:
+                cont2 = desc2.findall("dcc:content", ns)
+                set_text(cont2[0], info["standard_cert_number"])
+                set_text(cont2[1], info["standard_traceability"])
+
+
         lab = root.find(".//dcc:calibrationLaboratory", ns)
         set_text(lab.find("dcc:calibrationLaboratoryCode", ns), info["calibration_labcode"])
         set_text(lab.find("dcc:contact/dcc:name/dcc:content", ns), info["calibration_contactname"])
@@ -1028,8 +1036,7 @@ def run_app(json_pathing, script_dir):
         set_text(loc.find("dcc:countryCode", ns), info["calibration_labcountrycode"])
         set_text(loc.find("dcc:postCode", ns), info["calibration_lab_postcode"])
         set_text(loc.find("dcc:street", ns), info["calibration_labstreet"])
-
-
+        
         # 5) respPersons
         resp_nodes = root.findall(".//dcc:respPersons/dcc:respPerson", ns)
         for idx,(name,role) in enumerate([(info["resp_person1_name"],info["resp_person1_role"]),(info["resp_person2_name"],info["resp_person2_role"]),(info["resp_person3_name"],info["resp_person3_role"])]):
@@ -1121,21 +1128,122 @@ def run_app(json_pathing, script_dir):
             set_text(cc[0], "CALIBRATION PROCEDURE: " + info["calibration_procedure"], lang=info["used_lang_code"])
         if len(cc)>1: 
             set_text(cc[1], "REMARKS: " +info["remarks"], lang=info["used_lang_code"]) 
-        # 5) laboratory, 6) persons, 7) conditions, 8) results, 9) comments…
-        #    (copy each block from export_to_xml here, replacing `calibration_info` with `info`)
 
-        return tree
+            # Let the user choose where to save the file
+        suggested_filename = info["certificate_number"].replace(" ", "_") + "_DCC.xml"
+        output_path = filedialog.asksaveasfilename(
+            defaultextension=".xml",
+            initialfile=suggested_filename,
+            filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
+        )
 
-    def build_xml_string():
-        info = collect_calibration_info()
-        tree = generate_xml_tree(info)
-        buf = BytesIO()
-        tree.write(buf, encoding="utf-8", xml_declaration=True)
-        return buf.getvalue().decode("utf-8")
+        # Check if user canceled the save dialog
+        if not output_path:
+            messagebox.showinfo("Operation Canceled", "File save operation canceled.")
+            return
 
+        # Ensure the directory exists
+        output_dir = os.path.dirname(output_path)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+            
+        # Write the file
+        tree.write(output_path, encoding="utf-8", xml_declaration=True)
+        messagebox.showinfo("Success", f"XML file saved successfully to:\n{output_path}")
+
+        back_to_menu()
+
+
+
+
+
+    #### PREVIEW PANEL ####
+    # 1) Create a right-hand preview panel with dark mode
+
+
+    #### PREVIEW PANEL ####
+    # 1) Create a right-hand preview panel with dark mode
+    preview_frame = CTkFrame(
+        master=app,
+        fg_color="#2e2e2e",  # Dark background color
+        border_color="black",
+        border_width=1
+    )
+    preview_frame.place(relx=0.5, rely=0.0, relwidth=0.5, relheight=1.0)
+
+    # 2) Create the preview textbox with dark mode
+    preview_textbox = CTkTextbox(
+        master=preview_frame,
+        font=("Cascadia Code", 12),
+        fg_color="#333333",  # Darker background for the textbox
+        text_color="white",  # White text for contrast
+        wrap="none"
+    )
+    preview_textbox.pack(fill="both", expand=True, padx=5, pady=5)
+
+    # map each input widget to the XML tag name we want to scroll to
+    widget_tag_map = {
+        # coreData
+        tsr_textbox:                   ("uniqueIdentifier", 0),
+        start_date_textbox:            ("beginPerformanceDate", 0),
+        end_date_textbox:              ("endPerformanceDate", 0),
+        calibration_dropdown:          ("performanceLocation", 0),
+
+        # first item
+        calibration_item_dropdown:     ("name", 2),  # Target the item name
+        model_textbox:                 ("identifications", 0),
+        identification_issuer_textbox: ("description", 0),
+        serial_number_textbox:         ("description", 0),
+        capacity_textbox:              ("content", 3),
+        range_textbox:                 ("content", 4),
+        resolution_textbox:            ("content", 5),
+
+        # second (standard)
+        standard_item_textbox1:        ("name", 3),  # Target the standard item name
+        model_textbox1:                ("model", 1),
+        identification_issuer_textbox1:("identification", 3),
+        serial_number_textbox1:        ("value", 1),
+        calibCert_textbox:             ("content", 7),
+        traceability_textbox:          ("content", 7),
+
+        # persons
+        analyst1_textbox:              ("respPerson", 0),
+        role1_textbox:                 ("role", 0),
+        analyst2_textbox:              ("respPerson", 1),
+        role2_textbox:                 ("role", 1),
+        authorized_textbox:            ("respPerson", 2),
+        authorized_role_textbox:       ("role", 2),
+
+        # customer
+        customer_textbox:              ("location", 1),
+        address_textbox:               ("further", 0),
+
+        # conditions
+        temperature_textbox:           ("value", 2),
+        temperature_unit_textbox:      ("unit", 0),
+        humidity_textbox:              ("value", 3),
+        humidity_unit_textbox:         ("unit", 1),
+
+        # results
+        standard_measurement_textbox:   ("valueXMLList", 0),
+        standard_measurement_unit_textbox:("unitXMLList", 0),
+        indicated_measurement_textbox: ("valueXMLList", 1),
+        indicated_measurement_unit_textbox:("unitXMLList", 1),
+        measurement_error_textbox:   ("valueXMLList", 2),
+        measurement_error_unit_textbox:("unitXMLList", 2),
+        relative_expanded_uncertainty_textbox: ("valueXMLList", 3),
+        relative_expanded_uncertainty_unit_textbox: ("unitXMLList", 3),
+        repeatability_error_textbox: ("valueXMLList", 4),
+        repeatability_error_unit_textbox: ("unitXMLList", 4),
+
+        # big text areas
+        uncertainty_textbox:           ("usedMethods", 0),
+        calibration_procedure_textbox: ("comment", 0),
+        remarks_textbox:               ("comment", 0),
+    }
 
     # 2) update preview and scroll to the Nth occurrence
-
+    import re
     def update_preview(active_widget=None):
         preview_textbox.configure(state="normal")
         xml = build_xml_string()
@@ -1181,4 +1289,12 @@ def run_app(json_pathing, script_dir):
     # 4) initial draw
     update_preview()
 
-    app.mainloop()  # Start the GUI event loop
+    # wire up the button
+    exportButton.configure(command=export_to_xml) 
+
+    app.mainloop()
+
+
+
+
+
