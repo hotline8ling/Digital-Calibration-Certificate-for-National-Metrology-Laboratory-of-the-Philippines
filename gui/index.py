@@ -28,6 +28,7 @@ from PyPDF2 import PdfReader, PdfWriter
 import pdfToxml
 import imgToxml
 import newxml
+import settings as appSettings
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 #import static_info.json
@@ -539,7 +540,9 @@ def open_newxml_gui():
 
 def open_settings():
     app.destroy()  # Close the current app window
-    subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"settings.py")])  # Open the settings.py file
+
+    appSettings.run_app()
+    # subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"settings.py")])  # Open the settings.py file
 
 def extract_pdf(pdf_path):
     def extract_text(path):
