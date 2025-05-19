@@ -22,7 +22,9 @@ def run_app():
 
     def back_to_menu():
         app.destroy()  # Close the current app window
-        subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"index.py")])
+        import index
+        index.run_app()
+        # subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"index.py")])
 
 
     # app = CTk()

@@ -22,7 +22,9 @@ def run_app(json_pathing, script_dir):
 
     def back_to_menu():
         app.destroy()  # Close the current app window
-        subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"index.py")])
+        import index
+        index.run_app()
+        # subprocess.Popen(["python",  os.path.join(os.path.dirname(__file__),"index.py")])
 
     def export_to_xml():
         # grab all the current UI values
@@ -77,10 +79,19 @@ def run_app(json_pathing, script_dir):
     relwidth = 475 / 1200  
     relheight = 525 / 700  
     
+    # Debounce logic for preview update
+    preview_update_job = [None]  # Mutable container for job id
+
+    def debounce_update_preview(widget):
+        if preview_update_job[0]:
+            app.after_cancel(preview_update_job[0])
+        preview_update_job[0] = app.after(300, lambda: update_preview(widget))
+
 
     # Create a scrollable frame
     scrollable_frame = CTkScrollableFrame(master=app, fg_color='white')
     scrollable_frame.place(relx=relx, rely=rely, relwidth=relwidth, relheight=relheight)
+    
 
     ###############################
     # Title inside scrollable frame
@@ -1171,12 +1182,13 @@ def run_app(json_pathing, script_dir):
     # 3) bind *all* inputs
     for child in scrollable_frame.winfo_children():
         if isinstance(child, CTkEntry):
-            child._entry.bind("<KeyRelease>", lambda e, w=child: update_preview(w))
+            child._entry.bind("<KeyRelease>", lambda e, w=child: debounce_update_preview(w))
         elif isinstance(child, CTkTextbox):
-            child._textbox.bind("<KeyRelease>", lambda e, w=child: update_preview(w))
+            child._textbox.bind("<KeyRelease>", lambda e, w=child: debounce_update_preview(w))
 
-    calibration_dropdown.configure(command=lambda *_: update_preview(calibration_dropdown))
-    calibration_item_dropdown.configure(command=lambda *_: update_preview(calibration_item_dropdown))
+    calibration_dropdown.configure(command=lambda *_: debounce_update_preview(calibration_dropdown))
+    calibration_item_dropdown.configure(command=lambda *_: debounce_update_preview(calibration_item_dropdown))
+
 
     # 4) initial draw
     update_preview()
